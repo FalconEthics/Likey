@@ -6,7 +6,7 @@
         </div>
         <div class="px-5 py-3 border-b-8 border-lighter flex">
             <div class="flex-none">
-                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="flex-none w-12 h-12 rounded-full border border-lighter" />
+                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="flex-none w-12 h-12 rounded-full border border-lighter" />
             </div>
             <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
                 <textarea v-model.lazy.trim="thetweet" placeholder="What's up?"

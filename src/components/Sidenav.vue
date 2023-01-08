@@ -20,7 +20,7 @@
         <div class="lg:w-full relative">
             <button @click="dropdown = !dropdown"
                 class="flex items-center w-full hover:bg-lightcolor rounded-full p-2 focus:outline-none">
-                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="w-10 h-10 rounded-full border border-lighter" />
+                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="w-10 h-10 rounded-full border border-lighter" />
                 <div class="hidden lg:block ml-4">
                     <p class="text-sm font-bold leading-tight"> Soumik Das </p>
                     <p class="text-sm leading-tight"> @SD783370 </p>
@@ -31,7 +31,7 @@
                 class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
                 <button @click="dropdown = false"
                     class="flex items-center w-full hover:bg-lightest p-2 focus:outline-none">
-                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="w-10 h-10 rounded-full border border-lighter" />
+                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="w-10 h-10 rounded-full border border-lighter" />
                     <div class="ml-4">
                         <p class="text-sm font-bold leading-tight"> Soumik Das </p>
                         <p class="text-sm leading-tight"> @SD783370 </p>

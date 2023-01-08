@@ -26,7 +26,7 @@
         <div class="flex flex-col-reverse">
             <div v-for="tweet in tweets" class="w-full p-4 border-b hover:bg-lightcl flex">
                 <div class="flex-none mr-4">
-                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
+                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
                 </div>
                 <div class="w-full">
                     <div class="flex items-center w-full">

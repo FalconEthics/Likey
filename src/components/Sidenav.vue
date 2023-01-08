@@ -1,12 +1,12 @@
 <template>
     <div class="lg:w-1/5 border-r border-lighter px-2 lg:px-6 py-2 flex flex-col justify-between">
-        <div class="md:-ml-5 lg:m-2 md:mr-2">
+        <div class="md:-ml-5 lg:m-2 md:mr-2 ">
             <button class="pl-4 lg:pl-5 mb-4 h-12 w-12 hover:bg-lightcolor text-4xl rounded-full text-color">
                 <i class="fa-regular fa-thumbs-up"></i>
             </button>
-            <div class="shadow-2xl rounded-3xl mb-7 lg:p-6">
+            <div class="shadow-2xl rounded-3xl mb-7 lg:p-6 bg-white bg-opacity-60 ">
                 <button @click="alert" v-for="tab in tabs"
-                    :class="`focus:outline-none hover:text-color flex items-center py-2 px-4 hover:bg-lightcolor rounded-full mr-auto mb-3 md:pl-6 ${id === tab.id ? 'text-color' : ''}`">
+                    :class="`focus:outline-none hover:text-color flex items-center py-2 px-4 hover:bg-lightcl rounded-full mr-auto mb-3 md:pl-6 ${id === tab.id ? 'text-color' : ''}`">
                     <i :class="`${tab.icon} text-2xl text-left`"></i>
                     <p class="text-lg font-semibold text-left hidden lg:block ml-5"> {{ tab.title }} </p>
                 </button>

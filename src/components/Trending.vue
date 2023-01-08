@@ -4,11 +4,12 @@
         <input @keypress.enter="alert" class="pl-12 shadow-2xl mt-3 rounded-3xl w-full p-2 bg-lightcl text-sm mb-4"
             placeholder="Search Likey" />
         <i class="fas fa-search absolute left-0 top-0 mt-7 ml-12 text-sm text-light"></i>
-        <div class="w-full shadow-2xl rounded-3xl bg-lightest my-4">
+        <div class="w-full shadow-2xl rounded-3xl bg-white bg-opacity-60 my-4">
             <div class=" p-3">
                 <p class="text-lg font-bold">Who to Follow</p>
             </div>
-            <button @click="alert" v-for="friend in friends" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+            <button @click="alert" v-for="friend in friends"
+                class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
                 <img :src="`${friend.src}`" class="w-12 h-12 rounded-full border border-lighter" />
                 <div class="hidden lg:block md:block ml-4">
                     <p class="lg:text-sm text-xs font-bold leading-tight"> {{ friend.name }} </p>
@@ -22,7 +23,7 @@
                 Show More
             </button>
         </div>
-        <div class="w-full shadow-2xl rounded-3xl bg-lightest">
+        <div class="w-full shadow-2xl rounded-3xl bg-white bg-opacity-60 ">
             <div class="flex items-center justify-between p-3">
                 <p class="text-lg font-bold">Trends for You</p>
                 <i class="fas fa-cog text-lg text-color"></i>

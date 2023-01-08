@@ -101,12 +101,12 @@
                     </div>
                     <div>
                         <div class="flex items-center w-full">
-                            <p class="font-semibold text-sm"> {{ users[Math.round(Math.random() * 9)].name }} </p>
-                            <p class="text-sm text-dark ml-2"> {{ users[Math.round(Math.random() * 9)].username }} </p>
-                            <p class="text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
+                            <p class="font-semibold text-xs lg:text-sm"> {{ users[Math.round(Math.random() * 9)].name }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ users[Math.round(Math.random() * 9)].username }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
                             <i class="fas fa-angle-down text-dark ml-auto"></i>
                         </div>
-                        <p class="text-sm py-2 w-40 md:w-60 lg:w-fit">
+                        <p class="text-xs lg:text-sm py-2 w-40 md:w-60 lg:w-fit">
                             {{ comment.body }}
                         </p>
                     </div>

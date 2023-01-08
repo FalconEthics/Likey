@@ -1,6 +1,6 @@
 <template>
     <div
-        class="md:block hidden w-1/3 h-full border-l border-lighter py-2 px-8 overflow-y-scroll relative lg:pr-8 md:pr-0">
+        class="md:block hidden w-1/3 h-full border-l border-lighter py-2 px-8 lg:pl-7 md:pl-5 overflow-y-scroll relative lg:pr-8 md:pr-0">
         <input @keypress.enter="alert" class="pl-12 shadow-2xl mt-3 rounded-3xl w-full p-2 bg-lightcl text-sm mb-4"
             placeholder="Search Likey" />
         <i class="fas fa-search absolute left-0 top-0 mt-7 ml-12 text-sm text-light"></i>
@@ -11,11 +11,11 @@
             <button @click="alert" v-for="friend in friends" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
                 <img :src="`${friend.src}`" class="w-12 h-12 rounded-full border border-lighter" />
                 <div class="hidden lg:block md:block ml-4">
-                    <p class="text-sm font-bold leading-tight"> {{ friend.name }} </p>
-                    <p class="text-sm leading-tight"> {{ friend.handle }} </p>
+                    <p class="lg:text-sm text-xs font-bold leading-tight"> {{ friend.name }} </p>
+                    <p class="lg:text-sm text-xs leading-tight"> {{ friend.handle }} </p>
                 </div>
                 <button @click="clk" class="ml-auto text-sm text-color py-1 px-4 rounded-full border-2 border-color">
-                    <p>{{ msg }}</p>
+                    <p class="text-xs lg:text-sm">{{ msg }}</p>
                 </button>
             </button>
             <button @click="alert" class="p-3 w-full hover:bg-lighter text-left text-color border-t border-lighter">

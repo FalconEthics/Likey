@@ -31,11 +31,11 @@
                 <div class="w-full">
                     <div class="flex items-center w-full">
                         <p class="font-semibold"> Soumik Das </p>
-                        <p class="text-sm text-dark ml-2"> @SD783370 </p>
-                        <p class="text-sm text-dark ml-2"> Just Now </p>
+                        <p class="text-xs lg:text-sm text-dark ml-2"> @SD783370 </p>
+                        <p class="text-xs lg:text-sm text-dark ml-2"> Just Now </p>
                         <button @click="delTweet(tweet.content)" class="fa-solid fa-trash text-dark ml-auto"></button>
                     </div>
-                    <p class="py-2">
+                    <p class="py-2 text-sm lg:text-base">
                         {{ tweet.content }}
                     </p>
                     <div class="flex items-center justify-between w-full">
@@ -67,11 +67,11 @@
                     <div class="w-full">
                         <div class="flex items-center w-full">
                             <p class="font-semibold"> {{ users[Math.round(Math.random() * 9)].name }} </p>
-                            <p class="text-sm text-dark ml-2"> {{ '@' + users[Math.round(Math.random() * 9)].username }} </p>
-                            <p class="text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ '@' + users[Math.round(Math.random() * 9)].username }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
                             <i class="fas fa-angle-down text-dark ml-auto"></i>
                         </div>
-                        <p class="py-2 w-40 md:w-60 lg:w-fit">
+                        <p class="py-2 w-40 md:w-60 lg:w-fit text-sm lg:text-base">
                             {{ follow.body }}
                         </p>
                         <div class="flex items-center justify-between w-full">

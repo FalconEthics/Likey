@@ -1,7 +1,7 @@
 <template>
     <div class="lg:w-1/5 border-r border-lighter px-2 lg:px-6 py-2 flex flex-col justify-between">
         <div class="md:-ml-5 lg:m-2 md:mr-2">
-            <button class="pl-5 mb-4 h-12 w-12 hover:bg-lightcolor text-4xl rounded-full text-color">
+            <button class="pl-4 lg:pl-5 mb-4 h-12 w-12 hover:bg-lightcolor text-4xl rounded-full text-color">
                 <i class="fa-regular fa-thumbs-up"></i>
             </button>
             <div class="shadow-2xl rounded-3xl mb-7 lg:p-6">
@@ -12,7 +12,7 @@
                 </button>
             </div>
             <button
-                class="shadow-2xl text-white bg-color rounded-full font-semibold focus:outline-none w-12 h-12 lg:h-auto lg:w-full p-3 md:ml-2 lg:ml-0 hover:bg-darkcolor">
+                class="shadow-2xl text-white bg-color rounded-full font-semibold focus:outline-none w-12 h-12 lg:h-30 lg:w-full md:ml-2 ml-1 lg:ml-0 hover:bg-darkcolor">
                 <p class="hidden lg:block">Tweet</p>
                 <i class="fas fa-plus lg:hidden"></i>
             </button>

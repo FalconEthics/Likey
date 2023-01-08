@@ -58,9 +58,9 @@ export default {
                 { top: 'Trending', title: 'Friends', bottom: '25.4M tweets' },
             ],
             friends: [
-                { src: 'img1.jpg', name: 'Priyanka Chop', handle: '@HollyoodWali' },
-                { src: 'img2.jpg', name: 'Deepika Pad', handle: '@deepubolly' },
-                { src: 'img3.jpg', name: 'Salma Kha', handle: '@sallubhai' }
+                { src: 'https://avatars.dicebear.com/api/personas/' + 17 + '.svg', handle: '@HollyoodWali' },
+                { src: 'https://avatars.dicebear.com/api/personas/' + 18 + '.svg', handle: '@deepubolly' },
+                { src: 'https://avatars.dicebear.com/api/personas/' + 19 + '.svg', name: 'Salma Kha', handle: '@sallubhai' }
             ],
             msg: 'Follow'
         }

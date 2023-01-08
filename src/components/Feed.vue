@@ -6,7 +6,7 @@
         </div>
         <div class="px-5 py-3 border-b-8 border-lighter flex">
             <div class="flex-none">
-                <img src="profile.png" class="flex-none w-12 h-12 rounded-full border border-lighter" />
+                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="flex-none w-12 h-12 rounded-full border border-lighter" />
             </div>
             <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
                 <textarea v-model.lazy.trim="thetweet" placeholder="What's up?"
@@ -26,7 +26,7 @@
         <div class="flex flex-col-reverse">
             <div v-for="tweet in tweets" class="w-full p-4 border-b hover:bg-lightcl flex">
                 <div class="flex-none mr-4">
-                    <img src="profile.png" class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
+                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 1 + '.svg'}`" class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
                 </div>
                 <div class="w-full">
                     <div class="flex items-center w-full">

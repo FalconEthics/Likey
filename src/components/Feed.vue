@@ -32,7 +32,7 @@
                     <div class="flex items-center w-full">
                         <p class="font-semibold"> Soumik Das </p>
                         <p class="text-xs lg:text-sm text-dark ml-2"> @SD783370 </p>
-                        <p class="text-xs lg:text-sm text-dark ml-2"> Just Now </p>
+                        <p class="text-xs lg:text-sm text-dark ml-2 mr-1"> Just Now </p>
                         <button @click="delTweet(tweet.content)" class="fa-solid fa-trash text-dark ml-auto"></button>
                     </div>
                     <p class="py-2 text-sm lg:text-base">

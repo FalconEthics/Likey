@@ -6,7 +6,8 @@
         </div>
         <div class="px-5 py-3 border-b-8 border-lighter flex">
             <div class="flex-none">
-                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="flex-none w-12 h-12 rounded-full border border-lighter" />
+                <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`"
+                    class="flex-none w-12 h-12 rounded-full border border-lighter" />
             </div>
             <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
                 <textarea v-model.lazy.trim="thetweet" placeholder="What's up?"
@@ -24,18 +25,31 @@
             </form>
         </div>
         <div class="flex flex-col-reverse">
-            <div v-for="tweet in tweets" class="w-full p-4 border-b hover:bg-lightcl flex">
+            <div v-for="tweet in tweets" :key="tweet.id" class="w-full p-4 border-b hover:bg-lightcl flex">
                 <div class="flex-none mr-4">
-                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`" class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
+                    <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`"
+                        class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12" />
                 </div>
                 <div class="w-full">
                     <div class="flex items-center w-full">
                         <p class="font-semibold"> Soumik Das </p>
                         <p class="text-xs lg:text-sm text-dark ml-2"> @SD783370 </p>
                         <p class="text-xs lg:text-sm text-dark ml-2 mr-1"> Just Now </p>
-                        <button @click="delTweet(tweet.content)" class="fa-solid fa-trash text-dark ml-auto"></button>
+                        <button v-if="dropdown == false" @click="dropdown = !dropdown, check(tweet.id)"
+                            class="fas fa-angle-down text-dark ml-auto"></button>
+                        <button v-if="dropdown == true && chk == tweet.id" @click="delTweet(tweet.content)"><i
+                                class="fa-solid fa-trash text-dark ml-auto pl-5"></i></button>
+                        <button v-if="dropdown == true && chk == tweet.id" @click="edit = !edit"><i
+                                class="fa-solid fa-pen text-dark ml-auto pl-5"></i></button>
                     </div>
-                    <p class="py-2 text-sm lg:text-base">
+                    <div v-if="edit == 1 && chk == tweet.id" class="flex items-center">
+                        <textarea type="text" v-model="tweet.content" placeholder="{{ tweet.content }}"
+                            class="text-sm lg:text-base w-full outline-1 rounded-lg p-2" />
+                        <button @click="edit = !edit, dropdown = !dropdown">
+                            <i class="fa-solid fa-floppy-disk m-auto mx-4 hover:text-color"></i>
+                        </button>
+                    </div>
+                    <p v-else class="py-2 text-sm lg:text-base">
                         {{ tweet.content }}
                     </p>
                     <div class="flex items-center justify-between w-full">
@@ -60,15 +74,22 @@
         </div>
         <div v-for="follow in following" :key="follow.id" class="w-full p-4 border-b hover:bg-lightcl flex">
             <div class="flex-none mr-4">
-                <img :src="`${'https://avatars.dicebear.com/api/personas/' + follow.id + '.svg'}`" class="h-9 w-9 lg:h-12 lg:w-12 rounded-full flex-none" />
+                <img :src="`${'https://avatars.dicebear.com/api/personas/' + follow.id + '.svg'}`"
+                    class="h-9 w-9 lg:h-12 lg:w-12 rounded-full flex-none" />
             </div>
             <div class="flex-col">
                 <div class="flex">
                     <div class="w-full">
                         <div class="flex items-center w-full">
                             <p class="font-semibold"> {{ users[Math.round(Math.random() * 9)].name }} </p>
-                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ '@' + users[Math.round(Math.random() * 9)].username }} </p>
-                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{
+                                '@' + users[Math.round(Math.random() *
+                                    9)].username
+                            }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{
+                                Math.ceil(Math.random() * 100) + ' ' +
+                                    this.tm[Math.floor(Math.random() * this.tm.length)]
+                            }} </p>
                             <i class="fas fa-angle-down text-dark ml-auto"></i>
                         </div>
                         <p class="py-2 w-40 md:w-60 lg:w-fit text-sm lg:text-base">
@@ -97,13 +118,21 @@
                     class="w-30 place-items-center pt-4 lg:pl-10 pr-10 pb-4 mt-0 flex" v-for="comment in comments"
                     :key="comment.id">
                     <div class="flex-none mr-4">
-                        <img :src="`${'https://avatars.dicebear.com/api/personas/' + comment.id + '.svg'}`" class="h-9 w-9 lg:h-12 lg:w-12 rounded-full flex-none" />
+                        <img :src="`${'https://avatars.dicebear.com/api/personas/' + comment.id + '.svg'}`"
+                            class="h-9 w-9 lg:h-12 lg:w-12 rounded-full flex-none" />
                     </div>
                     <div>
                         <div class="flex items-center w-full">
-                            <p class="font-semibold text-xs lg:text-sm"> {{ users[Math.round(Math.random() * 9)].name }} </p>
-                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ users[Math.round(Math.random() * 9)].username }} </p>
-                            <p class="text-xs lg:text-sm text-dark ml-2"> {{ Math.ceil(Math.random() * 100) + ' ' + this.tm[Math.floor(Math.random() * this.tm.length)] }} </p>
+                            <p class="font-semibold text-xs lg:text-sm"> {{ users[Math.round(Math.random() * 9)].name }}
+                            </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{
+                                '@' + users[Math.round(Math.random() *
+                                    9)].username
+                            }} </p>
+                            <p class="text-xs lg:text-sm text-dark ml-2"> {{
+                                Math.ceil(Math.random() * 100) + ' ' +
+                                    this.tm[Math.floor(Math.random() * this.tm.length)]
+                            }} </p>
                             <i class="fas fa-angle-down text-dark ml-auto"></i>
                         </div>
                         <p class="text-xs lg:text-sm py-2 w-40 md:w-60 lg:w-fit">
@@ -133,7 +162,10 @@ export default {
             ],
             thetweet: '',
             clickCheck: false,
-            cmttag: 0
+            cmttag: 0,
+            dropdown: false,
+            edit: false,
+            chk: 0
         }
     },
     methods: {
@@ -141,7 +173,8 @@ export default {
             console.log('delTweet triggered')
             for (let i = 0; i < this.tweets.length; i++) {
                 if (this.tweets[i].content == content) {
-                    this.tweets.splice(i, 1)
+                    this.tweets.splice(i, 1);
+                    this.dropdown = false;
                 }
             }
 
@@ -185,6 +218,10 @@ export default {
             this.clickCheck = !this.clickCheck;
             this.getComments(id);
             this.cmttag = id;
+        },
+        check(content) {
+            console.log('check triggered')
+            this.chk = content;
         }
     },
     beforeMount() {
@@ -196,6 +233,7 @@ export default {
             console.log('addNewTweet triggered')
             let newTweet = {
                 content: this.thetweet,
+                id: this.tweets.length
             };
             this.tweets.push(newTweet)
             this.thetweet = '';

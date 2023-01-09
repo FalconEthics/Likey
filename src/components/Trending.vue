@@ -1,9 +1,11 @@
 <template>
     <div
         class="md:block hidden w-1/3 h-full border-l border-lighter py-2 px-8 lg:pl-7 md:pl-5 overflow-y-scroll relative lg:pr-8 md:pr-0">
+        <!-- Search bar -->
         <input @keypress.enter="alert" class="pl-12 shadow-2xl mt-3 rounded-3xl w-full p-2 bg-lightcl text-sm mb-4"
             placeholder="Search Likey" />
         <i class="fas fa-search absolute left-0 top-0 mt-7 ml-12 text-sm text-light"></i>
+        <!-- Follow recommendation section -->
         <div class="w-full shadow-2xl rounded-3xl bg-white bg-opacity-60 my-4">
             <div class=" p-3">
                 <p class="text-lg font-bold">Who to Follow</p>
@@ -23,6 +25,7 @@
                 Show More
             </button>
         </div>
+        <!-- Trending section -->
         <div class="w-full shadow-2xl rounded-3xl bg-white bg-opacity-60 ">
             <div class="flex items-center justify-between p-3">
                 <p class="text-lg font-bold">Trends for You</p>
@@ -51,6 +54,7 @@ export default {
     nm: 'demo',
     data() {
         return {
+            // object to hold dummy data of trending and follow recommendation section to use "v-for" rendering - JSONPLACEHOLDER api doesn't provute dubby data for sections like this
             trending: [
                 { top: 'Trending in IND', title: 'Mogo', bottom: 'We are proud momo Lovers' },
                 { top: 'Music', title: 'Kesariya', bottom: '392K Tweets' },
@@ -70,6 +74,7 @@ export default {
         clk() {
             this.msg = 'Following';
         },
+        // for all the buttons or UI features that are not yet developed and can't respond to clicks
         alert() {
             alert('Feature under-development')
         }

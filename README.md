@@ -131,8 +131,14 @@ bigger device screens.
 devices. It does not change with respect to the
 device.
     - UI progression for all screen and sizes.
-  - UI for new user account creation.
-  - UI for account login.
+  - Bonus:
+      - UI for new user account creation.
+    - UI for account login. 
+    <br>
+  "*i have placed the bonus section code sperately as becuase they are only pure ui and functionalty is not yet added, i would have needed to add vue router to make the new page avaiable from the main site it slef wheresa the site itself is not making any use of the vuejs, i will add it in near future if i get the ui functional*" 
+  <br>
+  ~The site is still reachable by clicking on logout/add account section from profile dropdown!
+  [Login/Signup Page](https://likey-extras.vercel.app/)
 
 <!-- ROADMAP -->
 ## Roadmap

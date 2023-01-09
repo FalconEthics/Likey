@@ -42,14 +42,19 @@
                     </div>
                     <i class="fas fa-check ml-auto test-color"></i>
                 </button>
-                <button @click="dropdown = false"
+                <!-- link to the logi/signup page ~ it's ui only for now -->
+                <a href="https://likey-extras.vercel.app/">
+                    <button @click="dropdown = false"
                     class="w-full text-left hover:bg-lightcl border-t border-lighter p-3 test-sm focus:outline-none">
                     Add an existing account
                 </button>
-                <button @click="dropdown = false"
+                </a>
+                <a href="https://likey-extras.vercel.app/">
+                    <button @click="dropdown = false"
                     class="w-full text-left hover:bg-lightcl border-t border-lighter p-3 test-sm focus:outline-none">
                     Log out @SD783370
                 </button>
+                </a>
             </div>
         </div>
     </div>

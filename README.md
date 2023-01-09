@@ -47,6 +47,7 @@ Username and Password: demo
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#progress">Progress</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -57,7 +58,16 @@ Username and Password: demo
 
 [![Product Name Screen Shot][product-screenshot]](https://github.com/FalconEthics/Likey)
 
-( "Will be updated after project completion" )
+My social media app will provide users with a platform to connect with their friends and family, meet new people, and share their thoughts, photos, and videos.
+
+Users will be able to create a profile, add friends, and post updates on their feed. They can also interact with others by commenting, reacting, and messaging. In addition, the app will feature a discovery tab, where users can browse and follow content from other users, as well as a notification tab that keeps users updated on the latest activity from their friends.
+
+My app will prioritize user privacy and security, with features such as account verification, two-factor authentication, and the ability to control who can see your posts and profile information.
+
+Overall, my social media app aims to provide an engaging and secure platform for users to connect and share with each other.
+
+ - Initially this project was assigned to me as frontend assesment task by a recruiter in their round 2 interview to evaluate my skills in the domain.
+  - For more indepth info about my project, please refer to the frontend problem statement of RobusTest technical evaluation round 2, that was provided by the recruiter to me for evalution [Documentation](./public/assignment%20.pdf)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -80,9 +90,17 @@ Here are all the tools used in the build.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-( "Will be updated after project completion" )
+Our social media app can be used in a variety of ways, including:
 
-For more indepth info about my project, please refer to the frontend problem statement of RobusTest technical evaluation round 2, that was provided by the recruiter to me for evalution [Documentation](./public/assignment%20.pdf)
+Staying connected with friends and family: Users can use the app to keep in touch with their loved ones by sending messages, commenting on each other's posts, and reacting to content.
+
+Meeting new people: The app's discovery tab and messaging feature allow users to connect with others who share similar interests, backgrounds, or locations.
+
+Sharing content: Users can share photos, videos, and thoughts on their feed for their friends and followers to see.
+
+Staying up to date: The notification tab keeps users informed about the latest activity from their friends, so they never miss an update.
+
+Privacy and security: Our app includes features such as account verification, two-factor authentication, and the ability to control who can see your posts and profile information, ensuring that users feel safe and secure while using the app.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -105,7 +123,7 @@ the user who owns the post)
 owns the post)
   - For each post, the user is be able to see the
 comments on it.
-  - Commenting is only allowed by registered users - *Dummy api doesn't actually process "POST" request, writing a axios post req. would nt through an error but also won't do perform anything so impleminting real authenticaion is not possible without a real API*
+  - Commenting is only allowed by registered users - *Dummy api doesn't actually process "POST" request, writing an axios post req. would not through an error but also won't perform anything so impleminting real authenticaion is not possible without a real API*
   - The UI is designed in such a way that it has a
 similar user experience when seen on mobile devices and
 bigger device screens.
@@ -119,7 +137,23 @@ device.
 <!-- ROADMAP -->
 ## Roadmap
 
-( "Will be updated after project completion" )
+Here is a rough roadmap for intrested contributors that i will be following in near future for my social media app project:
+
+Integrate with a backend service: In order to store user data and handle server-side logic, I will need to integrate my app with a backend service such as Firebase or a custom backend server.
+
+Implement user authentication: Allow users to create accounts and log in to the app using their email and password. I may also want to consider implementing social login options such as Facebook or Google.
+
+Implement feed functionality: Allow users to post updates to their feed and view updates from their friends. This will likely require integrating with a database to store and retrieve feed data.
+
+Implement messaging functionality: Allow users to send and receive private messages with each other. This will also require integrating with a database to store and retrieve message data.
+
+Implement notification functionality: Allow users to receive notifications when their friends interact with them on the app, such as commenting on their posts or messaging them.
+
+Test and debug: Thoroughly test the app to ensure that it is functioning correctly and fix any issues that are discovered.
+
+Launch the app: Once I have completed the above steps and my app is functioning as intended, I will launch it on the app store or make it available for download on my website.
+
+Note: This roadmap is a general suggestion and may not cover all the specific tasks and considerations that are relevant to my project. It's important to create a more detailed plan that takes into account the specific needs and requirements of my app that i will publish when i start commiting my time on this project more seriously.
 
 - [x] Base structure
 - [x] Twitter inspired frontend UI

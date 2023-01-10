@@ -38,7 +38,7 @@
                         <p class="text-xs lg:text-sm text-dark ml-2"> @SD783370 </p>
                         <p class="text-xs lg:text-sm text-dark ml-2 mr-1"> Just Now </p>
                         <button v-if="dropdown == false" @click="dropdown = !dropdown, check(tweet.id)"
-                            class="fas fa-angle-down text-dark ml-auto"></button>
+                            class="fa-solid fa-bars text-dark ml-auto"></button>
                         <!-- Delete user posts -->
                         <button v-if="dropdown == true && chk == tweet.id" @click="delTweet(tweet.content)"><i
                                 class="fa-solid fa-trash text-dark ml-auto pl-5"></i></button>

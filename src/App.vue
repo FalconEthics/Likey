@@ -1,7 +1,7 @@
 <template v-cloak>
   <div id="app" class="flex justify-center h-screen bg-[url('https://i.postimg.cc/8zDHYjjf/bg.jpg')]">
-    <Sidenav></Sidenav>
-    <Feed></Feed>
+    <Sidenav :username="username" :userid="userid"></Sidenav>
+    <Feed :username="username" :userid="userid"></Feed>
     <Trending></Trending>
   </div>
 </template>
@@ -17,6 +17,11 @@ export default {
     Sidenav,
     Feed,
     Trending
-  }
+  },
+  data() {
+    return{
+    username: 'Soumik Das',
+    userid: '@SD783370'
+  }}
 }
 </script>

@@ -262,7 +262,7 @@ Project Link: [https://github.com/FalconEthics/Likey](https://github.com/FalconE
 <!-- [product-screenshot2]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-16-58AM-000_CustomizedView13304029920.png
 [product-screenshot3]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-18-29AM-000_CustomizedView9151492485.png
 [product-screenshot4]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-22-00AM-000_CustomizedView12173695879.png
-[product-components]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Components.png -->
+[product-sub components]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Components.png -->
 
 
 [Bootstrap.com]: https://img.shields.io/badge/Vue_3-43D393?style=for-the-badge&logo=vue.js&logoColor=white

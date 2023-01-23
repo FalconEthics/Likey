@@ -3,7 +3,7 @@
     <!-- Sidemenu Buttons -->
     <Menu />
     <!-- Proile options -->
-    <Profile :username="username" :userid="userid"/>
+    <Profile :username="username" :userid="userid" :profilepic="profilepic"/>
   </div>
 </template>
 
@@ -13,7 +13,7 @@ import Profile from "././sub components/Profile.vue";
 
 export default {
   name: 'Sidenav',
-  props: ["username", "userid"],
+  props: ["username", "userid", "profilepic"],
   components: {Profile, Menu}
 }
 </script>

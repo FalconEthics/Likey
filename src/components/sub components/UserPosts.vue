@@ -2,7 +2,7 @@
   <!-- Create New Post section -->
   <div class="px-5 py-3 border-b-8 border-lighter flex">
     <div class="flex-none">
-      <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`"
+      <img :src="`${'https://avatars.dicebear.com/api/personas/' + profilepic  + '.svg'}`"
            class="flex-none w-12 h-12 rounded-full border border-lighter"/>
     </div>
     <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
@@ -24,7 +24,7 @@
   <div class="flex flex-col-reverse">
     <div v-for="tweet in tweets" :key="tweet.id" class="w-full p-4 border-b hover:bg-lightcl flex">
       <div class="flex-none mr-4">
-        <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`"
+        <img :src="`${'https://avatars.dicebear.com/api/personas/' + profilepic + '.svg'}`"
              class="h-9 w-9 rounded-full flex-none lg:h-12 lg:w-12"/>
       </div>
       <div class="w-full">
@@ -35,21 +35,21 @@
           <button v-if="dropdown == false" @click="dropdown = !dropdown, check(tweet.id)"
                   class="fa-solid fa-bars text-dark ml-auto"></button>
           <!-- Delete user posts -->
-          <button v-if="dropdown == true && chk == tweet.id" @click="delTweet(tweet.content)"><i
+          <button v-if="dropdown == true && clickcheck == tweet.id" @click="delTweet(tweet.content)"><i
               class="fa-solid fa-trash text-dark ml-auto pl-5"></i></button>
           <!-- Edit user posts -->
-          <button v-if="dropdown == true && chk == tweet.id" @click="edit = !edit"><i
+          <button v-if="dropdown == true && clickcheck == tweet.id" @click="editclicked = !editclicked"><i
               class="fa-solid fa-pen text-dark ml-auto pl-5"></i></button>
         </div>
-        <div v-if="edit == 1 && chk == tweet.id" class="flex items-center">
+        <div v-if="editclicked == 1 && clickcheck == tweet.id" class="flex items-center">
                         <textarea type="text" v-model="tweet.content" placeholder="{{ tweet.content }}"
                                   class="text-sm lg:text-base w-full outline-1 rounded-lg p-2"/>
           <!-- save changes -->
-          <button @click="edit = !edit, dropdown = !dropdown">
+          <button @click="editclicked = !editclicked, dropdown = !dropdown">
             <i class="fa-solid fa-floppy-disk m-auto mx-4 hover:text-color"></i>
           </button>
         </div>
-        <!-- display edited twweet -->
+        <!-- display edited tweet -->
         <p v-else class="py-2 text-sm lg:text-base">
           {{ tweet.content }}
         </p>
@@ -76,9 +76,11 @@
 </template>
 
 <script>
+import profile from "./Profile.vue";
+
 export default {
   name: "UserPosts",
-  props: ["username", "userid"],
+  props: ["username", "userid", "profilepic"],
   data() {
     return {
       tweets: [
@@ -86,8 +88,8 @@ export default {
       ],
       thetweet: '',
       dropdown: false,
-      edit: false,
-      chk: 0
+      editclicked: false,
+      clickcheck: 0
     }
   },
   methods: {
@@ -103,10 +105,13 @@ export default {
     },
     check(id) {
       // console.log('check triggered')
-      this.chk = id;
+      this.clickcheck = id;
     }
   },
   computed: {
+    profile() {
+      return profile
+    },
     addNewTweet() {
       // console.log('addNewTweet triggered')
       let newTweet = {

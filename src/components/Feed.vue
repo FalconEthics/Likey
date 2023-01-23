@@ -5,7 +5,7 @@
       <i class="far fa-star text-xl text-color"></i>
     </div>
     <!--  User Posts Section-->
-    <UserPosts :username="username" :userid="userid"/>
+    <UserPosts :username="username" :userid="userid" :profilepic="profilepic"/>
     <!-- Diplay tweets of others with likes and comments -->
     <FriendsPosts/>
   </div>
@@ -17,7 +17,7 @@ import FriendsPosts from "././sub components/FriendsPosts.vue";
 
 export default {
   name: 'Feed',
-  props: ['username', 'userid'],
+  props: ['username', 'userid', 'profilepic'],
   components: {FriendsPosts, UserPosts}
 }
 </script>

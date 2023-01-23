@@ -12,7 +12,7 @@
             <!-- random user generator -->
             <p class="font-semibold"> {{ usergen(post.id) }} </p>
             <!-- random username generator -->
-            <p class="text-xs lg:text-sm text-dark ml-2"> {{ usernamegen(post.id) }} </p>
+            <p class="text-xs lg:text-sm text-dark ml-2"> {{ '@' + usernamegen(post.id) }} </p>
             <!-- random upload time generator -->
             <p class="text-xs lg:text-sm text-dark ml-2"> {{ timegen(post.id) }} </p>
             <i class="fas fa-angle-down text-dark ml-auto"></i>
@@ -46,21 +46,21 @@
            class="w-30 place-items-center pt-4 lg:pl-10 pr-10 pb-4 mt-0 flex" v-for="comment in comments"
            :key="comment.id">
         <!-- display comments of the clicked post only -->
-        <div class="flex-none mr-4">
+        <div v-cloak class="flex-none mr-4">
           <img :src="`${'https://avatars.dicebear.com/api/personas/' + comment.id + '.svg'}`"
                alt="profile icon" class="h-9 w-9 lg:h-12 lg:w-12 rounded-full flex-none"/>
         </div>
         <div>
           <!-- random user info generator -->
-          <div class="flex items-center w-full">
+          <div v-cloak class="flex items-center w-full">
             <p class="font-semibold text-xs lg:text-sm"> {{ usergen(comment.id) }}
             </p>
-            <p class="text-xs lg:text-sm text-dark ml-2"> {{ usernamegen(comment.id) }} </p>
+            <p class="text-xs lg:text-sm text-dark ml-2"> {{ '@' + usernamegen(comment.id) }} </p>
             <p class="text-xs lg:text-sm text-dark ml-2"> {{ timegen(comment.id) }} </p>
             <i class="fas fa-angle-down text-dark ml-auto"></i>
           </div>
           <!-- comments of the respected post -->
-          <p class="text-xs lg:text-sm py-2 w-40 md:w-60 lg:w-fit">
+          <p v-cloak class="text-xs lg:text-sm py-2 w-40 md:w-60 lg:w-fit">
             {{ comment.body }}
           </p>
         </div>
@@ -121,99 +121,85 @@ export default {
     },
     usergen(id) {
       // console.log('usergen triggered')
-      if(id < 10){
+      if (id < 10) {
         return this.users[id].name;
-      }
-      else if(id > 10 && id < 20){
+      } else if (id > 10 && id < 20) {
         return this.users[id - 10].name;
-      }
-      else if(id > 20 && id < 30){
+      } else if (id > 20 && id < 30) {
         return this.users[id - 20].name;
-      }
-      else if(id > 30 && id < 40){
+      } else if (id > 30 && id < 40) {
         return this.users[id - 30].name;
-      }
-      else if(id > 40 && id < 50){
+      } else if (id > 40 && id < 50) {
         return this.users[id - 40].name;
-      }
-      else if(id > 50 && id < 60){
+      } else if (id > 50 && id < 60) {
         return this.users[id - 50].name;
-      }
-      else if(id > 60 && id < 70){
+      } else if (id > 60 && id < 70) {
         return this.users[id - 60].name;
-      }
-      else if(id > 70 && id < 80){
+      } else if (id > 70 && id < 80) {
         return this.users[id - 70].name;
-      }
-      else if(id > 80 && id < 90){
+      } else if (id > 80 && id < 90) {
         return this.users[id - 80].name;
-      }
-      else if(id > 90 && id < 100){
-        return this.users[id - 90].name;}
-      else{
+      } else if (id > 90 && id < 100) {
+        return this.users[id - 90].name;
+      } else if (id > 100) {
+        return this.users[id - 90].name;
+      } else {
         return this.users[0].name;
       }
     },
     usernamegen(id) {
       // console.log('usernamegen triggered')
-      if(id < 10){
+      if (id < 10) {
         return this.users[id].name;
-      }
-      else if(id > 10 && id < 20){
+      } else if (id > 10 && id < 20) {
         return this.users[id - 10].username;
-      }
-      else if(id > 20 && id < 30){
+      } else if (id > 20 && id < 30) {
         return this.users[id - 20].username;
-      }
-      else if(id > 30 && id < 40){
+      } else if (id > 30 && id < 40) {
         return this.users[id - 30].username;
-      }
-      else if(id > 40 && id < 50){
+      } else if (id > 40 && id < 50) {
         return this.users[id - 40].username;
-      }
-      else if(id > 50 && id < 60){
+      } else if (id > 50 && id < 60) {
         return this.users[id - 50].username;
-      }
-      else if(id > 60 && id < 70){
+      } else if (id > 60 && id < 70) {
         return this.users[id - 60].username;
-      }
-      else if(id > 70 && id < 80){
+      } else if (id > 70 && id < 80) {
         return this.users[id - 70].username;
-      }
-      else if(id > 80 && id < 90){
+      } else if (id > 80 && id < 90) {
         return this.users[id - 80].username;
-      }
-      else if(id > 90 && id < 100){
-        return this.users[id - 90].username;}
-      else{
+      } else if (id > 90 && id < 100) {
+        return this.users[id - 90].username;
+      } else if (id > 100) {
+        return this.users[id - 90].username;
+      } else {
         return this.users[0].name;
       }
     },
     timegen(id) {
-      console.log('timegen triggered')
-      return this.time[id] + ' sec';
+      // console.log('timegen triggered')
+      return this.time[id] + ' min';
     },
     likegen(content) {
-      console.log('likegen triggered')
-      var str = content;
+      // console.log('likegen triggered')
+      let str = content;
       return str.length;
     },
     sharegen(title) {
-      console.log('sharegen triggered')
-      var str = title;
+      // console.log('sharegen triggered')
+      let str = title;
       return str.length;
     },
     clciked(id) {
       // console.log('clciked triggered')
-      this.clickCheck = !this.clickCheck;
       this.getComments(id);
       this.cmtid = id;
+      this.clickCheck = !this.clickCheck;
     }
   },
   beforeMount() {
     this.getPosts();
     this.getUser();
-    this.time = Array.from({length: 100}, (_, index) => index + 1);
+    this.time = Array.from({length: 500}, (_, index) => index + 1);
   }
 }
 </script>

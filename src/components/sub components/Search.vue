@@ -7,6 +7,6 @@
 <script>
 export default {
   name: 'Search',
-  props: ['alert'],
+  props: ['alert']
 }
 </script>

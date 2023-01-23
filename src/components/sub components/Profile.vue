@@ -3,7 +3,7 @@
     <button @click="dropdown = !dropdown"
             class="flex items-center w-full hover:bg-lightcolor rounded-full p-2 focus:outline-none">
       <img :src="`${'https://avatars.dicebear.com/api/personas/' + profilepic + '.svg'}`"
-           class="w-10 h-10 rounded-full border border-lighter"/>
+           alt="profile pic" class="w-10 h-10 rounded-full border border-lighter"/>
       <div class="hidden lg:block ml-4">
         <p class="text-sm font-bold leading-tight"> {{ username }} </p>
         <p class="text-sm leading-tight"> {{ userid }} </p>
@@ -15,7 +15,7 @@
       <button @click="dropdown = false"
               class="flex items-center w-full hover:bg-lightcl p-2 focus:outline-none">
         <img :src="`${'https://avatars.dicebear.com/api/personas/' + 100 + '.svg'}`"
-             class="w-10 h-10 rounded-full border border-lighter"/>
+             alt="profile pic" class="w-10 h-10 rounded-full border border-lighter"/>
         <div class="ml-4">
           <p class="text-sm font-bold leading-tight"> {{ username }} </p>
           <p class="text-sm leading-tight"> {{ userid }} </p>

@@ -10,7 +10,6 @@
 import Sidenav from './components/Sidenav.vue'
 import Feed from './components/Feed.vue'
 import Trending from './components/Trending.vue'
-import profile from "./components/sub components/Profile.vue";
 
 export default {
   name: 'App',

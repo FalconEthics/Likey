@@ -24,7 +24,7 @@
           <!-- generatos random number of likes, shares and comments -->
           <div class="flex items-center justify-between w-full">
             <div class="flex items-center text-sm text-dark">
-              <button @click="clciked(post.id)"><i class="far fa-comment mr-3"></i></button>
+              <button @click="getComments(post.id)"><i class="far fa-comment mr-3"></i></button>
               <p class="mr-3"> 5 </p>
             </div>
             <div class="flex items-center text-sm text-dark">
@@ -118,6 +118,8 @@ export default {
             console.log(error);
           });
       // return this.comments.length;
+      this.cmtid = id;
+      this.clickCheck = !this.clickCheck;
     },
     usergen(id) {
       // console.log('usergen triggered')
@@ -188,12 +190,6 @@ export default {
       // console.log('sharegen triggered')
       let str = title;
       return str.length;
-    },
-    clciked(id) {
-      // console.log('clciked triggered')
-      this.getComments(id);
-      this.cmtid = id;
-      this.clickCheck = !this.clickCheck;
     }
   },
   beforeMount() {

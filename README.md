@@ -228,9 +228,13 @@ Distributed under the GNU License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Soumik Das - [Twitter](https://twitter.com/SoumikD95642409) / [Porfolio Site](https://www.soumik-das.com/) / [Linkedlin](https://www.linkedin.com/in/soumik-das-profile/)
+<ul>
+<li><a href="https://www.linkedin.com/in/soumik-das-profile/"> LinkedIn Profile</a></li>
+<li><a href="https://mrsoumikdas.com"> Portfolio Site</a></li>
+<li><a href="https://twitter.com/Mr_Soumik_Das"> Twitter Handle</a></li>
+</ul>
 
-Project Link: [https://github.com/FalconEthics/Likey](https://github.com/FalconEthics/Likey)
+~ wanna checkout my other projects: [https://github.com/FalconEthics](https://github.com/FalconEthics)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

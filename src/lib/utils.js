@@ -1,4 +1,5 @@
-import { debounce } from 'lodash';
+import pkg from 'lodash';
+const { debounce } = pkg;
 
 /**
  * Format date to relative time (e.g., "2 hours ago")

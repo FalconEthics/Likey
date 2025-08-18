@@ -1,287 +1,224 @@
-<a name="readme-top"></a>
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![GNU License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+# Likey - Social Media Platform
 
+A modern Instagram-like social media platform built with SvelteKit, Supabase, and DaisyUI.
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/FalconEthics/Likey">
-    <img src="./src/assets/logo.png" alt="Logo" width="100" height="80">
-  </a>
+## 🚀 Features
 
-  <h3 align="center">Likey - let's chill together</h3>
+### Core Features (MVP)
+- **User Authentication** - Sign up/login with email & password using Supabase Auth
+- **Profile Management** - Customizable profiles with usernames, display names, bios, and profile pictures
+- **Photo Sharing** - Upload and share multiple photos per post with automatic compression
+- **Feed System** - Home feed with infinite scroll showing posts from followed users
+- **Social Interactions** - Like and comment on posts
+- **Following System** - Follow/unfollow users with real-time follower counts
+- **Real-time Notifications** - Instant notifications for likes, comments, and new followers
 
-  <p align="center">
-    A platform to connect and hangout with your friends all over the world!
-    <br />
-    <a href="https://github.com/FalconEthics/Likey"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://likey-falconethics.vercel.app/">View Demo</a>
-    ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Request Feature</a>
-  </p>
-</div>
+### Extended Features
+- **Direct Messaging** - Real-time 1:1 chat with message history
+- **Trending Posts** - Algorithm-based trending content with time decay
+- **Explore Page** - Discover trending posts, popular users, and latest content
+- **User Recommendations** - Mutual follower-based user suggestions
+- **Profile Search** - Find users by username or display name with real-time results
+- **Virtualized Feed** - High-performance scrolling for thousands of posts
+- **Icon System** - Lucide Svelte icons throughout the interface
+- **Responsive Design** - Works perfectly on desktop and mobile
+- **Dark/Light Mode** - Theme switching with persistence
+- **Image Optimization** - Automatic image compression before upload
+- **Real-time Updates** - Live updates using Supabase Realtime
+- **PWA Support** - Installable as a mobile app
 
-## <a href="https://likey-falconethics.vercel.app/">Open Site</a>
-Username and Password: demo
+## 🛠 Tech Stack
 
+- **Runtime**: Bun
+- **Frontend**: SvelteKit 5+ with modern syntax
+- **Styling**: Tailwind CSS + DaisyUI
+- **Backend**: Supabase (PostgreSQL + Auth + Storage + Realtime)
+- **Icons**: Lucide Svelte for consistent SVG icons
+- **Virtualization**: @tanstack/svelte-virtual for performance
+- **Animation**: Motion for smooth transitions
+- **Utilities**: Lodash for utility functions
 
+## 📋 Prerequisites
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#progress">Progress</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+- Node.js 18+ or Bun
+- Supabase account
+- Git
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/FalconEthics/Likey)
+## 🚀 Quick Start
 
-My social media app will provide users with a platform to connect with their friends and family, meet new people, and share their thoughts, photos, and videos.
+### 1. Clone the Repository
 
-Users will be able to create a profile, add friends, and post updates on their feed. They can also interact with others by commenting, reacting, and messaging. In addition, the app will feature a discovery tab, where users can browse and follow content from other users, as well as a notification tab that keeps users updated on the latest activity from their friends.
-
-My app will prioritize user privacy and security, with features such as account verification, two-factor authentication, and the ability to control who can see your posts and profile information.
-
-Overall, my social media app aims to provide an engaging and secure platform for users to connect and share with each other.
-
- - Initially this project was assigned to me as frontend assesment task by a recruiter in their round 2 interview to evaluate my skills in the domain.
-  - For more indepth info about my project, please refer to the frontend problem statement of RobusTest technical evaluation round 2, that was provided by the recruiter to me for evalution [Documentation](./public/assignment%20.pdf)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-Here are all the tools used in the build.
-
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url] - JS Framework
-* [![JQuery][JQuery.com]][JQuery-url] - CSS Library
-* [![Affinity][Affinity.com]][Affinity-url] - Axios API 
-* [![Davinci][Davinci.com]][Davinci-url] - UI/UX
-* [![Git][Git.com]][Git-url] - Deployment
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Our social media app can be used in a variety of ways, including:
-
-Staying connected with friends and family: Users can use the app to keep in touch with their loved ones by sending messages, commenting on each other's posts, and reacting to content.
-
-Meeting new people: The app's discovery tab and messaging feature allow users to connect with others who share similar interests, backgrounds, or locations.
-
-Sharing content: Users can share photos, videos, and thoughts on their feed for their friends and followers to see.
-
-Staying up to date: The notification tab keeps users informed about the latest activity from their friends, so they never miss an update.
-
-Privacy and security: Our app includes features such as account verification, two-factor authentication, and the ability to control who can see your posts and profile information, ensuring that users feel safe and secure while using the app.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<!-- Progress -->
-## Progress
-
-These are the features available and functional on the site with respect to the problem statement provided to me: [Documentation](./public/assignment%20.pdf)
-
-- The platform displays
-  - the posts
-  - comments related to the post
-- Following are the detailed specifications according to which the system has
-been built
-  - The user are able to
-    - Create a new POST
-    - update any existing POST (allowed for
-the user who owns the post)
-    - Delete the post (allowed for the user who
-owns the post)
-  - For each post, the user is be able to see the
-comments on it.
-  - Commenting is only allowed by registered users - *Dummy api doesn't actually process "POST" request, writing an axios post req. would not through an error but also won't perform anything so impleminting real authenticaion is not possible without a real API*
-  - The UI is designed in such a way that it has a
-similar user experience when seen on mobile devices and
-bigger device screens.
-    - The design stays same for all mobile
-devices. It does not change with respect to the
-device.
-    - UI progression for all screen and sizes.
-  - Bonus:
-      - UI for new user account creation.
-    - UI for account login. 
-    <br>
-  "*i have placed the bonus section code sperately as becuase they are only pure ui and functionalty is not yet added, i would have needed to add vue router to make the new page avaiable from the main site it slef wheresa the site itself is not making any use of the vuejs, i will add it in near future if i get the ui functional*" 
-  <br>
-  ~The site is still reachable by clicking on logout/add account section from profile dropdown!
-  [Login/Signup Page](https://likey-extras-falconethics.vercel.app/)
-
-<!-- ROADMAP -->
-## Roadmap
-
-Here is a rough roadmap for intrested contributors that i will be following in near future for my social media app project:
-
-Integrate with a backend service: In order to store user data and handle server-side logic, I will need to integrate my app with a backend service such as Firebase or a custom backend server.
-
-Implement user authentication: Allow users to create accounts and log in to the app using their email and password. I may also want to consider implementing social login options such as Facebook or Google.
-
-Implement feed functionality: Allow users to post updates to their feed and view updates from their friends. This will likely require integrating with a database to store and retrieve feed data.
-
-Implement messaging functionality: Allow users to send and receive private messages with each other. This will also require integrating with a database to store and retrieve message data.
-
-Implement notification functionality: Allow users to receive notifications when their friends interact with them on the app, such as commenting on their posts or messaging them.
-
-Test and debug: Thoroughly test the app to ensure that it is functioning correctly and fix any issues that are discovered.
-
-Launch the app: Once I have completed the above steps and my app is functioning as intended, I will launch it on the app store or make it available for download on my website.
-
-Note: This roadmap is a general suggestion and may not cover all the specific tasks and considerations that are relevant to my project. It's important to create a more detailed plan that takes into account the specific needs and requirements of my app that i will publish when i start commiting my time on this project more seriously.
-
-- [x] Base structure
-- [x] Twitter inspired frontend UI
-- [x] Implement Vue.js Framework
-- [x] Replace Vannila css and Bootstrap with Tailwind CSS
-- [ ] Build the Backend
-    - [ ] API intergration
-    - [ ] Proper Deployment with payment gateway and user database
-
-See the [open issues](https://github.com/FalconEthics/Likey/issuess) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-- to run & setup the project in your local env. for development
-1. Fork the Project
- ```sh
-cd Likey
+```bash
+git clone <your-repo-url>
+cd likey
 ```
-2. Install all it's dependencies
- ```sh
+
+### 2. Install Dependencies
+
+```bash
+bun install
+# or
 npm install
 ```
-3. Preview site with vite
- ```sh
+
+### 3. Set Up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to Settings > API to get your project URL and anon key
+3. Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+PUBLIC_SUPABASE_URL=your_supabase_project_url
+PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Set Up Database
+
+1. Go to your Supabase project dashboard
+2. Navigate to the SQL Editor
+3. Copy and paste the contents of `database-schema.sql`
+4. Run the SQL commands to create all tables, functions, triggers, and policies
+
+### 5. Configure Storage
+
+1. In your Supabase dashboard, go to Storage
+2. The `images` bucket should be created automatically by the schema
+3. Verify that the storage policies are in place for public read access
+
+### 6. Start Development Server
+
+```bash
+bun run dev
+# or
 npm run dev
 ```
-- to contribute your code
-1. Create your Feature Branch 
- ```sh
-git checkout -b feature/AmazingFeature
+
+Visit `http://localhost:5173` to see your app!
+
+## 📁 Project Structure
+
 ```
-2. Commit your Changes 
-```s
-git commit -m Add some AmazingFeature
+src/
+├── lib/
+│   ├── components/          # Reusable Svelte components
+│   │   ├── Navigation.svelte
+│   │   ├── Post.svelte
+│   │   ├── Feed.svelte          # Standard feed component
+│   │   ├── VirtualizedFeed.svelte # High-performance virtualized feed
+│   │   ├── FeedComparison.svelte  # A/B testing component
+│   │   ├── UserCard.svelte
+│   │   ├── LoginModal.svelte
+│   │   ├── SignupModal.svelte
+│   │   └── CreatePostModal.svelte
+│   ├── auth.js             # Authentication logic
+│   ├── supabase.js         # Supabase client configuration
+│   ├── stores.js           # Svelte stores for state management
+│   ├── utils.js            # Utility functions
+│   ├── notifications.js    # Real-time notifications
+│   ├── messages.js         # Direct messaging API
+│   └── search.js           # Search and trending functionality
+├── routes/                 # SvelteKit routes
+│   ├── +layout.svelte      # Main layout
+│   ├── +page.svelte        # Home page (uses VirtualizedFeed)
+│   ├── profile/[username]/ # User profiles
+│   ├── settings/           # User settings
+│   ├── notifications/      # Notifications page
+│   ├── messages/           # Direct messaging interface
+│   │   ├── +page.svelte         # Messages list
+│   │   └── [conversationId]/    # Individual chat
+│   └── explore/            # Explore page with trending content
+└── app.css                 # Global styles
 ```
-3. Push to the Branch 
-```s
-git push origin feature/AmazingFeature
+
+## 🎨 Customization
+
+### Themes
+
+The app uses DaisyUI themes. You can customize themes in `tailwind.config.js`:
+
+```js
+daisyui: {
+  themes: ['light', 'dark', 'cupcake', 'cyberpunk'], // Add your themes
+}
 ```
-4. Open a Pull Request
-- Your code will be merged to the main branch as soon as I review your code ~
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Styling
 
+- Global styles in `src/app.css`
+- Component-specific styles using Tailwind classes
+- DaisyUI components for consistent UI elements
 
+## 🚀 Deployment
 
-<!-- LICENSE -->
-## License
+### Vercel (Recommended)
 
-Distributed under the GNU License. See `LICENSE.txt` for more information.
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add your environment variables in Vercel dashboard
+4. Deploy automatically
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Other Platforms
 
+The app uses the Vercel adapter by default. For other platforms:
 
+1. Install the appropriate SvelteKit adapter
+2. Update `svelte.config.js`
+3. Follow platform-specific deployment instructions
 
-<!-- CONTACT -->
-## Contact
+## 📱 PWA Features
 
-<ul>
-<li><a href="https://www.linkedin.com/in/soumik-das-profile/"> LinkedIn Profile</a></li>
-<li><a href="https://mrsoumikdas.com"> Portfolio Site</a></li>
-<li><a href="https://twitter.com/Mr_Soumik_Das"> Twitter Handle</a></li>
-</ul>
+The app is ready for PWA implementation:
 
-~ wanna checkout my other projects: [https://github.com/FalconEthics](https://github.com/FalconEthics)
+- Add `app.webmanifest` for app metadata
+- Implement service worker for offline functionality
+- Add installation prompts
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 🔒 Security Features
 
+- Row Level Security (RLS) enabled on all tables
+- Input validation and sanitization
+- Secure file uploads with type checking
+- Rate limiting ready for implementation
+- CSRF protection through Supabase
 
+## 🤝 Contributing
 
-## Acknowledgments
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
- -Initially this project was assigned to me as frontend assesment task by RobusTest in their round 2 interview to evaluate my skills in the domain.
+## 📄 License
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/FalconEthics/Likey.svg?style=for-the-badge
-[contributors-url]: https://github.com/FalconEthics/Likey/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/FalconEthics/Likey.svg?style=for-the-badge
-[forks-url]: https://github.com/FalconEthics/Likey/network/members
-[stars-shield]: https://img.shields.io/github/stars/FalconEthics/Likey.svg?style=for-the-badge
-[stars-url]: https://github.com/FalconEthics/Likey/stargazers
-[issues-shield]: https://img.shields.io/github/issues/FalconEthics/Likey.svg?style=for-the-badge
+MIT License - feel free to use this project for personal or commercial purposes.
 
-[issues-url]: https://github.com/FalconEthics/Likey/issues
-[license-shield]: https://img.shields.io/github/license/FalconEthics/Likey.svg?style=for-the-badge
+## 🆘 Troubleshooting
 
-[license-url]: https://github.com/FalconEthics/Likey/blob/main/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+### Common Issues
 
-[linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
+1. **Supabase connection issues**: Verify your environment variables
+2. **Image upload fails**: Check storage policies and bucket configuration
+3. **Real-time not working**: Ensure RLS policies allow reads for notifications
+4. **Build errors**: Make sure all dependencies are installed
 
-[product-screenshot]: ./public/screenshot.png
-<!-- [product-screenshot2]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-16-58AM-000_CustomizedView13304029920.png
-[product-screenshot3]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-18-29AM-000_CustomizedView9151492485.png
-[product-screenshot4]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Trinetro_Drone_2022-Sep-03_04-22-00AM-000_CustomizedView12173695879.png
-[product-sub components]: https://raw.githubusercontent.com/FalconEthics/Likey/main/Components.png -->
+### Getting Help
 
+- Check the browser console for errors
+- Verify Supabase logs in the dashboard
+- Ensure all database tables are created correctly
 
-[Bootstrap.com]: https://img.shields.io/badge/Vue_3-43D393?style=for-the-badge&logo=vue.js&logoColor=white
-[Bootstrap-url]: https://vuejs.org/
-[JQuery.com]: https://img.shields.io/badge/Tailwind-0769AD?style=for-the-badge&logo=tailwindcss&logoColor=white
-[JQuery-url]: https://tailwindcss.com/
-[Es6.com]: https://img.shields.io/badge/ECMAScript6-7BDCB5?style=for-the-badge&logo=vue.js&logoColor=white
-[Es6-url]: https://es6.io/
-[Html.com]: https://img.shields.io/badge/HTML5-8ED1FC?style=for-the-badge&logo=H&logoColor=white
-[Html-url]: https://html.com/html5/
-[Css.com]: https://img.shields.io/badge/Custom_CSS-8ED1FC?style=for-the-badge&logo=C&logoColor=white
-[Css-url]: http://css.com/
-[Affinity.com]: https://img.shields.io/badge/Jsonplaceholder-FFFF00?style=for-the-badge&logo=json&logoColor=white
-[Affinity-url]: https://jsonplaceholder.typicode.com/
-[Davinci.com]: https://img.shields.io/badge/Figma-9900EF?style=for-the-badge&logo=figma&logoColor=white
-[Davinci-url]: https://www.figma.com/
-[Git.com]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white
-[Git-url]: https://vercel.com/
+## 🎯 Next Steps
+
+- [ ] Add story features
+- [ ] Create admin dashboard
+- [ ] Add content moderation
+- [ ] Implement analytics
+- [ ] Add push notifications
+- [ ] Group messaging
+- [ ] Video/voice calls
+- [ ] Advanced search filters

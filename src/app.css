@@ -1,6 +1,14 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
 
-/* Import DaisyUI themes and components */
-@import 'daisyui/dist/full.css';
+@theme reference {
+  /* Enable all Tailwind utilities */
+  --font-size-xs: 0.75rem;
+  --line-height-xs: 1rem;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+}

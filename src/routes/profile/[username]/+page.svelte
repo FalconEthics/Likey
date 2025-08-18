@@ -11,13 +11,14 @@
 	import { MessageCircle } from 'lucide-svelte';
 	
 	const { data } = $props();
-	let { profile, posts } = data;
+	let { profile } = data;
+	let posts = $state(data.posts);
 	
-	let isFollowing = false;
-	let followLoading = false;
-	let isCurrentUser = false;
+	let isFollowing = $state(false);
+	let followLoading = $state(false);
 	
-	$: isCurrentUser = $user?.id === profile.id;
+	// Use $derived for Svelte 5 runes mode
+	let isCurrentUser = $derived($user?.id === profile.id);
 	
 	/**
 	 * Check if current user is following this profile

@@ -76,8 +76,8 @@
 		{:else}
 			<div class="space-y-2">
 				{#each $notifications as notification (notification.id)}
-					<div 
-						class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+					<button 
+						class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full text-left"
 						class:border-l-4={!notification.read}
 						class:border-l-primary={!notification.read}
 						onclick={() => handleNotificationClick(notification)}
@@ -132,7 +132,7 @@
 								</div>
 							</div>
 						</div>
-					</div>
+					</button>
 				{/each}
 			</div>
 		{/if}

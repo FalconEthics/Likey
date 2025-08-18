@@ -166,7 +166,7 @@
 				<form onsubmit={saveProfile} class="space-y-6">
 					<!-- Profile Picture -->
 					<div class="form-control">
-						<label class="label">
+						<label class="label" for="profile-pic-input">
 							<span class="label-text">Profile Picture</span>
 						</label>
 						<div class="flex items-center gap-4">
@@ -182,6 +182,7 @@
 								</div>
 							</div>
 							<input 
+								id="profile-pic-input"
 								type="file" 
 								accept="image/*" 
 								class="file-input file-input-bordered"

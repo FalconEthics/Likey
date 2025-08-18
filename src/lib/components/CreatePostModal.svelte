@@ -6,10 +6,10 @@
 	// Lucide Icons
 	import { Image, Plus, X } from 'lucide-svelte';
 	
-	let selectedImages = [];
-	let caption = '';
-	let uploading = false;
-	let dragActive = false;
+	let selectedImages = $state([]);
+	let caption = $state('');
+	let uploading = $state(false);
+	let dragActive = $state(false);
 	
 	/**
 	 * Handle file selection
@@ -171,9 +171,12 @@
 		<form onsubmit={createPost} class="space-y-4">
 			<!-- Image Upload Area -->
 			<div 
+				role="button"
+				tabindex="0"
 				class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary transition-colors"
 				class:border-primary={dragActive}
-				class:bg-primary/5={dragActive}
+				class:bg-primary={dragActive}
+				style:background-color={dragActive ? 'rgb(59 130 246 / 0.05)' : ''}
 				ondragover={(e) => {
 					e.preventDefault();
 					dragActive = true;

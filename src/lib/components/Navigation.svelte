@@ -342,10 +342,20 @@
 
 <style>
   .menu-item {
-    @apply flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 cursor-pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .menu-item:hover {
+    background-color: var(--fallback-b2, oklch(var(--b2) / var(--tw-bg-opacity)));
   }
   
   .menu-title {
-    @apply p-2 font-medium;
+    padding: 0.5rem;
+    font-weight: 500;
   }
 </style>

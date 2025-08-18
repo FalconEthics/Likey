@@ -15,11 +15,11 @@
 	
 	const dispatch = createEventDispatcher();
 	
-	let isLiking = false;
-	let showComments = false;
-	let newComment = '';
-	let comments = [];
-	let commentsLoading = false;
+	let isLiking = $state(false);
+	let showComments = $state(false);
+	let newComment = $state('');
+	let comments = $state([]);
+	let commentsLoading = $state(false);
 	
 	/**
 	 * Toggle like on post

@@ -13,8 +13,8 @@
 	 */
 	const { user: profileUser, showReason = false } = $props();
 
-	let isFollowing = profileUser.is_following || false;
-	let followLoading = false;
+	let isFollowing = $state(profileUser.is_following || false);
+	let followLoading = $state(false);
 
 	/**
 	 * Toggle follow status

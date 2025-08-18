@@ -92,8 +92,8 @@
 		{:else}
 			<div class="space-y-2">
 				{#each $conversations as conversation (conversation.id)}
-					<div 
-						class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+					<button 
+						class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full text-left"
 						onclick={() => openConversation(conversation.id)}
 					>
 						<div class="card-body p-4">
@@ -143,7 +143,7 @@
 								{/if}
 							</div>
 						</div>
-					</div>
+					</button>
 				{/each}
 			</div>
 		{/if}

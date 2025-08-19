@@ -103,9 +103,9 @@
 		},
 	});
 	
-	// Get virtual items
-	$: virtualItems = virtualizer.getVirtualItems();
-	$: totalSize = virtualizer.getTotalSize();
+	// Get virtual items - access the store values properly
+	$: virtualItems = virtualizer ? $virtualizer.getVirtualItems() : [];
+	$: totalSize = virtualizer ? $virtualizer.getTotalSize() : 0;
 	
 	/**
 	 * Handle scroll to load more posts
@@ -176,7 +176,7 @@
 					
 					<div
 						data-index={virtualItem.index}
-						use:virtualizer.measureElement
+						use:$virtualizer.measureElement
 						style="
 							position: absolute;
 							top: 0;

@@ -1,8 +1,13 @@
--- Likey Social Media App Database Schema
--- Run these commands in your Supabase SQL Editor
+-- Likey Social Media App - Complete Database Setup
+-- Run this SINGLE file in your fresh Supabase SQL Editor
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Storage bucket for images
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('images', 'images', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Users table (extends Supabase auth.users)
 CREATE TABLE public.profiles (
@@ -71,6 +76,48 @@ CREATE TABLE public.notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Direct Messages - Conversations table
+CREATE TABLE public.conversations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user1_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  user2_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user1_id, user2_id),
+  CHECK (user1_id != user2_id)
+);
+
+-- Direct Messages - Messages table
+CREATE TABLE public.messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id UUID REFERENCES public.conversations(id) ON DELETE CASCADE NOT NULL,
+  sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  content TEXT NOT NULL,
+  read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Trending posts table
+CREATE TABLE public.trending_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE NOT NULL,
+  score NUMERIC NOT NULL,
+  trending_date DATE DEFAULT CURRENT_DATE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(post_id)
+);
+
+-- User recommendations table
+CREATE TABLE public.user_recommendations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  recommended_user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  reason VARCHAR(50) NOT NULL,
+  score INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, recommended_user_id)
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_posts_user_id ON public.posts(user_id);
 CREATE INDEX idx_posts_created_at ON public.posts(created_at DESC);
@@ -81,9 +128,24 @@ CREATE INDEX idx_follows_follower_id ON public.follows(follower_id);
 CREATE INDEX idx_follows_following_id ON public.follows(following_id);
 CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
 CREATE INDEX idx_profiles_username ON public.profiles(username);
+CREATE INDEX idx_conversations_user1 ON public.conversations(user1_id);
+CREATE INDEX idx_conversations_user2 ON public.conversations(user2_id);
+CREATE INDEX idx_conversations_last_message ON public.conversations(last_message_at DESC);
+CREATE INDEX idx_messages_conversation ON public.messages(conversation_id);
+CREATE INDEX idx_messages_sender ON public.messages(sender_id);
+CREATE INDEX idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX idx_trending_posts_score ON public.trending_posts(score DESC);
+CREATE INDEX idx_trending_posts_date ON public.trending_posts(trending_date DESC);
+CREATE INDEX idx_user_recommendations_user ON public.user_recommendations(user_id);
+CREATE INDEX idx_user_recommendations_score ON public.user_recommendations(score DESC);
 
--- Functions to update counts
-CREATE OR REPLACE FUNCTION update_like_count()
+-- Full-text search indexes
+CREATE INDEX idx_profiles_search ON public.profiles USING GIN (
+  to_tsvector('english', username || ' ' || display_name)
+);
+
+-- Functions to update counts with proper security
+CREATE OR REPLACE FUNCTION public.update_like_count()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -101,7 +163,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION update_comment_count()
+CREATE OR REPLACE FUNCTION public.update_comment_count()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -119,7 +181,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION update_follow_counts()
+CREATE OR REPLACE FUNCTION public.update_follow_counts()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -139,7 +201,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION update_posts_count()
+CREATE OR REPLACE FUNCTION public.update_posts_count()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -157,22 +219,126 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.update_conversation_timestamp()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE public.conversations 
+  SET last_message_at = NEW.created_at 
+  WHERE id = NEW.conversation_id;
+  RETURN NEW;
+END;
+$$;
+
+-- Function to calculate trending score
+CREATE OR REPLACE FUNCTION public.calculate_trending_score(post_id UUID)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  like_count INTEGER;
+  comment_count INTEGER;
+  post_age_hours NUMERIC;
+  score NUMERIC;
+BEGIN
+  SELECT p.like_count, p.comment_count, 
+         EXTRACT(EPOCH FROM (NOW() - p.created_at)) / 3600 
+  INTO like_count, comment_count, post_age_hours
+  FROM public.posts p WHERE p.id = post_id;
+  
+  -- Trending algorithm: (likes * 2 + comments * 3) / (age_hours + 1)^1.5
+  score := (like_count * 2 + comment_count * 3) / POWER(post_age_hours + 1, 1.5);
+  
+  RETURN score;
+END;
+$$;
+
+-- Function to refresh trending posts
+CREATE OR REPLACE FUNCTION public.refresh_trending_posts()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Clear old trending data (older than 7 days)
+  DELETE FROM public.trending_posts 
+  WHERE trending_date < CURRENT_DATE - INTERVAL '7 days';
+  
+  -- Insert/update trending posts for today
+  INSERT INTO public.trending_posts (post_id, score, trending_date)
+  SELECT 
+    p.id,
+    public.calculate_trending_score(p.id),
+    CURRENT_DATE
+  FROM public.posts p
+  WHERE p.created_at > CURRENT_DATE - INTERVAL '7 days'
+    AND (p.like_count > 0 OR p.comment_count > 0)
+  ON CONFLICT (post_id) 
+  DO UPDATE SET 
+    score = EXCLUDED.score,
+    trending_date = EXCLUDED.trending_date;
+END;
+$$;
+
+-- Function to generate mutual follow recommendations
+CREATE OR REPLACE FUNCTION public.generate_mutual_follow_recommendations(target_user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Clear old recommendations for this user
+  DELETE FROM public.user_recommendations WHERE user_id = target_user_id;
+  
+  -- Insert mutual follower recommendations
+  INSERT INTO public.user_recommendations (user_id, recommended_user_id, reason, score)
+  SELECT DISTINCT
+    target_user_id,
+    mutual_user.id,
+    'mutual_followers',
+    COUNT(*) as score
+  FROM public.follows f1
+  JOIN public.follows f2 ON f1.following_id = f2.follower_id
+  JOIN public.profiles mutual_user ON f2.following_id = mutual_user.id
+  WHERE f1.follower_id = target_user_id
+    AND mutual_user.id != target_user_id
+    AND mutual_user.id NOT IN (
+      SELECT following_id FROM public.follows WHERE follower_id = target_user_id
+    )
+  GROUP BY mutual_user.id
+  HAVING COUNT(*) >= 2
+  ORDER BY score DESC
+  LIMIT 20;
+END;
+$$;
+
 -- Create triggers
 CREATE TRIGGER like_count_trigger
   AFTER INSERT OR DELETE ON public.likes
-  FOR EACH ROW EXECUTE FUNCTION update_like_count();
+  FOR EACH ROW EXECUTE FUNCTION public.update_like_count();
 
 CREATE TRIGGER comment_count_trigger
   AFTER INSERT OR DELETE ON public.comments
-  FOR EACH ROW EXECUTE FUNCTION update_comment_count();
+  FOR EACH ROW EXECUTE FUNCTION public.update_comment_count();
 
 CREATE TRIGGER follow_counts_trigger
   AFTER INSERT OR DELETE ON public.follows
-  FOR EACH ROW EXECUTE FUNCTION update_follow_counts();
+  FOR EACH ROW EXECUTE FUNCTION public.update_follow_counts();
 
 CREATE TRIGGER posts_count_trigger
   AFTER INSERT OR DELETE ON public.posts
-  FOR EACH ROW EXECUTE FUNCTION update_posts_count();
+  FOR EACH ROW EXECUTE FUNCTION public.update_posts_count();
+
+CREATE TRIGGER message_timestamp_trigger
+  AFTER INSERT ON public.messages
+  FOR EACH ROW EXECUTE FUNCTION public.update_conversation_timestamp();
 
 -- Row Level Security (RLS) Policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -181,6 +347,10 @@ ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trending_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_recommendations ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
@@ -245,197 +415,7 @@ CREATE POLICY "Users can view their own notifications" ON public.notifications
 CREATE POLICY "Users can update their own notifications" ON public.notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Create storage bucket for images
-INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true);
-
--- Storage policies
-CREATE POLICY "Images are publicly accessible" ON storage.objects
-  FOR SELECT USING (bucket_id = 'images');
-
-CREATE POLICY "Users can upload images" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
-
-CREATE POLICY "Users can update own images" ON storage.objects
-  FOR UPDATE USING (bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]);
-
-CREATE POLICY "Users can delete own images" ON storage.objects
-  FOR DELETE USING (bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]);
-
--- Direct Messages Tables
-
--- Conversations table (for 1:1 chats)
-CREATE TABLE public.conversations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user1_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  user2_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user1_id, user2_id),
-  CHECK (user1_id != user2_id)
-);
-
--- Messages table
-CREATE TABLE public.messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  conversation_id UUID REFERENCES public.conversations(id) ON DELETE CASCADE NOT NULL,
-  sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  content TEXT NOT NULL,
-  read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Trending posts view (materialized for performance)
-CREATE TABLE public.trending_posts (
-  post_id UUID PRIMARY KEY REFERENCES public.posts(id) ON DELETE CASCADE,
-  score NUMERIC DEFAULT 0,
-  trending_date DATE DEFAULT CURRENT_DATE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- User recommendations table
-CREATE TABLE public.user_recommendations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  recommended_user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  reason VARCHAR(50) NOT NULL CHECK (reason IN ('mutual_followers', 'similar_interests', 'new_user')),
-  score NUMERIC DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, recommended_user_id),
-  CHECK (user_id != recommended_user_id)
-);
-
--- Search index for profiles
-CREATE INDEX idx_profiles_search ON public.profiles USING gin(
-  (to_tsvector('english', display_name || ' ' || username || ' ' || COALESCE(bio, '')))
-);
-
--- Indexes for direct messages
-CREATE INDEX idx_conversations_user1 ON public.conversations(user1_id);
-CREATE INDEX idx_conversations_user2 ON public.conversations(user2_id);
-CREATE INDEX idx_conversations_last_message ON public.conversations(last_message_at DESC);
-CREATE INDEX idx_messages_conversation ON public.messages(conversation_id);
-CREATE INDEX idx_messages_sender ON public.messages(sender_id);
-CREATE INDEX idx_messages_created_at ON public.messages(created_at DESC);
-
--- Indexes for trending and recommendations
-CREATE INDEX idx_trending_posts_score ON public.trending_posts(score DESC);
-CREATE INDEX idx_trending_posts_date ON public.trending_posts(trending_date DESC);
-CREATE INDEX idx_user_recommendations_user ON public.user_recommendations(user_id);
-CREATE INDEX idx_user_recommendations_score ON public.user_recommendations(score DESC);
-
--- Functions for direct messages
-
--- Function to update conversation last_message_at
-CREATE OR REPLACE FUNCTION update_conversation_timestamp()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  UPDATE public.conversations 
-  SET last_message_at = NEW.created_at 
-  WHERE id = NEW.conversation_id;
-  RETURN NEW;
-END;
-$$;
-
--- Function to calculate trending score
-CREATE OR REPLACE FUNCTION calculate_trending_score(post_id UUID)
-RETURNS NUMERIC
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  like_count INTEGER;
-  comment_count INTEGER;
-  post_age_hours NUMERIC;
-  score NUMERIC;
-BEGIN
-  SELECT p.like_count, p.comment_count, 
-         EXTRACT(EPOCH FROM (NOW() - p.created_at)) / 3600 
-  INTO like_count, comment_count, post_age_hours
-  FROM public.posts p WHERE p.id = post_id;
-  
-  -- Trending algorithm: (likes * 2 + comments * 3) / (age_hours + 1)^1.5
-  score := (like_count * 2 + comment_count * 3) / POWER(post_age_hours + 1, 1.5);
-  
-  RETURN score;
-END;
-$$;
-
--- Function to refresh trending posts
-CREATE OR REPLACE FUNCTION refresh_trending_posts()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  -- Clear old trending data (older than 7 days)
-  DELETE FROM public.trending_posts 
-  WHERE trending_date < CURRENT_DATE - INTERVAL '7 days';
-  
-  -- Insert/update trending posts for today
-  INSERT INTO public.trending_posts (post_id, score, trending_date)
-  SELECT 
-    p.id,
-    calculate_trending_score(p.id),
-    CURRENT_DATE
-  FROM public.posts p
-  WHERE p.created_at > CURRENT_DATE - INTERVAL '7 days'
-    AND (p.like_count > 0 OR p.comment_count > 0)
-  ON CONFLICT (post_id) 
-  DO UPDATE SET 
-    score = EXCLUDED.score,
-    trending_date = EXCLUDED.trending_date;
-END;
-$$;
-
--- Function to generate mutual follow recommendations
-CREATE OR REPLACE FUNCTION generate_mutual_follow_recommendations(target_user_id UUID)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  -- Clear old recommendations for this user
-  DELETE FROM public.user_recommendations WHERE user_id = target_user_id;
-  
-  -- Insert mutual follower recommendations
-  INSERT INTO public.user_recommendations (user_id, recommended_user_id, reason, score)
-  SELECT DISTINCT
-    target_user_id,
-    mutual_user.id,
-    'mutual_followers',
-    COUNT(*) as score
-  FROM public.follows f1
-  JOIN public.follows f2 ON f1.following_id = f2.follower_id
-  JOIN public.profiles mutual_user ON f2.following_id = mutual_user.id
-  WHERE f1.follower_id = target_user_id
-    AND mutual_user.id != target_user_id
-    AND mutual_user.id NOT IN (
-      SELECT following_id FROM public.follows WHERE follower_id = target_user_id
-    )
-  GROUP BY mutual_user.id
-  HAVING COUNT(*) >= 2
-  ORDER BY score DESC
-  LIMIT 20;
-END;
-$$;
-
--- Triggers for direct messages
-CREATE TRIGGER message_timestamp_trigger
-  AFTER INSERT ON public.messages
-  FOR EACH ROW EXECUTE FUNCTION update_conversation_timestamp();
-
--- RLS Policies for Direct Messages
-
 -- Conversations policies
-ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Users can view their own conversations" ON public.conversations
   FOR SELECT USING (auth.uid() = user1_id OR auth.uid() = user2_id);
 
@@ -443,8 +423,6 @@ CREATE POLICY "Users can create conversations" ON public.conversations
   FOR INSERT WITH CHECK (auth.uid() = user1_id OR auth.uid() = user2_id);
 
 -- Messages policies
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Users can view messages in their conversations" ON public.messages
   FOR SELECT USING (
     conversation_id IN (
@@ -466,13 +444,22 @@ CREATE POLICY "Users can update their own messages" ON public.messages
   FOR UPDATE USING (auth.uid() = sender_id);
 
 -- Trending posts policies
-ALTER TABLE public.trending_posts ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Trending posts are viewable by everyone" ON public.trending_posts
   FOR SELECT USING (true);
 
 -- User recommendations policies
-ALTER TABLE public.user_recommendations ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Users can view their own recommendations" ON public.user_recommendations
   FOR SELECT USING (auth.uid() = user_id);
+
+-- Storage policies
+CREATE POLICY "Images are publicly accessible" ON storage.objects
+  FOR SELECT USING (bucket_id = 'images');
+
+CREATE POLICY "Users can upload images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Users can update own images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can delete own images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]);

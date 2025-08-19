@@ -70,14 +70,19 @@
     const result = await signUp(email, password, username, displayName);
     
     if (result.success) {
-      showSignup.set(false);
-      // Reset form
-      email = '';
-      password = '';
-      confirmPassword = '';
-      username = '';
-      displayName = '';
-      touched = {};
+      if (result.needsConfirmation) {
+        // Show confirmation message
+        errors.general = result.message || 'Please check your email and click the confirmation link to complete registration.';
+      } else {
+        showSignup.set(false);
+        // Reset form
+        email = '';
+        password = '';
+        confirmPassword = '';
+        username = '';
+        displayName = '';
+        touched = {};
+      }
     } else {
       if (result.error.includes('username')) {
         errors.username = result.error;
@@ -228,7 +233,7 @@
       </div>
       
       {#if errors.general}
-        <div class="alert alert-error">
+        <div class="alert" class:alert-success={errors.general.includes('check your email')} class:alert-error={!errors.general.includes('check your email')}>
           <span>{errors.general}</span>
         </div>
       {/if}

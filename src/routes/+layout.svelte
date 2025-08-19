@@ -6,8 +6,46 @@
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import SignupModal from '$lib/components/SignupModal.svelte';
 	import CreatePostModal from '$lib/components/CreatePostModal.svelte';
+	import ProfileSetup from '$lib/components/ProfileSetup.svelte';
 	import { initializeAuth } from '$lib/auth.js';
-	import { showLogin, showSignup, showCreatePost, loading } from '$lib/stores.js';
+	import { showLogin, showSignup, showCreatePost, loading, user } from '$lib/stores.js';
+	import { supabase } from '$lib/supabase.js';
+	
+	// Check if user is authenticated but has no profile
+	let needsProfileSetup = $state(false);
+	
+	$effect(() => {
+		// Check auth state and profile state
+		checkProfileSetup();
+	});
+	
+	async function checkProfileSetup() {
+		const { data } = await supabase.auth.getUser();
+		if (data.user && !$user) {
+			// Check if profile actually exists in database
+			try {
+				const { data: profile, error } = await supabase
+					.from('profiles')
+					.select('*')
+					.eq('id', data.user.id)
+					.single();
+				
+				if (profile && !error) {
+					// Profile exists, update user store and hide modal
+					user.set(profile);
+					needsProfileSetup = false;
+				} else {
+					// No profile found, show setup modal
+					needsProfileSetup = true;
+				}
+			} catch (err) {
+				// Error checking profile, show setup modal
+				needsProfileSetup = true;
+			}
+		} else {
+			needsProfileSetup = false;
+		}
+	}
 
 	let { children } = $props();
 	
@@ -47,4 +85,8 @@
 
 {#if $showCreatePost}
 	<CreatePostModal />
+{/if}
+
+{#if needsProfileSetup}
+	<ProfileSetup />
 {/if}

@@ -82,34 +82,51 @@
 	async function createPost(event) {
 		event.preventDefault();
 		
-		if (!$user || selectedImages.length === 0) return;
+		console.log('Creating post...');
+		console.log('User:', $user);
+		console.log('Caption:', caption);
+		console.log('Selected images:', selectedImages.length);
+		
+		if (!$user || (!caption.trim() && selectedImages.length === 0)) {
+			console.log('Validation failed');
+			return;
+		}
 		
 		uploading = true;
 		
 		try {
-			// Upload all images
+			// Upload all images (if any)
 			const imageUrls = [];
 			
-			for (const image of selectedImages) {
-				// Compress image before upload
-				const compressedFile = await compressImage(image.file);
-				const imagePath = generateImagePath($user.id, image.file.name);
-				
-				const { data, error } = await uploadImage(compressedFile, 'images', imagePath);
-				
-				if (error) throw error;
-				
-				const publicUrl = getImageUrl('images', imagePath);
-				imageUrls.push(publicUrl);
+			if (selectedImages.length > 0) {
+				for (const image of selectedImages) {
+					// Compress image before upload
+					const compressedFile = await compressImage(image.file);
+					const imagePath = generateImagePath($user.id, image.file.name);
+					
+					const { data, error } = await uploadImage(compressedFile, 'images', imagePath);
+					
+					if (error) throw error;
+					
+					const publicUrl = getImageUrl('images', imagePath);
+					imageUrls.push(publicUrl);
+				}
 			}
 			
 			// Create post in database
+			console.log('Creating post in database...');
+			console.log('Post data:', {
+				user_id: $user.id,
+				caption: caption.trim() || null,
+				image_urls: imageUrls.length > 0 ? imageUrls : []
+			});
+			
 			const { data: newPost, error: postError } = await supabase
 				.from('posts')
 				.insert({
 					user_id: $user.id,
 					caption: caption.trim() || null,
-					image_urls: imageUrls
+					image_urls: imageUrls.length > 0 ? imageUrls : []
 				})
 				.select(`
 					*,
@@ -120,6 +137,8 @@
 					)
 				`)
 				.single();
+			
+			console.log('Database response:', { data: newPost, error: postError });
 			
 			if (postError) throw postError;
 			
@@ -138,7 +157,8 @@
 			showCreatePost.set(false);
 		} catch (error) {
 			console.error('Error creating post:', error);
-			alert('Failed to create post. Please try again.');
+			console.error('Error details:', error.message, error.details);
+			alert(`Failed to create post: ${error.message}`);
 		} finally {
 			uploading = false;
 		}
@@ -195,7 +215,7 @@
 							type="file" 
 							multiple 
 							accept="image/*" 
-							class="file-input file-input-bordered w-full max-w-xs"
+							class="file-input file-input-bordered file-input-primary w-full max-w-xs"
 							onchange={handleFileSelect}
 							disabled={uploading}
 						/>
@@ -275,7 +295,7 @@
 					type="submit" 
 					class="btn btn-primary"
 					class:loading={uploading}
-					disabled={uploading || selectedImages.length === 0}
+					disabled={uploading || (!caption.trim() && selectedImages.length === 0)}
 				>
 					{uploading ? 'Creating Post...' : 'Share Post'}
 				</button>

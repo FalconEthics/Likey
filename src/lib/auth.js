@@ -45,7 +45,17 @@ async function loadUserProfile(userId) {
       .eq('id', userId)
       .single();
     
-    if (error) throw error;
+    if (error) {
+      // If profile doesn't exist, create it (for first-time login after email confirmation)
+      if (error.code === 'PGRST116') {
+        console.log('Profile not found, creating new profile for user:', userId);
+        // Set user as null to trigger profile creation flow
+        user.set(null);
+        return;
+      }
+      throw error;
+    }
+    
     user.set(data);
     
     // Initialize notifications after user is loaded
@@ -62,7 +72,7 @@ async function loadUserProfile(userId) {
  * @param {string} password - User password
  * @param {string} username - Unique username
  * @param {string} displayName - Display name
- * @returns {Promise<{success: boolean, error?: string}>}
+ * @returns {Promise<{success: boolean, error?: string, needsConfirmation?: boolean}>}
  */
 export async function signUp(email, password, username, displayName) {
   // Validate inputs
@@ -85,7 +95,7 @@ export async function signUp(email, password, username, displayName) {
   }
   
   try {
-    // Check if username already exists
+    // Check if username already exists (basic check, final check happens after email confirmation)
     const { data: existingUser } = await supabase
       .from('profiles')
       .select('username')
@@ -96,27 +106,29 @@ export async function signUp(email, password, username, displayName) {
       return { success: false, error: 'Username already taken' };
     }
     
-    // Sign up user
+    // Sign up user with metadata - Supabase will send confirmation email
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          username: username.toLowerCase(),
+          display_name: displayName.trim()
+        }
+      }
     });
     
     if (authError) throw authError;
     
     if (authData.user) {
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          username: username.toLowerCase(),
-          display_name: displayName.trim(),
-          bio: '',
-          profile_pic_url: null
-        });
-      
-      if (profileError) throw profileError;
+      // Check if email confirmation is needed
+      if (!authData.session) {
+        return { 
+          success: true, 
+          needsConfirmation: true,
+          message: 'Please check your email and click the confirmation link to complete registration.'
+        };
+      }
       
       return { success: true };
     }
@@ -210,6 +222,51 @@ export async function resetPassword(email) {
     return { 
       success: false, 
       error: error.message || 'Failed to send reset email' 
+    };
+  }
+}
+
+/**
+ * Create user profile after email confirmation
+ * @param {string} userId - User ID
+ * @param {string} username - Username
+ * @param {string} displayName - Display name
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function createProfile(userId, username, displayName) {
+  try {
+    // Double-check username availability
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username.toLowerCase())
+      .single();
+    
+    if (existingUser) {
+      return { success: false, error: 'Username already taken' };
+    }
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        username: username.toLowerCase(),
+        display_name: displayName.trim(),
+        bio: '',
+        profile_pic_url: null
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    user.set(data);
+    return { success: true };
+  } catch (error) {
+    console.error('Profile creation error:', error);
+    return { 
+      success: false, 
+      error: error.message || 'Failed to create profile' 
     };
   }
 }

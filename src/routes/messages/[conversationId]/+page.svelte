@@ -40,7 +40,19 @@
 		
 		const { data, error } = await getConversationMessages(conversationId);
 		
-		if (!error && data) {
+		if (error) {
+			// Handle access denied or conversation not found
+			if (error === 'Access denied' || error === 'Conversation not found') {
+				console.error('Unauthorized access to conversation:', conversationId);
+				goto('/messages'); // Redirect to messages list
+				return;
+			}
+			console.error('Error loading messages:', error);
+			loading = false;
+			return;
+		}
+		
+		if (data) {
 			currentMessages.set(data);
 			
 			// Get other user info from first message
@@ -58,9 +70,8 @@
 			// Mark messages as read
 			await markMessagesAsRead(conversationId);
 			
-			// Scroll to bottom
-			await tick();
-			scrollToBottom();
+			// Force scroll to bottom on initial load
+			await forceScrollToBottom();
 		}
 		
 		loading = false;
@@ -108,6 +119,13 @@
 				)
 			);
 		} else {
+			// Handle access denied errors
+			if (error === 'Access denied' || error === 'Conversation not found') {
+				console.error('Unauthorized send attempt:', error);
+				goto('/messages'); // Redirect to messages list
+				return;
+			}
+			
 			// Remove temp message and restore input on error
 			currentMessages.update(messages => 
 				messages.filter(msg => msg.id !== tempMessage.id)
@@ -151,12 +169,33 @@
 	}
 
 	/**
-	 * Scroll to bottom of messages
+	 * Scroll to bottom of messages with better timing
 	 */
 	function scrollToBottom() {
 		if (messagesContainer) {
-			messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			// Use requestAnimationFrame for better timing
+			requestAnimationFrame(() => {
+				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			});
 		}
+	}
+
+	/**
+	 * Force scroll to bottom with multiple attempts (for initial load)
+	 */
+	async function forceScrollToBottom() {
+		await tick();
+		scrollToBottom();
+		
+		// Fallback: try again after a short delay
+		setTimeout(() => {
+			scrollToBottom();
+		}, 100);
+		
+		// Final fallback: try once more after DOM updates
+		setTimeout(() => {
+			scrollToBottom();
+		}, 300);
 	}
 
 	/**
@@ -178,6 +217,17 @@
 			return date.toLocaleDateString();
 		}
 	}
+
+	// Effect to scroll to bottom when messages change
+	$effect(() => {
+		if ($currentMessages.length > 0 && messagesContainer) {
+			// Only auto-scroll if user is near the bottom (not scrolled up to read old messages)
+			const isNearBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= messagesContainer.scrollHeight - 100;
+			if (isNearBottom || $currentMessages.length === 1) {
+				scrollToBottom();
+			}
+		}
+	});
 
 	onMount(() => {
 		if ($user && conversationId) {

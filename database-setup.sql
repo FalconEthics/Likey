@@ -375,48 +375,74 @@ CREATE POLICY "Users can update own posts" ON public.posts
 CREATE POLICY "Users can delete own posts" ON public.posts
   FOR DELETE USING (auth.uid() = user_id);
 
--- Likes policies
+-- Likes policies (fixed for real-time support)
 CREATE POLICY "Likes are viewable by everyone" ON public.likes
   FOR SELECT USING (true);
 
 CREATE POLICY "Users can insert their own likes" ON public.likes
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own likes" ON public.likes
-  FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "likes_delete_authenticated" ON public.likes
+  FOR DELETE TO authenticated
+  USING (user_id = auth.uid());
 
--- Comments policies
+-- Allow real-time to read likes for broadcasting
+CREATE POLICY "likes_realtime_select" ON public.likes
+  FOR SELECT TO anon
+  USING (true);
+
+-- Comments policies (fixed for real-time support)
 CREATE POLICY "Comments are viewable by everyone" ON public.comments
   FOR SELECT USING (true);
 
 CREATE POLICY "Users can insert their own comments" ON public.comments
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own comments" ON public.comments
-  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "comments_update_authenticated" ON public.comments
+  FOR UPDATE TO authenticated
+  USING (user_id = auth.uid());
 
-CREATE POLICY "Users can delete own comments" ON public.comments
-  FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "comments_delete_authenticated" ON public.comments
+  FOR DELETE TO authenticated
+  USING (user_id = auth.uid());
 
--- Follows policies
+-- Allow real-time to read comments for broadcasting
+CREATE POLICY "comments_realtime_select" ON public.comments
+  FOR SELECT TO anon
+  USING (true);
+
+-- Follows policies (fixed for real-time support)
 CREATE POLICY "Follows are viewable by everyone" ON public.follows
   FOR SELECT USING (true);
 
 CREATE POLICY "Users can insert their own follows" ON public.follows
   FOR INSERT WITH CHECK (auth.uid() = follower_id);
 
-CREATE POLICY "Users can delete their own follows" ON public.follows
-  FOR DELETE USING (auth.uid() = follower_id);
+CREATE POLICY "follows_delete_authenticated" ON public.follows
+  FOR DELETE TO authenticated
+  USING (follower_id = auth.uid());
 
--- Notifications policies
-CREATE POLICY "Users can view their own notifications" ON public.notifications
-  FOR SELECT USING (auth.uid() = user_id);
+-- Allow real-time to read follows for broadcasting
+CREATE POLICY "follows_realtime_select" ON public.follows
+  FOR SELECT TO anon
+  USING (true);
 
-CREATE POLICY "Users can update their own notifications" ON public.notifications
-  FOR UPDATE USING (auth.uid() = user_id);
+-- Notifications policies (fixed for real-time support)
+CREATE POLICY "notifications_select_authenticated" ON public.notifications
+  FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
+
+CREATE POLICY "notifications_update_authenticated" ON public.notifications
+  FOR UPDATE TO authenticated
+  USING (user_id = auth.uid());
 
 CREATE POLICY "Authenticated users can create notifications for others" ON public.notifications
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- CRITICAL: Allow real-time to read notifications for broadcasting
+CREATE POLICY "notifications_realtime_select" ON public.notifications
+  FOR SELECT TO anon
+  USING (true);
 
 -- Conversations policies
 CREATE POLICY "Users can view their own conversations" ON public.conversations
@@ -473,3 +499,29 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.likes;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.follows;
+
+-- Create security helper function for conversation access
+CREATE OR REPLACE FUNCTION user_can_access_conversation(conv_id uuid, user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.conversations 
+    WHERE id = conv_id 
+    AND (user1_id = user_id OR user2_id = user_id)
+  );
+$$;
+
+-- Grant execute permissions
+GRANT EXECUTE ON FUNCTION user_can_access_conversation(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION user_can_access_conversation(uuid, uuid) TO anon;
+
+-- Set replica identity to FULL for better real-time support  
+ALTER TABLE public.messages REPLICA IDENTITY FULL;
+ALTER TABLE public.conversations REPLICA IDENTITY FULL;
+ALTER TABLE public.notifications REPLICA IDENTITY FULL;
+ALTER TABLE public.likes REPLICA IDENTITY FULL;
+ALTER TABLE public.comments REPLICA IDENTITY FULL;
+ALTER TABLE public.follows REPLICA IDENTITY FULL;

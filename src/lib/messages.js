@@ -177,14 +177,38 @@ export async function getUserConversations() {
 }
 
 /**
- * Get messages for a conversation
+ * Get messages for a conversation (with access validation)
  * @param {string} conversationId - Conversation ID
  * @param {number} limit - Number of messages to fetch
  * @param {number} offset - Offset for pagination
  * @returns {Promise<{data: Message[], error: any}>}
  */
 export async function getConversationMessages(conversationId, limit = 50, offset = 0) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: [], error: 'Not authenticated' };
+	}
+
 	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { data: [], error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized access attempt to conversation:', conversationId);
+			return { data: [], error: 'Access denied' };
+		}
+
+		// Now fetch messages
 		const { data, error } = await supabase
 			.from('messages')
 			.select(`
@@ -210,7 +234,7 @@ export async function getConversationMessages(conversationId, limit = 50, offset
 }
 
 /**
- * Send a message
+ * Send a message (with access validation)
  * @param {string} conversationId - Conversation ID
  * @param {string} content - Message content
  * @returns {Promise<{data: Message, error: any}>}
@@ -222,6 +246,24 @@ export async function sendMessage(conversationId, content) {
 	}
 
 	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { data: null, error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized send attempt to conversation:', conversationId);
+			return { data: null, error: 'Access denied' };
+		}
+
 		const { data, error } = await supabase
 			.from('messages')
 			.insert({
@@ -242,6 +284,12 @@ export async function sendMessage(conversationId, content) {
 
 		if (error) throw error;
 
+		// Update conversation last_message_at
+		await supabase
+			.from('conversations')
+			.update({ last_message_at: new Date().toISOString() })
+			.eq('id', conversationId);
+
 		return { data, error: null };
 	} catch (error) {
 		console.error('Error sending message:', error);
@@ -250,7 +298,7 @@ export async function sendMessage(conversationId, content) {
 }
 
 /**
- * Mark messages as read
+ * Mark messages as read (with access validation)
  * @param {string} conversationId - Conversation ID
  * @returns {Promise<{success: boolean, error: any}>}
  */
@@ -261,6 +309,24 @@ export async function markMessagesAsRead(conversationId) {
 	}
 
 	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { success: false, error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized read attempt on conversation:', conversationId);
+			return { success: false, error: 'Access denied' };
+		}
+
 		const { error } = await supabase
 			.from('messages')
 			.update({ read: true })

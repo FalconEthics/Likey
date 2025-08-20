@@ -2,26 +2,20 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { user, showLogin, showSignup, showCreatePost, theme, notifications, unreadCount, unreadMessageCount, searchQuery, searchResults, searchLoading } from '../stores.js';
+  import { user, showLogin, showSignup, theme, notifications, unreadCount, searchQuery, searchResults, searchLoading } from '../stores.js';
   import { signOut } from '../auth.js';
   import { requestNotificationPermission } from '../notifications.js';
   import { searchUsers } from '../search.js';
-  import { getUserConversations, getUnreadMessageCount } from '../messages.js';
   
   // Lucide Icons
   import { 
-    Plus, 
-    MessageCircle, 
     Bell, 
     User, 
     Search, 
     Settings, 
     Moon, 
     Sun, 
-    LogOut, 
-    RefreshCw,
-    Loader2,
-    ArrowLeft
+    LogOut
   } from 'lucide-svelte';
   
   let showUserMenu = $state(false);
@@ -120,15 +114,6 @@
     showSearchResults = false;
   }
 
-  /**
-   * Load unread message count
-   */
-  async function loadUnreadMessageCount() {
-    if (!$user) return;
-    
-    const { count } = await getUnreadMessageCount();
-    unreadMessageCount.set(count);
-  }
   
   onMount(() => {
     // Load saved theme
@@ -139,7 +124,6 @@
     // Request notification permission for logged in users
     if ($user) {
       requestNotificationPermission();
-      loadUnreadMessageCount();
     }
     
     // Add click outside listener with passive option to avoid interference
@@ -162,8 +146,8 @@
   </div>
   
   <div class="navbar-center">
-    <!-- Search bar for larger screens -->
-    <div class="form-control hidden md:block relative">
+    <!-- Search bar for larger screens - hidden on home page since we have sidebar search -->
+    <div class="form-control hidden md:block relative" class:lg:hidden={$page.url.pathname === '/'}>
       <input 
         type="text" 
         placeholder="Search users..." 
@@ -220,29 +204,6 @@
   
   <div class="navbar-end space-x-2">
     {#if $user}
-      <!-- Create Post Button -->
-      <button 
-        class="btn btn-ghost btn-circle"
-        onclick={() => showCreatePost.set(true)}
-        title="Create Post"
-      >
-        <Plus size={20} />
-      </button>
-      
-      <!-- Messages Button -->
-      <a 
-        href="/messages"
-        class="btn btn-ghost btn-circle"
-        title="Messages"
-      >
-        <div class="indicator">
-          <MessageCircle size={20} />
-          {#if $unreadMessageCount > 0}
-            <span class="badge badge-xs badge-primary indicator-item">{$unreadMessageCount}</span>
-          {/if}
-        </div>
-      </a>
-      
       <!-- Notifications -->
       <div class="dropdown dropdown-end">
         <button 
@@ -316,11 +277,6 @@
             <a href="/profile/{$user.username}" class="menu-item" onclick={handleNavClick}>
               <User size={16} />
               Profile
-            </a>
-            
-            <a href="/explore" class="menu-item" onclick={handleNavClick}>
-              <Search size={16} />
-              Explore
             </a>
             
             <a href="/settings" class="menu-item" onclick={handleNavClick}>

@@ -3,6 +3,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import BottomNavigation from '$lib/components/BottomNavigation.svelte';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import SignupModal from '$lib/components/SignupModal.svelte';
 	import CreatePostModal from '$lib/components/CreatePostModal.svelte';
@@ -63,7 +64,7 @@
 <div class="min-h-screen bg-base-100">
 	<Navigation />
 	
-	<main class="container mx-auto px-4 py-6 max-w-6xl">
+	<main class="container mx-auto px-4 py-6 max-w-6xl pb-20 lg:pb-6">
 		{#if $loading}
 			<div class="flex items-center justify-center h-64">
 				<span class="loading loading-spinner loading-lg"></span>
@@ -72,6 +73,10 @@
 			{@render children?.()}
 		{/if}
 	</main>
+	
+	{#if $user}
+		<BottomNavigation />
+	{/if}
 </div>
 
 <!-- Modals -->

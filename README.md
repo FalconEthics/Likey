@@ -43,6 +43,7 @@ A modern Instagram-like social media platform built with SvelteKit, Supabase, an
 - Node.js 18+ or Bun
 - Supabase account
 - Git
+- Supabase CLI (for database setup)
 
 ## 🚀 Quick Start
 
@@ -78,16 +79,40 @@ PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ### 4. Set Up Database
 
+#### Option 1: Using Supabase CLI (Recommended)
+
+1. Install Supabase CLI:
+```bash
+npm install -g supabase
+# or
+bun install -g supabase
+```
+
+2. Set up the database schema:
+```bash
+# Link to your Supabase project (replace YOUR_PROJECT_REF with your project ID)
+supabase link --project-ref YOUR_PROJECT_REF
+
+# Deploy the complete database schema
+supabase db push
+```
+
+That's it! This will create all tables, RLS policies, functions, triggers, and storage buckets automatically.
+
+#### Option 2: Manual Setup
+
+If you prefer manual setup:
+
 1. Go to your Supabase project dashboard
-2. Navigate to the SQL Editor
-3. Copy and paste the contents of `database-schema.sql`
+2. Navigate to the SQL Editor  
+3. Copy and paste the contents of `supabase/migrations/20250820190123_remote_schema.sql`
 4. Run the SQL commands to create all tables, functions, triggers, and policies
 
-### 5. Configure Storage
+### 5. Verify Setup
 
-1. In your Supabase dashboard, go to Storage
-2. The `images` bucket should be created automatically by the schema
-3. Verify that the storage policies are in place for public read access
+1. Check that the `images` storage bucket was created automatically
+2. Verify all tables are present in your Database dashboard
+3. Test that you can sign up and create a profile
 
 ### 6. Start Development Server
 
@@ -201,10 +226,23 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 ### Common Issues
 
-1. **Supabase connection issues**: Verify your environment variables
-2. **Image upload fails**: Check storage policies and bucket configuration
-3. **Real-time not working**: Ensure RLS policies allow reads for notifications
-4. **Build errors**: Make sure all dependencies are installed
+1. **Supabase CLI setup issues**: 
+   - Make sure you're logged in: `supabase login`
+   - Verify project link: `supabase projects list`
+   - Check you have the correct project reference ID
+
+2. **Database migration fails**: 
+   - Ensure your Supabase project is empty before running `supabase db push`
+   - Check your internet connection
+   - Verify project permissions in Supabase dashboard
+
+3. **Supabase connection issues**: Verify your environment variables in `.env.local`
+
+4. **Image upload fails**: Check storage policies and bucket configuration
+
+5. **Real-time not working**: The migrations include all necessary RLS policies for real-time
+
+6. **Build errors**: Make sure all dependencies are installed with `bun install`
 
 ### Getting Help
 

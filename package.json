@@ -21,7 +21,8 @@
 		"daisyui": "^5.0.50",
 		"lodash": "^4.17.21",
 		"lucide-svelte": "^0.539.0",
-		"motion": "^11.11.17"
+		"motion": "^11.11.17",
+		"supabase": "^2.34.3"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

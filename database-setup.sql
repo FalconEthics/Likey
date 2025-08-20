@@ -415,6 +415,9 @@ CREATE POLICY "Users can view their own notifications" ON public.notifications
 CREATE POLICY "Users can update their own notifications" ON public.notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
+CREATE POLICY "Authenticated users can create notifications for others" ON public.notifications
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
 -- Conversations policies
 CREATE POLICY "Users can view their own conversations" ON public.conversations
   FOR SELECT USING (auth.uid() = user1_id OR auth.uid() = user2_id);
@@ -463,3 +466,10 @@ CREATE POLICY "Users can update own images" ON storage.objects
 
 CREATE POLICY "Users can delete own images" ON storage.objects
   FOR DELETE USING (bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Enable real-time for tables that need live updates
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.likes;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.comments;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.follows;

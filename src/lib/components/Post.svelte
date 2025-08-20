@@ -6,7 +6,7 @@
 	import { createNotification } from '../notifications.js';
 	
 	// Lucide Icons
-	import { Heart, MessageCircle, Share2 } from 'lucide-svelte';
+	import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2 } from 'lucide-svelte';
 	
 	/**
 	 * @type {import('../stores.js').Post}
@@ -15,11 +15,20 @@
 	
 	const dispatch = createEventDispatcher();
 	
+	// Local reactive state for post data to avoid prop mutation
+	let postData = $state({ ...post });
 	let isLiking = $state(false);
 	let showComments = $state(false);
 	let newComment = $state('');
 	let comments = $state([]);
 	let commentsLoading = $state(false);
+	let showOptions = $state(false);
+	let deleting = $state(false);
+	
+	// Update local state when prop changes
+	$effect(() => {
+		postData = { ...post };
+	});
 	
 	/**
 	 * Toggle like on post
@@ -30,39 +39,39 @@
 		isLiking = true;
 		
 		try {
-			if (post.liked_by_user) {
+			if (postData.liked_by_user) {
 				// Unlike
 				const { error } = await supabase
 					.from('likes')
 					.delete()
-					.eq('post_id', post.id)
+					.eq('post_id', postData.id)
 					.eq('user_id', $user.id);
 				
 				if (error) throw error;
 				
-				post.liked_by_user = false;
-				post.like_count -= 1;
+				postData.liked_by_user = false;
+				postData.like_count -= 1;
 			} else {
 				// Like
 				const { error } = await supabase
 					.from('likes')
 					.insert({
-						post_id: post.id,
+						post_id: postData.id,
 						user_id: $user.id
 					});
 				
 				if (error) throw error;
 				
-				post.liked_by_user = true;
-				post.like_count += 1;
+				postData.liked_by_user = true;
+				postData.like_count += 1;
 				
 				// Create notification for the post owner
 				await createNotification(
-					post.user_id,
+					postData.user_id,
 					'like',
 					`${$user.display_name} liked your post`,
 					$user.id,
-					post.id
+					postData.id
 				);
 			}
 		} catch (error) {
@@ -91,7 +100,7 @@
 							profile_pic_url
 						)
 					`)
-					.eq('post_id', post.id)
+					.eq('post_id', postData.id)
 					.order('created_at', { ascending: true });
 				
 				if (error) throw error;
@@ -123,7 +132,7 @@
 			const { data, error } = await supabase
 				.from('comments')
 				.insert({
-					post_id: post.id,
+					post_id: postData.id,
 					user_id: $user.id,
 					content: newComment.trim()
 				})
@@ -145,19 +154,52 @@
 			};
 			
 			comments = [...comments, commentWithUser];
-			post.comment_count += 1;
+			postData.comment_count += 1;
 			newComment = '';
 			
 			// Create notification for the post owner
 			await createNotification(
-				post.user_id,
+				postData.user_id,
 				'comment',
 				`${$user.display_name} commented on your post`,
 				$user.id,
-				post.id
+				postData.id
 			);
 		} catch (error) {
 			console.error('Error adding comment:', error);
+		}
+	}
+	
+	/**
+	 * Delete post
+	 */
+	async function deletePost() {
+		if (!$user || postData.user_id !== $user.id || deleting) return;
+		
+		const confirmed = confirm('Are you sure you want to delete this post? This action cannot be undone.');
+		if (!confirmed) return;
+		
+		deleting = true;
+		
+		try {
+			// Delete post from database (this will cascade delete likes, comments, etc.)
+			const { error } = await supabase
+				.from('posts')
+				.delete()
+				.eq('id', postData.id)
+				.eq('user_id', $user.id); // Extra security check
+			
+			if (error) throw error;
+			
+			// Dispatch event to parent components to remove from their local state
+			dispatch('postDeleted', { postId: postData.id });
+			
+		} catch (error) {
+			console.error('Error deleting post:', error);
+			alert('Failed to delete postData. Please try again.');
+		} finally {
+			deleting = false;
+			showOptions = false;
 		}
 	}
 </script>
@@ -165,44 +207,69 @@
 <article class="card bg-base-100 shadow-lg border border-base-300">
 	<!-- Post Header -->
 	<div class="flex items-center gap-3 p-4 pb-2">
-		<a href="/profile/{post.user.username}" class="avatar">
+		<a href="/profile/{postData.user.username}" class="avatar">
 			<div class="w-10 rounded-full">
-				{#if post.user.profile_pic_url}
-					<img src={post.user.profile_pic_url} alt={post.user.display_name} />
+				{#if postData.user.profile_pic_url}
+					<img src={postData.user.profile_pic_url} alt={postData.user.display_name} />
 				{:else}
 					<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full">
-						{post.user.display_name?.charAt(0).toUpperCase() || 'U'}
+						{postData.user.display_name?.charAt(0).toUpperCase() || 'U'}
 					</div>
 				{/if}
 			</div>
 		</a>
 		
 		<div class="flex-1">
-			<a href="/profile/{post.user.username}" class="font-semibold hover:underline">
-				{post.user.display_name}
+			<a href="/profile/{postData.user.username}" class="font-semibold hover:underline">
+				{postData.user.display_name}
 			</a>
-			<p class="text-sm text-base-content/60">@{post.user.username}</p>
+			<p class="text-sm text-base-content/60">@{postData.user.username}</p>
 		</div>
 		
-		<time class="text-sm text-base-content/60" datetime={post.created_at}>
-			{formatRelativeTime(post.created_at)}
-		</time>
+		<div class="flex items-center gap-2">
+			<time class="text-sm text-base-content/60" datetime={postData.created_at}>
+				{formatRelativeTime(postData.created_at)}
+			</time>
+			
+			<!-- Options Menu (only for post owner) -->
+			{#if $user && postData.user_id === $user.id}
+				<div class="dropdown dropdown-end">
+					<button class="btn btn-ghost btn-sm btn-circle" class:loading={deleting}>
+						{#if !deleting}
+							<MoreHorizontal size={16} />
+						{/if}
+					</button>
+					<ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
+						<li>
+							<button 
+								onclick={deletePost} 
+								class="text-error flex items-center gap-2"
+								disabled={deleting}
+							>
+								<Trash2 size={16} />
+								Delete
+							</button>
+						</li>
+					</ul>
+				</div>
+			{/if}
+		</div>
 	</div>
 	
 	<!-- Post Images -->
-	{#if post.image_urls && post.image_urls.length > 0}
+	{#if postData.image_urls && postData.image_urls.length > 0}
 		<div class="px-4">
-			{#if post.image_urls.length === 1}
+			{#if postData.image_urls.length === 1}
 				<img 
-					src={post.image_urls[0]} 
+					src={postData.image_urls[0]} 
 					alt="Post" 
 					class="w-full rounded-lg object-cover max-h-96"
 					loading="lazy"
 				/>
 			{:else}
 				<div class="carousel w-full rounded-lg">
-					{#each post.image_urls as imageUrl, index}
-						<div class="carousel-item w-full" id={`post-${post.id}-image-${index}`}>
+					{#each postData.image_urls as imageUrl, index}
+						<div class="carousel-item w-full" id={`post-${postData.id}-image-${index}`}>
 							<img 
 								src={imageUrl} 
 								alt="Post {index + 1}" 
@@ -213,10 +280,10 @@
 					{/each}
 				</div>
 				
-				{#if post.image_urls.length > 1}
+				{#if postData.image_urls.length > 1}
 					<div class="flex justify-center py-2 gap-1">
-						{#each post.image_urls as _, index}
-							<a href={`#post-${post.id}-image-${index}`} class="btn btn-xs btn-circle">
+						{#each postData.image_urls as _, index}
+							<a href={`#post-${postData.id}-image-${index}`} class="btn btn-xs btn-circle">
 								{index + 1}
 							</a>
 						{/each}
@@ -227,9 +294,9 @@
 	{/if}
 	
 	<!-- Post Content -->
-	{#if post.caption}
+	{#if postData.caption}
 		<div class="px-4 py-2">
-			<p class="text-sm">{post.caption}</p>
+			<p class="text-sm">{postData.caption}</p>
 		</div>
 	{/if}
 	
@@ -238,16 +305,16 @@
 		<!-- Like Button -->
 		<button 
 			class="btn btn-ghost btn-sm gap-2"
-			class:text-error={post.liked_by_user}
+			class:text-error={postData.liked_by_user}
 			onclick={toggleLike}
 			disabled={isLiking || !$user}
 		>
 			<Heart 
 				size={20} 
-				fill={post.liked_by_user ? 'currentColor' : 'none'}
-				class={post.liked_by_user ? 'text-red-500' : ''}
+				fill={postData.liked_by_user ? 'currentColor' : 'none'}
+				class={postData.liked_by_user ? 'text-red-500' : ''}
 			/>
-			{post.like_count}
+			{postData.like_count}
 		</button>
 		
 		<!-- Comment Button -->
@@ -257,7 +324,7 @@
 			disabled={!$user}
 		>
 			<MessageCircle size={20} />
-			{post.comment_count}
+			{postData.comment_count}
 		</button>
 		
 		<!-- Share Button -->
@@ -267,10 +334,10 @@
 				if (navigator.share) {
 					navigator.share({
 						title: 'Check out this post on Likey',
-						url: window.location.origin + '/post/' + post.id
+						url: window.location.origin + '/post/' + postData.id
 					});
 				} else {
-					navigator.clipboard.writeText(window.location.origin + '/post/' + post.id);
+					navigator.clipboard.writeText(window.location.origin + '/post/' + postData.id);
 				}
 			}}
 		>

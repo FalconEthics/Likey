@@ -22,8 +22,9 @@
 		// Navigate based on notification type
 		if (notification.type === 'follow' && notification.related_user) {
 			goto(`/profile/${notification.related_user.username}`);
-		} else if ((notification.type === 'like' || notification.type === 'comment') && notification.related_post_id) {
-			goto(`/post/${notification.related_post_id}`);
+		} else if ((notification.type === 'like' || notification.type === 'comment') && notification.related_user) {
+			// Navigate to the profile of the user who created the post
+			goto(`/profile/${notification.related_user.username}`);
 		}
 	}
 	

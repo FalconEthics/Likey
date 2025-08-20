@@ -14,9 +14,9 @@
 	// Lucide Icons
 	import { RefreshCw, Flame, Users, Camera } from 'lucide-svelte';
 
-	let activeTab = 'trending';
-	let loading = true;
-	let explorePosts = [];
+	let activeTab = $state('trending');
+	let loading = $state(true);
+	let explorePosts = $state([]);
 
 	/**
 	 * Load trending posts
@@ -70,18 +70,22 @@
 	async function refreshData() {
 		loading = true;
 		
-		// Refresh trending posts calculation
-		await refreshTrendingPosts();
-		
-		// Load all data
-		await Promise.all([
-			loadTrendingPosts(),
-			loadTrendingUsers(),
-			loadExplorePosts(),
-			$user ? loadRecommendedUsers() : Promise.resolve()
-		]);
-		
-		loading = false;
+		try {
+			// Refresh trending posts calculation
+			await refreshTrendingPosts();
+			
+			// Load all data
+			await Promise.all([
+				loadTrendingPosts(),
+				loadTrendingUsers(),
+				loadExplorePosts(),
+				$user ? loadRecommendedUsers() : Promise.resolve()
+			]);
+		} catch (error) {
+			console.error('Error refreshing explore data:', error);
+		} finally {
+			loading = false;
+		}
 	}
 
 	/**

@@ -15,18 +15,22 @@
 	import { ArrowLeft, Send, MessageCircle } from 'lucide-svelte';
 
 	let conversationId = $page.params.conversationId;
-	let messageInput = '';
-	let sending = false;
-	let loading = true;
-	let messagesContainer;
+	let messageInput = $state('');
+	let sending = $state(false);
+	let loading = $state(true);
+	let messagesContainer = $state();
 	let messageSubscription = null;
-	let otherUser = null;
+	let otherUser = $state(null);
 
-	$: if (!$user) {
-		goto('/');
-	}
+	$effect(() => {
+		if (!$user) {
+			goto('/');
+		}
+	});
 
-	$: currentConversationId.set(conversationId);
+	$effect(() => {
+		currentConversationId.set(conversationId);
+	});
 
 	/**
 	 * Load messages for the conversation
@@ -75,15 +79,41 @@
 		const content = messageInput.trim();
 		messageInput = '';
 		
+		// Optimistically add message to local state
+		const tempMessage = {
+			id: 'temp-' + Date.now(),
+			content,
+			created_at: new Date().toISOString(),
+			sender: {
+				id: $user.id,
+				username: $user.username,
+				display_name: $user.display_name,
+				profile_pic_url: $user.profile_pic_url
+			},
+			conversation_id: conversationId,
+			sending: true // Mark as optimistic
+		};
+		
+		currentMessages.update(messages => [...messages, tempMessage]);
+		await tick();
+		scrollToBottom();
+		
 		const { data, error } = await sendMessage(conversationId, content);
 		
 		if (!error && data) {
-			// Message will be added via real-time subscription
-			await tick();
-			scrollToBottom();
+			// Replace temp message with real message
+			currentMessages.update(messages => 
+				messages.map(msg => 
+					msg.id === tempMessage.id ? data : msg
+				)
+			);
 		} else {
-			// Restore message on error
+			// Remove temp message and restore input on error
+			currentMessages.update(messages => 
+				messages.filter(msg => msg.id !== tempMessage.id)
+			);
 			messageInput = content;
+			console.error('Failed to send message:', error);
 		}
 		
 		sending = false;
@@ -94,6 +124,22 @@
 	 * @param {Object} message
 	 */
 	function handleNewMessage(message) {
+		console.log('Received real-time message:', message);
+		
+		// Check if this message already exists (avoid duplicates)
+		const messageExists = $currentMessages.some(msg => msg.id === message.id);
+		if (messageExists) {
+			console.log('Message already exists, skipping');
+			return;
+		}
+		
+		// Remove any temp messages from the sender (if it was us)
+		if (message.sender.id === $user.id) {
+			currentMessages.update(messages => 
+				messages.filter(msg => !msg.sending)
+			);
+		}
+		
 		currentMessages.update(messages => [...messages, message]);
 		
 		// Mark as read if not from current user
@@ -235,13 +281,19 @@
 						<!-- Message Bubble -->
 						<div class="max-w-xs lg:max-w-md">
 							<div 
-								class="px-4 py-2 rounded-2xl"
+								class="px-4 py-2 rounded-2xl relative"
 								class:bg-primary={isCurrentUser}
+								class:opacity-70={message.sending}
 								class:text-primary-content={isCurrentUser}
 								class:bg-base-200={!isCurrentUser}
 								class:text-base-content={!isCurrentUser}
 							>
-								<p class="text-sm">{message.content}</p>
+								<p class="text-sm" class:opacity-70={message.sending}>{message.content}</p>
+								{#if message.sending}
+									<div class="absolute -bottom-1 -right-1">
+										<span class="loading loading-spinner loading-xs"></span>
+									</div>
+								{/if}
 							</div>
 							
 							{#if showAvatar || index === $currentMessages.length - 1}

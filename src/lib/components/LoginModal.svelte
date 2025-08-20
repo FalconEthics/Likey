@@ -74,7 +74,7 @@
   <div class="modal-box">
     <button 
       class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-      on:click={closeModal}
+      onclick={closeModal}
     >
       ✕
     </button>
@@ -84,7 +84,7 @@
     </h3>
     
     {#if !showResetPassword}
-      <form on:submit={handleLogin} class="space-y-4">
+      <form onsubmit={handleLogin} class="space-y-4">
         <div class="form-control">
           <label class="label" for="email">
             <span class="label-text">Email</span>
@@ -134,7 +134,7 @@
           <button 
             type="button"
             class="link link-primary text-sm"
-            on:click={() => showResetPassword = true}
+            onclick={() => showResetPassword = true}
           >
             Forgot your password?
           </button>
@@ -144,7 +144,7 @@
             <button 
               type="button"
               class="link link-primary"
-              on:click={switchToSignup}
+              onclick={switchToSignup}
             >
               Sign up
             </button>
@@ -152,7 +152,7 @@
         </div>
       </form>
     {:else}
-      <form on:submit={handleResetPassword} class="space-y-4">
+      <form onsubmit={handleResetPassword} class="space-y-4">
         <div class="form-control">
           <label class="label" for="reset-email">
             <span class="label-text">Email</span>
@@ -189,7 +189,7 @@
           <button 
             type="button"
             class="link link-primary text-sm"
-            on:click={() => showResetPassword = false}
+            onclick={() => showResetPassword = false}
           >
             Back to Sign In
           </button>

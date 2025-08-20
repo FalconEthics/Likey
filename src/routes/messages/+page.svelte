@@ -8,24 +8,33 @@
 	// Lucide Icons
 	import { RefreshCw, MessageCircle } from 'lucide-svelte';
 
-	let loading = true;
+	let loading = $state(true);
 
-	$: if (!$user) {
-		goto('/');
-	}
+	$effect(() => {
+		if (!$user) {
+			goto('/');
+		}
+	});
 
 	/**
 	 * Load conversations
 	 */
 	async function loadConversations() {
 		loading = true;
-		const { data, error } = await getUserConversations();
 		
-		if (!error && data) {
-			conversations.set(data);
+		try {
+			const { data, error } = await getUserConversations();
+			
+			if (error) throw error;
+			
+			if (data) {
+				conversations.set(data);
+			}
+		} catch (error) {
+			console.error('Error loading conversations:', error);
+		} finally {
+			loading = false;
 		}
-		
-		loading = false;
 	}
 
 	/**

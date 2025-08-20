@@ -24,9 +24,9 @@
     ArrowLeft
   } from 'lucide-svelte';
   
-  let showUserMenu = false;
-  let showNotifications = false;
-  let showSearchResults = false;
+  let showUserMenu = $state(false);
+  let showNotifications = $state(false);
+  let showSearchResults = $state(false);
   let searchTimeout;
   
   /**
@@ -35,6 +35,20 @@
   async function handleSignOut() {
     await signOut();
     showUserMenu = false;
+  }
+  
+  /**
+   * Handle navigation clicks and close menus
+   */
+  function handleNavClick(event) {
+    console.log('Navigation click detected:', event.target);
+    
+    // Use setTimeout to ensure the click event completes before closing menus
+    setTimeout(() => {
+      showUserMenu = false;
+      showNotifications = false;
+      showSearchResults = false;
+    }, 10);
   }
   
   /**
@@ -51,11 +65,20 @@
    * Close menus when clicking outside
    */
   function handleClickOutside(event) {
-    if (!event.target.closest('.dropdown')) {
-      showUserMenu = false;
-      showNotifications = false;
-      showSearchResults = false;
+    // Don't interfere with navigation links, buttons, or interactive elements
+    if (event.target.closest('.dropdown') || 
+        event.target.closest('a') || 
+        event.target.closest('button') ||
+        event.target.closest('[href]') ||
+        event.target.closest('.menu-item') ||
+        event.target.closest('.btn') ||
+        event.target.closest('[role="button"]')) {
+      return;
     }
+    
+    showUserMenu = false;
+    showNotifications = false;
+    showSearchResults = false;
   }
 
   /**
@@ -119,11 +142,14 @@
       loadUnreadMessageCount();
     }
     
-    // Add click outside listener
-    document.addEventListener('click', handleClickOutside);
+    // Add click outside listener with passive option to avoid interference
+    document.addEventListener('click', handleClickOutside, { passive: true });
     
     return () => {
       document.removeEventListener('click', handleClickOutside);
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
     };
   });
 </script>
@@ -143,8 +169,8 @@
         placeholder="Search users..." 
         class="input input-bordered w-64"
         bind:value={$searchQuery}
-        on:input={handleSearch}
-        on:focus={() => $searchQuery.length >= 2 && (showSearchResults = true)}
+        oninput={handleSearch}
+        onfocus={() => $searchQuery.length >= 2 && (showSearchResults = true)}
       />
       
       <!-- Search Results Dropdown -->
@@ -162,7 +188,7 @@
             {#each $searchResults as result (result.id)}
               <button 
                 class="flex items-center gap-3 w-full p-3 hover:bg-base-200 transition-colors"
-                on:click={() => selectSearchResult(result)}
+                onclick={() => selectSearchResult(result)}
               >
                 <div class="avatar">
                   <div class="w-8 rounded-full">
@@ -197,7 +223,7 @@
       <!-- Create Post Button -->
       <button 
         class="btn btn-ghost btn-circle"
-        on:click={() => showCreatePost.set(true)}
+        onclick={() => showCreatePost.set(true)}
         title="Create Post"
       >
         <Plus size={20} />
@@ -222,7 +248,7 @@
         <button 
           class="btn btn-ghost btn-circle"
           class:btn-active={showNotifications}
-          on:click={() => showNotifications = !showNotifications}
+          onclick={() => showNotifications = !showNotifications}
           title="Notifications"
         >
           <div class="indicator">
@@ -254,7 +280,7 @@
               {/each}
               
               <div class="divider"></div>
-              <a href="/notifications" class="btn btn-sm btn-ghost">View All</a>
+              <a href="/notifications" class="btn btn-sm btn-ghost" onclick={handleNavClick}>View All</a>
             {/if}
           </div>
         {/if}
@@ -265,7 +291,7 @@
         <button 
           class="btn btn-ghost btn-circle avatar"
           class:btn-active={showUserMenu}
-          on:click={() => showUserMenu = !showUserMenu}
+          onclick={() => showUserMenu = !showUserMenu}
         >
           <div class="w-8 rounded-full">
             {#if $user.profile_pic_url}
@@ -287,22 +313,22 @@
             
             <div class="divider"></div>
             
-            <a href="/profile/{$user.username}" class="menu-item">
+            <a href="/profile/{$user.username}" class="menu-item" onclick={handleNavClick}>
               <User size={16} />
               Profile
             </a>
             
-            <a href="/explore" class="menu-item">
+            <a href="/explore" class="menu-item" onclick={handleNavClick}>
               <Search size={16} />
               Explore
             </a>
             
-            <a href="/settings" class="menu-item">
+            <a href="/settings" class="menu-item" onclick={handleNavClick}>
               <Settings size={16} />
               Settings
             </a>
             
-            <button class="menu-item" on:click={toggleTheme}>
+            <button class="menu-item" onclick={toggleTheme}>
               {#if $theme === 'light'}
                 <Moon size={16} />
                 Dark Mode
@@ -314,7 +340,7 @@
             
             <div class="divider"></div>
             
-            <button class="menu-item text-error" on:click={handleSignOut}>
+            <button class="menu-item text-error" onclick={handleSignOut}>
               <LogOut size={16} />
               Sign Out
             </button>
@@ -325,14 +351,14 @@
       <!-- Not authenticated -->
       <button 
         class="btn btn-ghost"
-        on:click={() => showLogin.set(true)}
+        onclick={() => showLogin.set(true)}
       >
         Sign In
       </button>
       
       <button 
         class="btn btn-primary"
-        on:click={() => showSignup.set(true)}
+        onclick={() => showSignup.set(true)}
       >
         Sign Up
       </button>

@@ -7,8 +7,8 @@
 	// Lucide Icons
 	import { RefreshCw, Camera } from 'lucide-svelte';
 	
-	let hasMore = true;
-	let page = 0;
+	let hasMore = $state(true);
+	let page = $state(0);
 	const postsPerPage = 10;
 	
 	/**
@@ -92,6 +92,7 @@
 			onclick={() => {
 				page = 0;
 				hasMore = true;
+				posts.set([]);
 				loadPosts();
 			}}
 			disabled={$feedLoading}

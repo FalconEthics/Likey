@@ -3,47 +3,55 @@
   import { showSignup, showLogin } from '../stores.js';
   import { validateEmail, validateUsername } from '../utils.js';
   
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
-  let username = '';
-  let displayName = '';
-  let loading = false;
-  let errors = {};
-  let touched = {};
+  let email = $state('');
+  let password = $state('');
+  let confirmPassword = $state('');
+  let username = $state('');
+  let displayName = $state('');
+  let loading = $state(false);
+  let errors = $state({});
+  let touched = $state({});
   
-  $: {
-    errors = {};
+  // Validation with $derived
+  let validationErrors = $derived(() => {
+    const newErrors = {};
     
     if (touched.email) {
       const emailValidation = validateEmail(email);
       if (!emailValidation.valid) {
-        errors.email = emailValidation.error;
+        newErrors.email = emailValidation.error;
       }
     }
     
     if (touched.username) {
       const usernameValidation = validateUsername(username);
       if (!usernameValidation.valid) {
-        errors.username = usernameValidation.error;
+        newErrors.username = usernameValidation.error;
       }
     }
     
     if (touched.password && password && password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Password must be at least 6 characters';
     }
     
     if (touched.confirmPassword && confirmPassword && password !== confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Passwords do not match';
     }
     
     if (touched.displayName && !displayName?.trim()) {
-      errors.displayName = 'Display name is required';
+      newErrors.displayName = 'Display name is required';
     }
-  }
+    
+    return newErrors;
+  });
   
-  $: canSubmit = email && password && confirmPassword && username && displayName && 
-                 Object.keys(errors).length === 0 && password === confirmPassword;
+  // Update errors when validation changes
+  $effect(() => {
+    errors = validationErrors;
+  });
+  
+  let canSubmit = $derived(email && password && confirmPassword && username && displayName && 
+                           Object.keys(errors).length === 0 && password === confirmPassword);
   
   /**
    * Handle form field blur
@@ -117,14 +125,14 @@
   <div class="modal-box">
     <button 
       class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-      on:click={closeModal}
+      onclick={closeModal}
     >
       ✕
     </button>
     
     <h3 class="font-bold text-lg mb-4">Create Account</h3>
     
-    <form on:submit={handleSignup} class="space-y-4">
+    <form onsubmit={handleSignup} class="space-y-4">
       <div class="form-control">
         <label class="label" for="signup-email">
           <span class="label-text">Email</span>
@@ -135,7 +143,7 @@
           class="input input-bordered" 
           class:input-error={errors.email}
           bind:value={email}
-          on:blur={() => handleBlur('email')}
+          onblur={() => handleBlur('email')}
           required
           disabled={loading}
         />
@@ -156,7 +164,7 @@
           class="input input-bordered" 
           class:input-error={errors.username}
           bind:value={username}
-          on:blur={() => handleBlur('username')}
+          onblur={() => handleBlur('username')}
           required
           disabled={loading}
           placeholder="johndoe"
@@ -178,7 +186,7 @@
           class="input input-bordered" 
           class:input-error={errors.displayName}
           bind:value={displayName}
-          on:blur={() => handleBlur('displayName')}
+          onblur={() => handleBlur('displayName')}
           required
           disabled={loading}
           placeholder="John Doe"
@@ -200,7 +208,7 @@
           class="input input-bordered" 
           class:input-error={errors.password}
           bind:value={password}
-          on:blur={() => handleBlur('password')}
+          onblur={() => handleBlur('password')}
           required
           disabled={loading}
         />
@@ -221,7 +229,7 @@
           class="input input-bordered" 
           class:input-error={errors.confirmPassword}
           bind:value={confirmPassword}
-          on:blur={() => handleBlur('confirmPassword')}
+          onblur={() => handleBlur('confirmPassword')}
           required
           disabled={loading}
         />
@@ -254,7 +262,7 @@
         <button 
           type="button"
           class="link link-primary"
-          on:click={switchToLogin}
+          onclick={switchToLogin}
         >
           Sign in
         </button>

@@ -284,7 +284,9 @@ export async function markMessagesAsRead(conversationId) {
  * @returns {Object} Subscription object
  */
 export function subscribeToMessages(conversationId, onMessage) {
-	return supabase
+	console.log('Setting up message subscription for conversation:', conversationId);
+	
+	const channel = supabase
 		.channel(`messages:${conversationId}`)
 		.on(
 			'postgres_changes',
@@ -295,27 +297,47 @@ export function subscribeToMessages(conversationId, onMessage) {
 				filter: `conversation_id=eq.${conversationId}`
 			},
 			async (payload) => {
-				// Fetch the full message with sender data
-				const { data, error } = await supabase
-					.from('messages')
-					.select(`
-						*,
-						sender:sender_id (
-							id,
-							username,
-							display_name,
-							profile_pic_url
-						)
-					`)
-					.eq('id', payload.new.id)
-					.single();
+				console.log('Real-time message received:', payload);
+				
+				if (!payload?.new?.id) {
+					console.warn('Invalid payload structure:', payload);
+					return;
+				}
+				
+				try {
+					// Fetch the full message with sender data
+					const { data, error } = await supabase
+						.from('messages')
+						.select(`
+							*,
+							sender:sender_id (
+								id,
+								username,
+								display_name,
+								profile_pic_url
+							)
+						`)
+						.eq('id', payload.new.id)
+						.single();
 
-				if (!error && data) {
-					onMessage(data);
+					if (error) {
+						console.error('Error fetching message for real-time update:', error);
+						return;
+					}
+					
+					if (data) {
+						onMessage(data);
+					}
+				} catch (error) {
+					console.error('Error in message subscription handler:', error);
 				}
 			}
 		)
-		.subscribe();
+		.subscribe((status) => {
+			console.log('Message subscription status:', status);
+		});
+	
+	return channel;
 }
 
 /**
@@ -329,17 +351,29 @@ export async function getUnreadMessageCount() {
 	}
 
 	try {
+		// First, get the user's conversation IDs
+		const { data: conversations, error: convError } = await supabase
+			.from('conversations')
+			.select('id')
+			.or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`);
+
+		if (convError) throw convError;
+
+		// If no conversations, return 0
+		if (!conversations || conversations.length === 0) {
+			return { count: 0, error: null };
+		}
+
+		// Get conversation IDs as array
+		const conversationIds = conversations.map(conv => conv.id);
+
+		// Now get unread message count
 		const { data, error } = await supabase
 			.from('messages')
 			.select('id', { count: 'exact', head: true })
 			.neq('sender_id', currentUser.id)
 			.eq('read', false)
-			.in('conversation_id', 
-				supabase
-					.from('conversations')
-					.select('id')
-					.or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
-			);
+			.in('conversation_id', conversationIds);
 
 		if (error) throw error;
 

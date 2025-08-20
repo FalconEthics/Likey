@@ -104,6 +104,20 @@
 		}
 	}
 	
+	/**
+	 * Handle post deletion
+	 * @param {CustomEvent} event
+	 */
+	function handlePostDeleted(event) {
+		const { postId } = event.detail;
+		
+		// Remove post from local array
+		posts = posts.filter(post => post.id !== postId);
+		
+		// Update profile post count
+		profile.posts_count = Math.max(0, profile.posts_count - 1);
+	}
+	
 	onMount(() => {
 		checkFollowStatus();
 		
@@ -227,7 +241,7 @@
 			</div>
 		{:else}
 			{#each posts as post (post.id)}
-				<Post {post} />
+				<Post {post} on:postDeleted={handlePostDeleted} />
 			{/each}
 		{/if}
 	</div>

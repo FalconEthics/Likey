@@ -167,47 +167,76 @@
 	});
 </script>
 
-<!-- Mobile Layout -->
-<div class="lg:hidden max-w-2xl mx-auto">
-	<!-- Create Post Button -->
-	<div class="mb-6">
+<!-- Modern Mobile Layout -->
+<div class="lg:hidden max-w-2xl mx-auto px-4 pb-28">
+	<!-- Modern Header Section -->
+	<div class="sticky top-16 z-40 bg-base-100/80 backdrop-blur-xl border-b border-base-300/50 -mx-4 px-4 py-4 mb-6">
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-2xl font-bold likey-gradient-text">Feed</h1>
+				<p class="text-sm text-base-content/60 mt-1">Discover what's happening</p>
+			</div>
+			<button 
+				class="btn btn-circle btn-ghost"
+				onclick={() => {
+					page = 0;
+					hasMore = true;
+					posts.set([]);
+					loadPosts();
+				}}
+				disabled={$feedLoading}
+				title="Refresh feed"
+			>
+				{#if $feedLoading}
+					<span class="loading loading-spinner loading-sm"></span>
+				{:else}
+					<RefreshCw size={20} class="text-primary" />
+				{/if}
+			</button>
+		</div>
+	</div>
+
+	<!-- Floating Create Post Button -->
+	<div class="modern-create-post mb-8">
 		<button 
-			class="btn btn-primary w-full"
+			class="create-post-btn"
 			onclick={() => showCreatePost.set(true)}
 		>
-			<Plus size={20} />
-			Create Post
-		</button>
-	</div>
-	
-	<!-- Feed Header -->
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">Feed</h1>
-		<button 
-			class="btn btn-outline btn-sm"
-			onclick={() => {
-				page = 0;
-				hasMore = true;
-				posts.set([]);
-				loadPosts();
-			}}
-			disabled={$feedLoading}
-		>
-			{#if $feedLoading}
-				<span class="loading loading-spinner loading-sm"></span>
-			{:else}
-				<RefreshCw size={16} />
-			{/if}
-			Refresh
+			<div class="create-post-content">
+				<div class="create-post-icon">
+					<Plus size={24} />
+				</div>
+				<div class="create-post-text">
+					<span class="create-post-title">Share your moment</span>
+					<span class="create-post-subtitle">What's on your mind?</span>
+				</div>
+			</div>
+			<div class="create-post-glow"></div>
 		</button>
 	</div>
 	
 	<!-- Posts -->
 	{#if $posts.length === 0 && !$feedLoading}
-		<div class="text-center py-12">
-			<Camera size={64} class="mx-auto mb-4 text-base-content/40" />
-			<h3 class="text-xl font-semibold mb-2">No posts yet</h3>
-			<p class="text-base-content/60 mb-4">Follow some users or create your first post to get started!</p>
+		<div class="modern-empty-state">
+			<div class="empty-state-content">
+				<div class="empty-state-icon">
+					<Camera size={48} />
+					<div class="empty-state-glow"></div>
+				</div>
+				<h3 class="empty-state-title">Your feed awaits</h3>
+				<p class="empty-state-description">
+					Follow some amazing creators or share your first moment to see posts here!
+				</p>
+				<div class="empty-state-actions">
+					<button 
+						class="btn btn-primary btn-sm"
+						onclick={() => showCreatePost.set(true)}
+					>
+						<Plus size={16} />
+						Create your first post
+					</button>
+				</div>
+			</div>
 		</div>
 	{:else}
 		<div class="space-y-6">
@@ -320,47 +349,76 @@
 	</div>
 
 	<!-- Main Content -->
-	<div class="col-span-6">
-		<!-- Create Post Button -->
-		<div class="mb-6">
+	<div class="col-span-6 pb-24">
+		<!-- Modern Header Section -->
+		<div class="sticky top-4 z-40 bg-base-100/80 backdrop-blur-xl border border-base-300/50 rounded-2xl p-6 mb-6">
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="text-2xl font-bold likey-gradient-text">Feed</h1>
+					<p class="text-sm text-base-content/60 mt-1">Discover what's happening</p>
+				</div>
+				<button 
+					class="btn btn-circle btn-ghost"
+					onclick={() => {
+						page = 0;
+						hasMore = true;
+						posts.set([]);
+						loadPosts();
+						loadSidebarData();
+					}}
+					disabled={$feedLoading}
+					title="Refresh feed"
+				>
+					{#if $feedLoading}
+						<span class="loading loading-spinner loading-sm"></span>
+					{:else}
+						<RefreshCw size={20} class="text-primary" />
+					{/if}
+				</button>
+			</div>
+		</div>
+
+		<!-- Desktop Create Post Button -->
+		<div class="desktop-create-post mb-8">
 			<button 
-				class="btn btn-primary w-full"
+				class="create-post-btn"
 				onclick={() => showCreatePost.set(true)}
 			>
-				<Plus size={20} />
-				Create Post
-			</button>
-		</div>
-		
-		<!-- Feed Header -->
-		<div class="flex items-center justify-between mb-6">
-			<h1 class="text-2xl font-bold">Feed</h1>
-			<button 
-				class="btn btn-outline btn-sm"
-				onclick={() => {
-					page = 0;
-					hasMore = true;
-					posts.set([]);
-					loadPosts();
-					loadSidebarData();
-				}}
-				disabled={$feedLoading}
-			>
-				{#if $feedLoading}
-					<span class="loading loading-spinner loading-sm"></span>
-				{:else}
-					<RefreshCw size={16} />
-				{/if}
-				Refresh
+				<div class="create-post-content">
+					<div class="create-post-icon">
+						<Plus size={24} />
+					</div>
+					<div class="create-post-text">
+						<span class="create-post-title">Share your moment</span>
+						<span class="create-post-subtitle">What's on your mind?</span>
+					</div>
+				</div>
+				<div class="create-post-glow"></div>
 			</button>
 		</div>
 
 		<!-- Posts -->
 		{#if $posts.length === 0 && !$feedLoading}
-			<div class="text-center py-12">
-				<Camera size={64} class="mx-auto mb-4 text-base-content/40" />
-				<h3 class="text-xl font-semibold mb-2">No posts yet</h3>
-				<p class="text-base-content/60 mb-4">Follow some users or create your first post to get started!</p>
+			<div class="modern-empty-state">
+				<div class="empty-state-content">
+					<div class="empty-state-icon">
+						<Camera size={48} />
+						<div class="empty-state-glow"></div>
+					</div>
+					<h3 class="empty-state-title">Your feed awaits</h3>
+					<p class="empty-state-description">
+						Follow some amazing creators or share your first moment to see posts here!
+					</p>
+					<div class="empty-state-actions">
+						<button 
+							class="btn btn-primary btn-sm"
+							onclick={() => showCreatePost.set(true)}
+						>
+							<Plus size={16} />
+							Create your first post
+						</button>
+					</div>
+				</div>
 			</div>
 		{:else}
 			<div class="space-y-6">
@@ -482,3 +540,274 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	/* Modern Create Post Button */
+	.modern-create-post {
+		position: relative;
+	}
+
+	.create-post-btn {
+		position: relative;
+		width: 100%;
+		background: linear-gradient(135deg, 
+			hsl(var(--base-100)) 0%, 
+			hsl(var(--base-200)) 100%);
+		border: 2px solid transparent;
+		border-radius: 20px;
+		padding: 20px 24px;
+		cursor: pointer;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		box-shadow: 
+			0 4px 20px rgba(0, 0, 0, 0.08),
+			0 0 0 1px hsl(var(--base-300) / 0.5);
+	}
+
+	.create-post-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 
+			0 8px 30px rgba(0, 0, 0, 0.12),
+			0 0 0 2px hsl(var(--primary) / 0.3);
+	}
+
+	.create-post-btn:active {
+		transform: translateY(0px);
+	}
+
+	.create-post-content {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		position: relative;
+		z-index: 2;
+	}
+
+	.create-post-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		background: linear-gradient(135deg, 
+			hsl(var(--primary)) 0%, 
+			hsl(340 70% 65%) 100%);
+		border-radius: 16px;
+		color: white;
+		box-shadow: 0 4px 16px hsl(var(--primary) / 0.3);
+		transition: all 0.3s ease;
+	}
+
+	.create-post-btn:hover .create-post-icon {
+		transform: scale(1.05);
+		box-shadow: 0 6px 20px hsl(var(--primary) / 0.4);
+	}
+
+	.create-post-text {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		text-align: left;
+	}
+
+	.create-post-title {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: hsl(var(--base-content));
+		margin-bottom: 2px;
+	}
+
+	.create-post-subtitle {
+		font-size: 0.9rem;
+		color: hsl(var(--base-content) / 0.6);
+		font-weight: 400;
+	}
+
+	.create-post-glow {
+		position: absolute;
+		inset: -2px;
+		background: linear-gradient(135deg, 
+			hsl(var(--primary) / 0.1) 0%, 
+			hsl(340 70% 65% / 0.1) 50%, 
+			hsl(348 80% 70% / 0.1) 100%);
+		border-radius: 22px;
+		opacity: 0;
+		filter: blur(8px);
+		transition: opacity 0.3s ease;
+		z-index: -1;
+	}
+
+	.create-post-btn:hover .create-post-glow {
+		opacity: 1;
+		animation: glow-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes glow-pulse {
+		0%, 100% { 
+			opacity: 0.3;
+			filter: blur(8px);
+		}
+		50% { 
+			opacity: 0.6;
+			filter: blur(12px);
+		}
+	}
+
+	/* Modern Posts Container */
+	:global(.space-y-6) {
+		position: relative;
+	}
+
+	/* Enhanced loading states */
+	:global(.loading) {
+		color: hsl(var(--primary));
+	}
+
+	/* Dark theme adjustments */
+	[data-theme="dark"] .create-post-btn {
+		background: linear-gradient(135deg, 
+			hsl(var(--base-200)) 0%, 
+			hsl(var(--base-300)) 100%);
+		box-shadow: 
+			0 4px 20px rgba(0, 0, 0, 0.2),
+			0 0 0 1px hsl(var(--base-300) / 0.3);
+	}
+
+	[data-theme="dark"] .create-post-btn:hover {
+		box-shadow: 
+			0 8px 30px rgba(0, 0, 0, 0.3),
+			0 0 0 2px hsl(var(--primary) / 0.4);
+	}
+
+	/* Modern Empty State */
+	.modern-empty-state {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 400px;
+		padding: 2rem;
+	}
+
+	.empty-state-content {
+		text-align: center;
+		max-width: 320px;
+	}
+
+	.empty-state-icon {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 80px;
+		height: 80px;
+		background: linear-gradient(135deg, 
+			hsl(var(--base-200)) 0%, 
+			hsl(var(--base-300)) 100%);
+		border-radius: 24px;
+		margin-bottom: 24px;
+		color: hsl(var(--base-content) / 0.4);
+	}
+
+	.empty-state-glow {
+		position: absolute;
+		inset: -4px;
+		background: linear-gradient(135deg, 
+			hsl(var(--primary) / 0.1) 0%, 
+			hsl(340 70% 65% / 0.1) 50%, 
+			hsl(348 80% 70% / 0.1) 100%);
+		border-radius: 28px;
+		opacity: 0.3;
+		filter: blur(8px);
+		animation: gentle-glow 3s ease-in-out infinite;
+		z-index: -1;
+	}
+
+	.empty-state-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: hsl(var(--base-content));
+		margin-bottom: 12px;
+		background: linear-gradient(135deg, 
+			hsl(var(--base-content)) 0%, 
+			hsl(var(--primary)) 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.empty-state-description {
+		color: hsl(var(--base-content) / 0.6);
+		font-size: 1rem;
+		line-height: 1.6;
+		margin-bottom: 24px;
+	}
+
+	.empty-state-actions {
+		display: flex;
+		justify-content: center;
+	}
+
+	@keyframes gentle-glow {
+		0%, 100% { 
+			opacity: 0.2;
+			filter: blur(8px);
+		}
+		50% { 
+			opacity: 0.4;
+			filter: blur(12px);
+		}
+	}
+
+	/* Desktop Create Post Button */
+	.desktop-create-post {
+		position: relative;
+	}
+
+	/* Gradient text effect */
+	:global(.likey-gradient-text) {
+		background: linear-gradient(135deg, 
+			hsl(var(--primary)) 0%, 
+			hsl(340 70% 65%) 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	/* Mobile responsiveness */
+	@media (max-width: 640px) {
+		.create-post-btn {
+			padding: 16px 20px;
+		}
+		
+		.create-post-content {
+			gap: 12px;
+		}
+		
+		.create-post-icon {
+			width: 44px;
+			height: 44px;
+		}
+		
+		.create-post-title {
+			font-size: 1rem;
+		}
+		
+		.create-post-subtitle {
+			font-size: 0.85rem;
+		}
+
+		.empty-state-icon {
+			width: 64px;
+			height: 64px;
+			border-radius: 20px;
+		}
+
+		.empty-state-title {
+			font-size: 1.25rem;
+		}
+
+		.empty-state-description {
+			font-size: 0.9rem;
+		}
+	}
+</style>

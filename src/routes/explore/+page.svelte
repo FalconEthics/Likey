@@ -105,7 +105,7 @@
 	<title>Explore - Likey</title>
 </svelte:head>
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-6xl mx-auto pb-28">
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-6">
 		<h1 class="text-3xl font-bold">Explore</h1>

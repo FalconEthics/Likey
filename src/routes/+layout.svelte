@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/Likey.png';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import BottomNavigation from '$lib/components/BottomNavigation.svelte';
 	import LoginModal from '$lib/components/LoginModal.svelte';
@@ -16,8 +16,16 @@
 	let needsProfileSetup = $state(false);
 	
 	$effect(() => {
-		// Check auth state and profile state
+		// Check auth state and profile state whenever user store changes
 		checkProfileSetup();
+	});
+	
+	// Also watch the user store specifically
+	$effect(() => {
+		if ($user) {
+			// User profile exists, hide the setup modal
+			needsProfileSetup = false;
+		}
 	});
 	
 	async function checkProfileSetup() {
@@ -51,8 +59,40 @@
 	let { children } = $props();
 	
 	onMount(() => {
+		// Check for OAuth errors in URL parameters before initializing auth
+		checkForOAuthErrors();
 		initializeAuth();
 	});
+	
+	function checkForOAuthErrors() {
+		// Don't check for errors if we're already on the error page
+		if (window.location.pathname === '/error') {
+			return;
+		}
+		
+		const urlParams = new URLSearchParams(window.location.search);
+		const hashParams = new URLSearchParams(window.location.hash.substring(1));
+		
+		// Check for error parameters in both URL and hash
+		const error = urlParams.get('error') || hashParams.get('error');
+		const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+		const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
+		
+		// If we have an OAuth error, redirect to error page with parameters
+		if (error) {
+			console.log('OAuth error detected:', { error, errorDescription, errorCode });
+			
+			// Build error page URL with all error parameters
+			const errorParams = new URLSearchParams();
+			if (error) errorParams.set('error', error);
+			if (errorDescription) errorParams.set('error_description', errorDescription);
+			if (errorCode) errorParams.set('error_code', errorCode);
+			
+			// Redirect to error page
+			window.location.href = `/error?${errorParams.toString()}`;
+			return;
+		}
+	}
 </script>
 
 <svelte:head>

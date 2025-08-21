@@ -394,11 +394,11 @@
 							{#each comments as comment}
 								<div class="flex gap-3">
 									<a href="/profile/{comment.user.username}" class="avatar">
-										<div class="w-8 rounded-full">
+										<div class="w-8 h-8 rounded-full">
 											{#if comment.user.profile_pic_url}
-												<img src={comment.user.profile_pic_url} alt={comment.user.display_name} />
+												<img src={comment.user.profile_pic_url} alt={comment.user.display_name} class="rounded-full w-full h-full object-cover" />
 											{:else}
-												<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-sm">
+												<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-sm rounded-full">
 													{comment.user.display_name?.charAt(0).toUpperCase() || 'U'}
 												</div>
 											{/if}
@@ -431,11 +431,11 @@
 					{#if $user}
 						<form onsubmit={addComment} class="flex gap-3 mt-6 pt-4 border-t border-base-300">
 							<div class="avatar">
-								<div class="w-8 rounded-full">
+								<div class="w-8 h-8 rounded-full">
 									{#if $user.profile_pic_url}
-										<img src={$user.profile_pic_url} alt={$user.display_name} />
+										<img src={$user.profile_pic_url} alt={$user.display_name} class="rounded-full w-full h-full object-cover" />
 									{:else}
-										<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-sm">
+										<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-sm rounded-full">
 											{$user.display_name?.charAt(0).toUpperCase() || 'U'}
 										</div>
 									{/if}
@@ -453,7 +453,7 @@
 								></textarea>
 								<button 
 									type="submit" 
-									class="btn btn-primary" 
+									class="btn btn-primary disabled:opacity-50 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed" 
 									disabled={!newComment.trim() || addingComment}
 									class:loading={addingComment}
 								>

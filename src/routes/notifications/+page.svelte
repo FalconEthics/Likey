@@ -53,13 +53,13 @@
 </svelte:head>
 
 {#if $user}
-	<div class="max-w-2xl mx-auto">
+	<div class="max-w-2xl mx-auto pb-28 lg:pb-6">
 		<div class="flex items-center justify-between mb-6">
-			<h1 class="text-3xl font-bold">Notifications</h1>
+			<h1 class="text-3xl font-bold bg-gradient-to-r from-[hsl(346_77%_49%)] to-[hsl(340_70%_65%)] bg-clip-text text-transparent">Notifications</h1>
 			
 			{#if $notifications.some(n => !n.read)}
 				<button 
-					class="btn btn-outline btn-sm"
+					class="btn btn-outline btn-sm border-[hsl(346_77%_49%)] text-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_49%)] hover:text-white"
 					onclick={markAllNotificationsAsRead}
 				>
 					Mark all as read
@@ -79,9 +79,8 @@
 			<div class="space-y-2">
 				{#each $notifications as notification (notification.id)}
 					<button 
-						class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer w-full text-left"
-						class:border-l-4={!notification.read}
-						class:border-l-primary={!notification.read}
+						class="card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer w-full text-left border border-base-300/50"
+						class:unread={!notification.read}
 						onclick={() => handleNotificationClick(notification)}
 					>
 						<div class="card-body p-4">
@@ -96,11 +95,11 @@
 									<div class="flex items-center gap-2 mb-1">
 										{#if notification.related_user}
 											<div class="avatar">
-												<div class="w-6 rounded-full">
+												<div class="w-8 h-8 rounded-full">
 													{#if notification.related_user.profile_pic_url}
-														<img src={notification.related_user.profile_pic_url} alt={notification.related_user.display_name} />
+														<img src={notification.related_user.profile_pic_url} alt={notification.related_user.display_name} class="rounded-full w-full h-full object-cover" />
 													{:else}
-														<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
+														<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs rounded-full">
 															{notification.related_user.display_name?.charAt(0).toUpperCase() || 'U'}
 														</div>
 													{/if}
@@ -109,7 +108,7 @@
 										{/if}
 										
 										{#if !notification.read}
-											<div class="w-2 h-2 rounded-full bg-primary"></div>
+											<div class="w-2 h-2 rounded-full unread-dot shadow-sm"></div>
 										{/if}
 									</div>
 									
@@ -140,3 +139,26 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	/* Unread notification styling */
+	.unread {
+		border-left: 4px solid hsl(346 77% 49%);
+		background: linear-gradient(to right, hsl(346 77% 49% / 0.03), transparent);
+	}
+	
+	/* Unread dot styling */
+	.unread-dot {
+		background: hsl(346 77% 49%);
+	}
+	
+	/* Dark theme support */
+	[data-theme="dark"] .unread {
+		background: linear-gradient(to right, hsl(346 77% 55% / 0.05), transparent);
+		border-left-color: hsl(346 77% 55%);
+	}
+	
+	[data-theme="dark"] .unread-dot {
+		background: hsl(346 77% 55%);
+	}
+</style>

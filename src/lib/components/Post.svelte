@@ -379,11 +379,11 @@
 						{#each comments as comment}
 							<div class="flex gap-3 p-4 border-b border-base-300 last:border-b-0">
 								<div class="avatar">
-									<div class="w-6 rounded-full">
+									<div class="w-8 h-8 rounded-full">
 										{#if comment.user.profile_pic_url}
-											<img src={comment.user.profile_pic_url} alt={comment.user.display_name} />
+											<img src={comment.user.profile_pic_url} alt={comment.user.display_name} class="rounded-full w-full h-full object-cover" />
 										{:else}
-											<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
+											<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs rounded-full">
 												{comment.user.display_name?.charAt(0).toUpperCase() || 'U'}
 											</div>
 										{/if}
@@ -410,11 +410,11 @@
 				{#if $user}
 					<form onsubmit={addComment} class="flex gap-3 p-4">
 						<div class="avatar">
-							<div class="w-6 rounded-full">
+							<div class="w-8 h-8 rounded-full">
 								{#if $user.profile_pic_url}
-									<img src={$user.profile_pic_url} alt={$user.display_name} />
+									<img src={$user.profile_pic_url} alt={$user.display_name} class="rounded-full w-full h-full object-cover" />
 								{:else}
-									<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
+									<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs rounded-full">
 										{$user.display_name?.charAt(0).toUpperCase() || 'U'}
 									</div>
 								{/if}
@@ -429,7 +429,7 @@
 								bind:value={newComment}
 								required
 							/>
-							<button type="submit" class="btn btn-primary btn-sm" disabled={!newComment.trim()}>
+							<button type="submit" class="btn btn-primary btn-sm disabled:opacity-50 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed" disabled={!newComment.trim()}>
 								Post
 							</button>
 						</div>

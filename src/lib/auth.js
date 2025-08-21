@@ -70,24 +70,13 @@ async function loadUserProfile(userId) {
  * Sign up a new user
  * @param {string} email - User email
  * @param {string} password - User password
- * @param {string} username - Unique username
- * @param {string} displayName - Display name
  * @returns {Promise<{success: boolean, error?: string, needsConfirmation?: boolean}>}
  */
-export async function signUp(email, password, username, displayName) {
+export async function signUp(email, password) {
   // Validate inputs
   const emailValidation = validateEmail(email);
   if (!emailValidation.valid) {
     return { success: false, error: emailValidation.error };
-  }
-  
-  const usernameValidation = validateUsername(username);
-  if (!usernameValidation.valid) {
-    return { success: false, error: usernameValidation.error };
-  }
-  
-  if (!displayName?.trim()) {
-    return { success: false, error: 'Display name is required' };
   }
   
   if (password.length < 6) {
@@ -95,26 +84,16 @@ export async function signUp(email, password, username, displayName) {
   }
   
   try {
-    // Check if username already exists (basic check, final check happens after email confirmation)
-    const { data: existingUser } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('username', username.toLowerCase())
-      .single();
     
-    if (existingUser) {
-      return { success: false, error: 'Username already taken' };
-    }
+    // Get the current origin for redirect URL
+    const redirectTo = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
     
-    // Sign up user with metadata - Supabase will send confirmation email
+    // Sign up user - Supabase will send confirmation email
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          username: username.toLowerCase(),
-          display_name: displayName.trim()
-        }
+        emailRedirectTo: redirectTo
       }
     });
     
@@ -122,7 +101,7 @@ export async function signUp(email, password, username, displayName) {
     
     if (authData.user) {
       // Check if email confirmation is needed
-      if (!authData.session) {
+      if (!authData.session || !authData.user.email_confirmed_at) {
         return { 
           success: true, 
           needsConfirmation: true,
@@ -236,13 +215,17 @@ export async function resetPassword(email) {
 export async function createProfile(userId, username, displayName) {
   try {
     // Double-check username availability
-    const { data: existingUser } = await supabase
+    const { data: existingUsers, error: checkError } = await supabase
       .from('profiles')
       .select('username')
-      .eq('username', username.toLowerCase())
-      .single();
+      .eq('username', username.toLowerCase());
     
-    if (existingUser) {
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking username:', checkError);
+      return { success: false, error: 'Failed to validate username' };
+    }
+    
+    if (existingUsers && existingUsers.length > 0) {
       return { success: false, error: 'Username already taken' };
     }
     
@@ -267,6 +250,60 @@ export async function createProfile(userId, username, displayName) {
     return { 
       success: false, 
       error: error.message || 'Failed to create profile' 
+    };
+  }
+}
+
+/**
+ * Sign in with Google
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function signInWithGoogle() {
+  try {
+    const redirectTo = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo
+      }
+    });
+    
+    if (error) throw error;
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    return { 
+      success: false, 
+      error: error.message || 'Failed to sign in with Google' 
+    };
+  }
+}
+
+/**
+ * Sign in with GitHub
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function signInWithGithub() {
+  try {
+    const redirectTo = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo
+      }
+    });
+    
+    if (error) throw error;
+    
+    return { success: true };
+  } catch (error) {
+    console.error('GitHub OAuth error:', error);
+    return { 
+      success: false, 
+      error: error.message || 'Failed to sign in with GitHub' 
     };
   }
 }

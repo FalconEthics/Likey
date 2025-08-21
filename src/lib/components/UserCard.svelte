@@ -98,8 +98,8 @@
 	}
 </script>
 
-<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
-	<div class="card-body p-4 text-center">
+<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow h-full">
+	<div class="card-body p-4 text-center flex flex-col h-full">
 		<!-- Profile Picture -->
 		<a href="/profile/{profileUser.username}" class="avatar mx-auto">
 			<div class="w-16 rounded-full">
@@ -114,17 +114,19 @@
 		</a>
 
 		<!-- User Info -->
-		<div class="mt-3">
+		<div class="mt-3 flex-1">
 			<a href="/profile/{profileUser.username}" class="font-semibold hover:underline block">
 				{profileUser.display_name}
 			</a>
 			<p class="text-sm text-base-content/60">@{profileUser.username}</p>
 			
-			{#if profileUser.bio}
-				<p class="text-xs text-base-content/80 mt-2 line-clamp-2">
-					{profileUser.bio}
-				</p>
-			{/if}
+			<div class="bio-container h-12 flex items-center justify-center">
+				{#if profileUser.bio}
+					<p class="text-xs text-base-content/80 line-clamp-2">
+						{profileUser.bio}
+					</p>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Stats -->
@@ -140,40 +142,44 @@
 		</div>
 
 		<!-- Recommendation Reason -->
-		{#if showReason && profileUser.recommendation_reason}
-			<div class="badge badge-ghost badge-sm mt-2">
-				{getReasonText(profileUser.recommendation_reason)}
-			</div>
-		{/if}
+		<div class="reason-container h-8 flex items-center justify-center">
+			{#if showReason && profileUser.recommendation_reason}
+				<div class="badge badge-ghost badge-sm">
+					{getReasonText(profileUser.recommendation_reason)}
+				</div>
+			{/if}
+		</div>
 
 		<!-- Actions -->
-		{#if $user && profileUser.id !== $user.id}
-			<div class="card-actions justify-center mt-4 gap-2">
-				<button 
-					class="btn btn-primary btn-sm flex-1"
-					class:btn-outline={isFollowing}
-					class:loading={followLoading}
-					onclick={toggleFollow}
-					disabled={followLoading}
-				>
-					{followLoading ? '' : (isFollowing ? 'Following' : 'Follow')}
-				</button>
-				
-				<button 
-					class="btn btn-ghost btn-sm btn-square"
-					onclick={startConversation}
-					title="Send message"
-				>
-					<MessageCircle size={16} />
-				</button>
-			</div>
-		{:else if !$user}
-			<div class="card-actions justify-center mt-4">
-				<a href="/" class="btn btn-primary btn-sm">
-					Sign in to follow
-				</a>
-			</div>
-		{/if}
+		<div class="action-container mt-4">
+			{#if $user && profileUser.id !== $user.id}
+				<div class="flex gap-2 h-10">
+					<button 
+						class="btn btn-primary btn-sm flex-1 h-full"
+						class:btn-outline={isFollowing}
+						class:loading={followLoading}
+						onclick={toggleFollow}
+						disabled={followLoading}
+					>
+						{followLoading ? '' : (isFollowing ? 'Following' : 'Follow')}
+					</button>
+					
+					<button 
+						class="btn btn-ghost btn-sm aspect-square h-full"
+						onclick={startConversation}
+						title="Send message"
+					>
+						<MessageCircle size={16} />
+					</button>
+				</div>
+			{:else if !$user}
+				<div class="flex h-10">
+					<a href="/" class="btn btn-primary btn-sm flex-1 h-full">
+						Sign in to follow
+					</a>
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
 

@@ -411,13 +411,13 @@
 
 {#if $user}
 	<div 
-		class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col" 
+		class="max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col pb-32 lg:pb-6" 
 		onclick={handleClickOutside}
 		onkeydown={handleClickOutside}
 		role="main"
 	>
 		<!-- Header -->
-		<div class="flex items-center gap-4 p-4 border-b border-base-300 bg-base-100">
+		<div class="flex items-center gap-4 p-4 border-b border-base-300/50 bg-base-100/95 backdrop-blur-xl sticky top-0 z-10">
 			<button 
 				class="btn btn-ghost btn-circle"
 				onclick={() => goto('/messages')}
@@ -453,7 +453,7 @@
 
 		<!-- Messages -->
 		<div 
-			class="flex-1 overflow-y-auto p-4 space-y-4" 
+			class="flex-1 p-4 space-y-4" 
 			bind:this={messagesContainer}
 		>
 			{#if loading}
@@ -471,28 +471,30 @@
 					{@const prevMessage = index > 0 ? $currentMessages[index - 1] : null}
 					{@const showAvatar = !prevMessage || prevMessage.sender.id !== message.sender.id}
 					
-					<div class="flex gap-2" class:flex-row-reverse={isCurrentUser}>
-						<!-- Avatar -->
-						<div class="flex-shrink-0">
-							{#if showAvatar && !isCurrentUser}
-								<div class="avatar">
-									<div class="w-8 rounded-full">
-										{#if message.sender.profile_pic_url}
-											<img src={message.sender.profile_pic_url} alt={message.sender.display_name} />
-										{:else}
-											<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
-												{message.sender.display_name?.charAt(0).toUpperCase() || 'U'}
-											</div>
-										{/if}
+					<div class="flex gap-3" class:justify-end={isCurrentUser}>
+						{#if !isCurrentUser}
+							<!-- Avatar for incoming messages -->
+							<div class="flex-shrink-0">
+								{#if showAvatar}
+									<div class="avatar">
+										<div class="w-8 rounded-full">
+											{#if message.sender.profile_pic_url}
+												<img src={message.sender.profile_pic_url} alt={message.sender.display_name} />
+											{:else}
+												<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
+													{message.sender.display_name?.charAt(0).toUpperCase() || 'U'}
+												</div>
+											{/if}
+										</div>
 									</div>
-								</div>
-							{:else}
-								<div class="w-8"></div>
-							{/if}
-						</div>
+								{:else}
+									<div class="w-8"></div>
+								{/if}
+							</div>
+						{/if}
 						
 						<!-- Message Bubble -->
-						<div class="max-w-xs lg:max-w-md relative">
+						<div class="max-w-xs lg:max-w-md relative" class:ml-auto={isCurrentUser} class:mr-3={isCurrentUser}>
 							{#if editingMessageId === message.id}
 								<!-- Edit Mode -->
 								<form onsubmit={saveEditMessage} class="space-y-2">
@@ -523,12 +525,10 @@
 								<!-- Normal Message Display -->
 								<div class="relative">
 									<div 
-										class="px-4 py-2 rounded-2xl relative cursor-pointer select-none context-menu-container"
-										class:bg-primary={isCurrentUser}
+										class="px-4 py-3 rounded-2xl relative cursor-pointer select-none context-menu-container modern-message-bubble"
+										class:current-user={isCurrentUser}
+										class:other-user={!isCurrentUser}
 										class:opacity-70={message.sending}
-										class:text-primary-content={isCurrentUser}
-										class:bg-base-200={!isCurrentUser}
-										class:text-base-content={!isCurrentUser}
 										oncontextmenu={(e) => !message.sending && handleContextMenu(e, message.id)}
 										ontouchstart={(e) => !message.sending && handleTouchStart(e, message.id)}
 										ontouchend={handleTouchEnd}
@@ -607,19 +607,19 @@
 		</div>
 
 		<!-- Message Input -->
-		<div class="p-4 border-t border-base-300 bg-base-100">
+		<div class="p-4 border-t border-base-300/50 bg-base-100/95 backdrop-blur-xl sticky bottom-0 z-10">
 			<form onsubmit={handleSendMessage} class="flex gap-2">
 				<input 
 					type="text" 
 					placeholder="Type a message..." 
-					class="input input-bordered flex-1"
+					class="input input-bordered flex-1 bg-base-200/50 focus:bg-base-200/80"
 					bind:value={messageInput}
 					disabled={sending}
 					autocomplete="off"
 				/>
 				<button 
 					type="submit" 
-					class="btn btn-primary"
+					class="btn btn-primary disabled:opacity-50 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed"
 					class:loading={sending}
 					disabled={sending || !messageInput.trim()}
 				>
@@ -661,5 +661,51 @@
 	.overflow-y-auto::-webkit-scrollbar-thumb {
 		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 3px;
+	}
+
+	/* Modern Message Bubbles */
+	.modern-message-bubble {
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		border: 1px solid transparent;
+	}
+
+	.modern-message-bubble.current-user {
+		background: linear-gradient(135deg, 
+			hsl(346 77% 49%) 0%, 
+			hsl(340 70% 65%) 100%);
+		color: white;
+		box-shadow: 0 4px 12px hsl(346 77% 49% / 0.3);
+	}
+
+	.modern-message-bubble.other-user {
+		background: hsl(var(--base-200) / 0.8);
+		color: hsl(var(--base-content));
+		border: 1px solid hsl(var(--base-300) / 0.5);
+	}
+
+	.modern-message-bubble:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+	}
+
+	.modern-message-bubble.current-user:hover {
+		box-shadow: 0 6px 20px hsl(346 77% 49% / 0.4);
+	}
+
+	/* Dark theme adjustments */
+	[data-theme="dark"] .modern-message-bubble.other-user {
+		background: hsl(var(--base-300) / 0.6);
+		border: 1px solid hsl(var(--base-300) / 0.3);
+	}
+
+	[data-theme="dark"] .modern-message-bubble:hover {
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Enhanced message input styling for dark theme */
+	[data-theme="dark"] .input:focus {
+		background: hsl(var(--base-200) / 0.9);
+		border-color: hsl(346 77% 65% / 0.5);
 	}
 </style>

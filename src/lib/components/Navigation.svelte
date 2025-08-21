@@ -6,6 +6,7 @@
   import { signOut } from '../auth.js';
   import { requestNotificationPermission, markNotificationAsRead } from '../notifications.js';
   import { searchUsers } from '../search.js';
+  import LikeyLogo from '$lib/assets/Likey.png';
   
   // Lucide Icons
   import { 
@@ -163,8 +164,9 @@
 
 <nav class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 overflow-visible">
   <div class="navbar-start">
-    <a href="/" class="btn btn-ghost text-xl font-bold text-primary">
-      Likey
+    <a href="/" class="btn btn-ghost text-xl font-bold flex items-center gap-2">
+      <img src={LikeyLogo} alt="Likey" class="w-8 h-8 rounded-lg likey-logo" />
+      <span class="hidden sm:block likey-gradient-text">Likey</span>
     </a>
   </div>
   
@@ -244,38 +246,47 @@
         </button>
         
         {#if showNotifications}
-          <div class="absolute top-full right-0 mt-2 z-[100] menu p-2 shadow-lg bg-base-100 rounded-box w-72 sm:w-80 border border-base-300">
-            <div class="menu-title">
-              <span>Notifications</span>
+          <div class="absolute top-full right-0 mt-2 z-[100] modern-dropdown w-72 sm:w-80">
+            <div class="modern-dropdown-header">
+              <h3 class="font-semibold text-lg">Notifications</h3>
+              {#if $unreadCount > 0}
+                <span class="modern-badge">{$unreadCount}</span>
+              {/if}
             </div>
             
             {#if $notifications.length === 0}
-              <div class="p-4 text-center text-base-content/60">
-                No notifications yet
+              <div class="modern-empty-state">
+                <Bell size={32} class="opacity-40" />
+                <p class="text-base-content/60 mt-2">No notifications yet</p>
               </div>
             {:else}
-              {#each $notifications.slice(0, 5) as notification}
-                <button 
-                  class="w-full p-2 hover:bg-base-200 rounded-lg text-left transition-colors"
-                  class:bg-base-200={!notification.read}
-                  onclick={() => handleNotificationClick(notification)}
-                >
-                  <div class="flex items-start gap-2">
-                    {#if !notification.read}
-                      <div class="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0"></div>
-                    {/if}
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm">{notification.message}</p>
-                      <p class="text-xs text-base-content/60 mt-1">
-                        {new Date(notification.created_at).toLocaleDateString()}
-                      </p>
+              <div class="modern-dropdown-content">
+                {#each $notifications.slice(0, 5) as notification}
+                  <button 
+                    class="modern-notification-item"
+                    class:unread={!notification.read}
+                    onclick={() => handleNotificationClick(notification)}
+                  >
+                    <div class="flex items-start gap-3">
+                      {#if !notification.read}
+                        <div class="modern-unread-indicator"></div>
+                      {/if}
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium">{notification.message}</p>
+                        <p class="text-xs text-base-content/60 mt-1">
+                          {new Date(notification.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              {/each}
+                  </button>
+                {/each}
+              </div>
               
-              <div class="divider"></div>
-              <a href="/notifications" class="btn btn-sm btn-ghost" onclick={handleNavClick}>View All</a>
+              <div class="modern-dropdown-footer">
+                <a href="/notifications" class="modern-view-all-btn" onclick={handleNavClick}>
+                  View All Notifications
+                </a>
+              </div>
             {/if}
           </div>
         {/if}
@@ -373,5 +384,144 @@
   .menu-title {
     padding: 0.5rem;
     font-weight: 500;
+  }
+
+  /* Modern Dropdown Styles */
+  .modern-dropdown {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    max-height: 400px;
+  }
+
+  [data-theme="dark"] .modern-dropdown {
+    background: rgba(20, 20, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .modern-dropdown-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid hsl(var(--base-300) / 0.5);
+    background: linear-gradient(135deg, 
+      hsl(var(--base-100)) 0%, 
+      hsl(var(--base-200) / 0.5) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modern-badge {
+    background: linear-gradient(135deg, 
+      hsl(346 77% 49%) 0%, 
+      hsl(340 80% 60%) 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px hsl(346 77% 49% / 0.3);
+  }
+
+  .modern-empty-state {
+    padding: 32px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modern-dropdown-content {
+    padding: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .modern-notification-item {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    text-align: left;
+    transition: all 0.2s ease;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+
+  .modern-notification-item:hover {
+    background: hsl(var(--base-200) / 0.7);
+    transform: translateX(2px);
+  }
+
+  .modern-notification-item.unread {
+    background: linear-gradient(135deg, 
+      hsl(var(--primary) / 0.05) 0%, 
+      hsl(340 70% 65% / 0.05) 100%);
+    border-left: 3px solid hsl(346 77% 49%);
+  }
+
+  .modern-unread-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, 
+      hsl(346 77% 49%) 0%, 
+      hsl(340 80% 60%) 100%);
+    margin-top: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px hsl(346 77% 49% / 0.4);
+  }
+
+  .modern-dropdown-footer {
+    padding: 12px 20px;
+    border-top: 1px solid hsl(var(--base-300) / 0.5);
+    background: hsl(var(--base-100) / 0.5);
+  }
+
+  .modern-view-all-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: center;
+    color: hsl(346 77% 49%);
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .modern-view-all-btn:hover {
+    background: hsl(346 77% 49% / 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Scrollbar styling for dropdown content */
+  .modern-dropdown-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .modern-dropdown-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modern-dropdown-content::-webkit-scrollbar-thumb {
+    background: hsl(var(--base-300));
+    border-radius: 2px;
+  }
+
+  .modern-dropdown-content::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--base-400));
   }
 </style>

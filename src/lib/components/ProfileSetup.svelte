@@ -7,6 +7,7 @@
   let displayName = $state('');
   let loading = $state(false);
   let error = $state('');
+  let success = $state('');
   
   // Get current auth user
   let authUser = $state(null);
@@ -16,9 +17,9 @@
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       authUser = data.user;
-      // Pre-fill from metadata if available
-      username = data.user.user_metadata?.username || '';
-      displayName = data.user.user_metadata?.display_name || '';
+      // Start with empty fields for user to fill
+      username = '';
+      displayName = '';
       
       // Check if profile already exists
       await checkExistingProfile(data.user.id);
@@ -65,6 +66,7 @@
     }
     
     error = '';
+    success = '';
     loading = true;
     
     try {
@@ -73,8 +75,16 @@
       console.log('createProfile result:', result);
       
       if (result.success) {
-        // Profile created successfully, user store is updated
+        // Profile created successfully, user store is updated in auth.js
+        success = 'Profile created successfully! Welcome to Likey!';
         console.log('Profile created successfully');
+        console.log('User store should now be updated:', $user);
+        
+        // Auto-close modal after 2 seconds - this should happen automatically due to user store update
+        setTimeout(() => {
+          console.log('Auto-close timeout reached, user store value:', $user);
+          console.log('Modal should have closed automatically by now');
+        }, 2000);
       } else {
         if (result.error === 'Username already taken') {
           error = 'Username already taken. Please try a different username.';
@@ -132,8 +142,20 @@
         />
       </div>
       
+      {#if success}
+        <div class="alert alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{success}</span>
+        </div>
+      {/if}
+      
       {#if error}
         <div class="alert alert-error">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           <span>{error}</span>
         </div>
       {/if}
@@ -142,11 +164,13 @@
         <button 
           type="submit" 
           class="btn btn-primary"
-          disabled={loading || !username.trim() || !displayName.trim()}
+          disabled={loading || !username.trim() || !displayName.trim() || success}
         >
           {#if loading}
             <span class="loading loading-spinner loading-sm"></span>
             Creating Profile...
+          {:else if success}
+            Profile Created!
           {:else}
             Complete Setup
           {/if}

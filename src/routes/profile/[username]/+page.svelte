@@ -201,14 +201,14 @@
 							<div class="font-bold text-lg">{profile.posts_count}</div>
 							<div class="text-sm text-base-content/60">Posts</div>
 						</div>
-						<div class="text-center">
+						<a href="/users/{profile.username}/followers" class="text-center hover:bg-base-200 rounded-lg p-2 -m-2 transition-colors">
 							<div class="font-bold text-lg">{profile.followers_count}</div>
-							<div class="text-sm text-base-content/60">Followers</div>
-						</div>
-						<div class="text-center">
+							<div class="text-sm text-base-content/60 hover:underline">Followers</div>
+						</a>
+						<a href="/users/{profile.username}/following" class="text-center hover:bg-base-200 rounded-lg p-2 -m-2 transition-colors">
 							<div class="font-bold text-lg">{profile.following_count}</div>
-							<div class="text-sm text-base-content/60">Following</div>
-						</div>
+							<div class="text-sm text-base-content/60 hover:underline">Following</div>
+						</a>
 					</div>
 					
 					<!-- Bio -->

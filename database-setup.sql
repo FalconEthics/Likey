@@ -94,6 +94,8 @@ CREATE TABLE public.messages (
   sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   content TEXT NOT NULL,
   read BOOLEAN DEFAULT FALSE,
+  edited_at TIMESTAMP WITH TIME ZONE,
+  forwarded_from UUID REFERENCES public.messages(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -134,6 +136,8 @@ CREATE INDEX idx_conversations_last_message ON public.conversations(last_message
 CREATE INDEX idx_messages_conversation ON public.messages(conversation_id);
 CREATE INDEX idx_messages_sender ON public.messages(sender_id);
 CREATE INDEX idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX idx_messages_forwarded_from ON public.messages(forwarded_from);
+CREATE INDEX idx_messages_conversation_created ON public.messages(conversation_id, created_at);
 CREATE INDEX idx_trending_posts_score ON public.trending_posts(score DESC);
 CREATE INDEX idx_trending_posts_date ON public.trending_posts(trending_date DESC);
 CREATE INDEX idx_user_recommendations_user ON public.user_recommendations(user_id);

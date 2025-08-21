@@ -449,3 +449,243 @@ export async function getUnreadMessageCount() {
 		return { count: 0, error: error.message };
 	}
 }
+
+/**
+ * Delete a message (only if sent by current user and within 2 minutes)
+ * @param {string} messageId - Message ID
+ * @returns {Promise<{success: boolean, error: any}>}
+ */
+export async function deleteMessage(messageId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { success: false, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to check ownership and timestamp
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, sender_id, created_at, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for deletion:', fetchError);
+			return { success: false, error: 'Message not found' };
+		}
+
+		// Check if current user is the sender
+		if (message.sender_id !== currentUser.id) {
+			console.warn('Unauthorized delete attempt by user:', currentUser.id);
+			return { success: false, error: 'You can only delete your own messages' };
+		}
+
+		// Check if message is within 5 minutes
+		const messageTime = new Date(message.created_at);
+		const now = new Date();
+		const diffMinutes = (now - messageTime) / (1000 * 60);
+
+		if (diffMinutes > 5) {
+			return { success: false, error: 'You can only delete messages within 5 minutes of sending' };
+		}
+
+		// Verify user has access to the conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (convError || (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)) {
+			return { success: false, error: 'Access denied' };
+		}
+
+		// Delete the message
+		const { error } = await supabase
+			.from('messages')
+			.delete()
+			.eq('id', messageId)
+			.eq('sender_id', currentUser.id); // Extra security check
+
+		if (error) throw error;
+
+		return { success: true, error: null };
+	} catch (error) {
+		console.error('Error deleting message:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Edit a message (only if sent by current user and within 2 minutes)
+ * @param {string} messageId - Message ID
+ * @param {string} newContent - New message content
+ * @returns {Promise<{data: Message, error: any}>}
+ */
+export async function editMessage(messageId, newContent) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to check ownership and timestamp
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, sender_id, created_at, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for editing:', fetchError);
+			return { data: null, error: 'Message not found' };
+		}
+
+		// Check if current user is the sender
+		if (message.sender_id !== currentUser.id) {
+			console.warn('Unauthorized edit attempt by user:', currentUser.id);
+			return { data: null, error: 'You can only edit your own messages' };
+		}
+
+		// Check if message is within 5 minutes
+		const messageTime = new Date(message.created_at);
+		const now = new Date();
+		const diffMinutes = (now - messageTime) / (1000 * 60);
+
+		if (diffMinutes > 5) {
+			return { data: null, error: 'You can only edit messages within 5 minutes of sending' };
+		}
+
+		// Verify user has access to the conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (convError || (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)) {
+			return { data: null, error: 'Access denied' };
+		}
+
+		// Update the message
+		const { data, error } = await supabase
+			.from('messages')
+			.update({ 
+				content: newContent.trim(),
+				edited_at: new Date().toISOString()
+			})
+			.eq('id', messageId)
+			.eq('sender_id', currentUser.id) // Extra security check
+			.select(`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`)
+			.single();
+
+		if (error) throw error;
+
+		return { data, error: null };
+	} catch (error) {
+		console.error('Error editing message:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Forward a message to another conversation
+ * @param {string} messageId - Message ID to forward
+ * @param {string} targetConversationId - Target conversation ID
+ * @returns {Promise<{data: Message, error: any}>}
+ */
+export async function forwardMessage(messageId, targetConversationId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to forward
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, content, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for forwarding:', fetchError);
+			return { data: null, error: 'Message not found' };
+		}
+
+		// Verify user has access to the source conversation
+		const { data: sourceConv, error: sourceError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (sourceError || (sourceConv.user1_id !== currentUser.id && sourceConv.user2_id !== currentUser.id)) {
+			return { data: null, error: 'Access denied to source conversation' };
+		}
+
+		// Verify user has access to the target conversation
+		const { data: targetConv, error: targetError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', targetConversationId)
+			.single();
+
+		if (targetError || (targetConv.user1_id !== currentUser.id && targetConv.user2_id !== currentUser.id)) {
+			return { data: null, error: 'Access denied to target conversation' };
+		}
+
+		// Send the forwarded message
+		const { data, error } = await supabase
+			.from('messages')
+			.insert({
+				conversation_id: targetConversationId,
+				sender_id: currentUser.id,
+				content: message.content,
+				forwarded_from: messageId
+			})
+			.select(`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`)
+			.single();
+
+		if (error) throw error;
+
+		// Update target conversation last_message_at
+		await supabase
+			.from('conversations')
+			.update({ last_message_at: new Date().toISOString() })
+			.eq('id', targetConversationId);
+
+		return { data, error: null };
+	} catch (error) {
+		console.error('Error forwarding message:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Check if a message can be edited or deleted (within 5 minutes)
+ * @param {string} createdAt - Message creation timestamp
+ * @returns {boolean}
+ */
+export function canModifyMessage(createdAt) {
+	const messageTime = new Date(createdAt);
+	const now = new Date();
+	const diffMinutes = (now - messageTime) / (1000 * 60);
+	return diffMinutes <= 5;
+}

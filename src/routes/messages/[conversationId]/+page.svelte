@@ -7,12 +7,16 @@
 		getConversationMessages, 
 		sendMessage, 
 		markMessagesAsRead, 
-		subscribeToMessages 
+		subscribeToMessages,
+		deleteMessage,
+		editMessage,
+		canModifyMessage
 	} from '$lib/messages.js';
 	import { formatRelativeTime } from '$lib/utils.js';
+	import ForwardMessageModal from '$lib/components/ForwardMessageModal.svelte';
 	
 	// Lucide Icons
-	import { ArrowLeft, Send, MessageCircle } from 'lucide-svelte';
+	import { ArrowLeft, Send, MessageCircle, MoreVertical, Edit, Trash2, Forward } from 'lucide-svelte';
 
 	let conversationId = $page.params.conversationId;
 	let messageInput = $state('');
@@ -21,6 +25,17 @@
 	let messagesContainer = $state();
 	let messageSubscription = null;
 	let otherUser = $state(null);
+	
+	// Message management state
+	let editingMessageId = $state(null);
+	let editingContent = $state('');
+	let showContextMenu = $state(null); // messageId or null
+	let deletingMessageId = $state(null);
+	let forwardingMessageId = $state(null);
+	
+	// Forward modal state
+	let showForwardModal = $state(false);
+	let forwardMessage = $state(null);
 
 	$effect(() => {
 		if (!$user) {
@@ -218,6 +233,149 @@
 		}
 	}
 
+	/**
+	 * Start editing a message
+	 * @param {Object} message
+	 */
+	function startEditMessage(message) {
+		editingMessageId = message.id;
+		editingContent = message.content;
+		showContextMenu = null;
+	}
+
+	/**
+	 * Save edited message
+	 * @param {Event} event
+	 */
+	async function saveEditMessage(event) {
+		event.preventDefault();
+		
+		if (!editingContent.trim() || !editingMessageId) return;
+		
+		const { data, error } = await editMessage(editingMessageId, editingContent);
+		
+		if (!error && data) {
+			// Update message in local state
+			currentMessages.update(messages => 
+				messages.map(msg => 
+					msg.id === editingMessageId ? data : msg
+				)
+			);
+			cancelEdit();
+		} else {
+			console.error('Failed to edit message:', error);
+			alert(error || 'Failed to edit message');
+		}
+	}
+
+	/**
+	 * Cancel editing
+	 */
+	function cancelEdit() {
+		editingMessageId = null;
+		editingContent = '';
+	}
+
+	/**
+	 * Delete a message
+	 * @param {string} messageId
+	 */
+	async function handleDeleteMessage(messageId) {
+		const confirmed = confirm('Delete this message? This action cannot be undone.');
+		if (!confirmed) return;
+		
+		deletingMessageId = messageId;
+		showContextMenu = null;
+		
+		const { success, error } = await deleteMessage(messageId);
+		
+		if (success) {
+			// Remove message from local state
+			currentMessages.update(messages => 
+				messages.filter(msg => msg.id !== messageId)
+			);
+		} else {
+			console.error('Failed to delete message:', error);
+			alert(error || 'Failed to delete message');
+		}
+		
+		deletingMessageId = null;
+	}
+
+	/**
+	 * Start forwarding a message
+	 * @param {Object} message
+	 */
+	function startForwardMessage(message) {
+		forwardMessage = message;
+		showForwardModal = true;
+		showContextMenu = null;
+	}
+
+	/**
+	 * Toggle context menu for a message
+	 * @param {string} messageId
+	 */
+	function toggleContextMenu(messageId) {
+		showContextMenu = showContextMenu === messageId ? null : messageId;
+	}
+
+	/**
+	 * Handle long press / right click for context menu
+	 * @param {Event} event
+	 * @param {string} messageId
+	 */
+	function handleContextMenu(event, messageId) {
+		event.preventDefault();
+		toggleContextMenu(messageId);
+	}
+
+	/**
+	 * Handle touch start for long press detection
+	 * @param {TouchEvent} event
+	 * @param {string} messageId
+	 */
+	let longPressTimer = null;
+	function handleTouchStart(event, messageId) {
+		longPressTimer = setTimeout(() => {
+			// Trigger haptic feedback if available
+			if (navigator.vibrate) {
+				navigator.vibrate(50);
+			}
+			toggleContextMenu(messageId);
+		}, 500); // 500ms long press
+	}
+
+	/**
+	 * Handle touch end - cancel long press if needed
+	 */
+	function handleTouchEnd() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	/**
+	 * Handle touch move - cancel long press if finger moves
+	 */
+	function handleTouchMove() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	/**
+	 * Close context menu when clicking elsewhere
+	 * @param {Event} event
+	 */
+	function handleClickOutside(event) {
+		if (!event.target.closest('.context-menu-container')) {
+			showContextMenu = null;
+		}
+	}
+
 	// Effect to scroll to bottom when messages change
 	$effect(() => {
 		if ($currentMessages.length > 0 && messagesContainer) {
@@ -252,7 +410,12 @@
 </svelte:head>
 
 {#if $user}
-	<div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
+	<div 
+		class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col" 
+		onclick={handleClickOutside}
+		onkeydown={handleClickOutside}
+		role="main"
+	>
 		<!-- Header -->
 		<div class="flex items-center gap-4 p-4 border-b border-base-300 bg-base-100">
 			<button 
@@ -329,22 +492,108 @@
 						</div>
 						
 						<!-- Message Bubble -->
-						<div class="max-w-xs lg:max-w-md">
-							<div 
-								class="px-4 py-2 rounded-2xl relative"
-								class:bg-primary={isCurrentUser}
-								class:opacity-70={message.sending}
-								class:text-primary-content={isCurrentUser}
-								class:bg-base-200={!isCurrentUser}
-								class:text-base-content={!isCurrentUser}
-							>
-								<p class="text-sm" class:opacity-70={message.sending}>{message.content}</p>
-								{#if message.sending}
-									<div class="absolute -bottom-1 -right-1">
-										<span class="loading loading-spinner loading-xs"></span>
+						<div class="max-w-xs lg:max-w-md relative">
+							{#if editingMessageId === message.id}
+								<!-- Edit Mode -->
+								<form onsubmit={saveEditMessage} class="space-y-2">
+									<textarea 
+										bind:value={editingContent}
+										class="textarea textarea-bordered textarea-sm w-full resize-none"
+										rows="2"
+										required
+									></textarea>
+									<div class="flex gap-2 justify-end">
+										<button 
+											type="button" 
+											class="btn btn-ghost btn-xs"
+											onclick={cancelEdit}
+										>
+											Cancel
+										</button>
+										<button 
+											type="submit" 
+											class="btn btn-primary btn-xs"
+											disabled={!editingContent.trim()}
+										>
+											Save
+										</button>
 									</div>
-								{/if}
-							</div>
+								</form>
+							{:else}
+								<!-- Normal Message Display -->
+								<div class="relative">
+									<div 
+										class="px-4 py-2 rounded-2xl relative cursor-pointer select-none context-menu-container"
+										class:bg-primary={isCurrentUser}
+										class:opacity-70={message.sending}
+										class:text-primary-content={isCurrentUser}
+										class:bg-base-200={!isCurrentUser}
+										class:text-base-content={!isCurrentUser}
+										oncontextmenu={(e) => !message.sending && handleContextMenu(e, message.id)}
+										ontouchstart={(e) => !message.sending && handleTouchStart(e, message.id)}
+										ontouchend={handleTouchEnd}
+										ontouchmove={handleTouchMove}
+										role="button"
+										tabindex="0"
+									>
+										<p class="text-sm" class:opacity-70={message.sending}>
+											{message.content}
+											{#if message.edited_at}
+												<span class="text-xs opacity-60 ml-2">(edited)</span>
+											{/if}
+											{#if message.forwarded_from}
+												<span class="text-xs opacity-60 ml-2">↻ forwarded</span>
+											{/if}
+										</p>
+										{#if message.sending}
+											<div class="absolute -bottom-1 -right-1">
+												<span class="loading loading-spinner loading-xs"></span>
+											</div>
+										{/if}
+									</div>
+									
+									<!-- Context Menu (shows for all messages) -->
+									{#if showContextMenu === message.id && !message.sending}
+										<div class="absolute top-0 right-0 z-20">
+											<div class="menu p-2 shadow-lg bg-base-100 rounded-box w-36 border border-base-300">
+												{#if isCurrentUser && canModifyMessage(message.created_at)}
+													<li>
+														<button 
+															onclick={() => startEditMessage(message)}
+															class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left"
+														>
+															<Edit size={14} />
+															Edit
+														</button>
+													</li>
+													<li>
+														<button 
+															onclick={() => handleDeleteMessage(message.id)}
+															class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left text-error"
+															class:loading={deletingMessageId === message.id}
+															disabled={deletingMessageId === message.id}
+														>
+															{#if deletingMessageId !== message.id}
+																<Trash2 size={14} />
+																Delete
+															{/if}
+														</button>
+													</li>
+												{/if}
+												<li>
+													<button 
+														onclick={() => startForwardMessage(message)}
+														class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left"
+													>
+														<Forward size={14} />
+														Forward
+													</button>
+												</li>
+											</div>
+										</div>
+									{/if}
+								</div>
+							{/if}
 							
 							{#if showAvatar || index === $currentMessages.length - 1}
 								<p class="text-xs text-base-content/60 mt-1" class:text-right={isCurrentUser}>
@@ -383,6 +632,15 @@
 			</form>
 		</div>
 	</div>
+
+	<!-- Forward Message Modal -->
+	{#if forwardMessage}
+		<ForwardMessageModal 
+			bind:show={showForwardModal}
+			messageId={forwardMessage.id}
+			messageContent={forwardMessage.content}
+		/>
+	{/if}
 {/if}
 
 <style>

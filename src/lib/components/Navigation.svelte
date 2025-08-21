@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import { user, showLogin, showSignup, theme, notifications, unreadCount, searchQuery, searchResults, searchLoading } from '../stores.js';
   import { signOut } from '../auth.js';
-  import { requestNotificationPermission } from '../notifications.js';
+  import { requestNotificationPermission, markNotificationAsRead } from '../notifications.js';
   import { searchUsers } from '../search.js';
   
   // Lucide Icons
@@ -114,6 +114,29 @@
     showSearchResults = false;
   }
 
+  /**
+   * Handle notification click
+   * @param {Object} notification
+   */
+  async function handleNotificationClick(notification) {
+    // Mark as read
+    if (!notification.read) {
+      await markNotificationAsRead(notification.id);
+    }
+    
+    // Close the notifications dropdown
+    showNotifications = false;
+    
+    // Navigate based on notification type
+    if (notification.type === 'follow' && notification.related_user) {
+      // For follows, go to the user's profile
+      goto(`/profile/${notification.related_user.username}`);
+    } else if ((notification.type === 'like' || notification.type === 'comment') && notification.related_post_id) {
+      // For likes and comments, go to the specific post
+      goto(`/post/${notification.related_post_id}`);
+    }
+  }
+
   
   onMount(() => {
     // Load saved theme
@@ -138,7 +161,7 @@
   });
 </script>
 
-<nav class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50">
+<nav class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 overflow-visible">
   <div class="navbar-start">
     <a href="/" class="btn btn-ghost text-xl font-bold text-primary">
       Likey
@@ -205,7 +228,7 @@
   <div class="navbar-end space-x-2">
     {#if $user}
       <!-- Notifications -->
-      <div class="dropdown dropdown-end">
+      <div class="relative">
         <button 
           class="btn btn-ghost btn-circle"
           class:btn-active={showNotifications}
@@ -221,7 +244,7 @@
         </button>
         
         {#if showNotifications}
-          <div class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80">
+          <div class="absolute top-full right-0 mt-2 z-[100] menu p-2 shadow-lg bg-base-100 rounded-box w-72 sm:w-80 border border-base-300">
             <div class="menu-title">
               <span>Notifications</span>
             </div>
@@ -232,12 +255,23 @@
               </div>
             {:else}
               {#each $notifications.slice(0, 5) as notification}
-                <div class="p-2 hover:bg-base-200 rounded-lg" class:bg-base-200={!notification.read}>
-                  <p class="text-sm">{notification.message}</p>
-                  <p class="text-xs text-base-content/60 mt-1">
-                    {new Date(notification.created_at).toLocaleDateString()}
-                  </p>
-                </div>
+                <button 
+                  class="w-full p-2 hover:bg-base-200 rounded-lg text-left transition-colors"
+                  class:bg-base-200={!notification.read}
+                  onclick={() => handleNotificationClick(notification)}
+                >
+                  <div class="flex items-start gap-2">
+                    {#if !notification.read}
+                      <div class="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0"></div>
+                    {/if}
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm">{notification.message}</p>
+                      <p class="text-xs text-base-content/60 mt-1">
+                        {new Date(notification.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               {/each}
               
               <div class="divider"></div>
@@ -248,7 +282,7 @@
       </div>
       
       <!-- User Menu -->
-      <div class="dropdown dropdown-end">
+      <div class="relative">
         <button 
           class="btn btn-ghost btn-circle avatar"
           class:btn-active={showUserMenu}
@@ -266,7 +300,7 @@
         </button>
         
         {#if showUserMenu}
-          <div class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <div class="absolute top-full right-0 mt-2 z-[100] menu p-2 shadow-lg bg-base-100 rounded-box w-52 sm:w-52 border border-base-300">
             <div class="menu-title">
               <span>{$user.display_name}</span>
               <span class="text-xs text-base-content/60">@{$user.username}</span>

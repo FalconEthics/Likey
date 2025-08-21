@@ -330,16 +330,36 @@
 		<!-- Share Button -->
 		<button 
 			class="btn btn-ghost btn-sm gap-2"
-			onclick={() => {
+			onclick={async () => {
+				const postUrl = `${window.location.origin}/post/${postData.id}`;
+				
 				if (navigator.share) {
-					navigator.share({
-						title: 'Check out this post on Likey',
-						url: window.location.origin + '/post/' + postData.id
-					});
+					try {
+						await navigator.share({
+							title: `${postData.user.display_name}'s post on Likey`,
+							text: postData.caption || 'Check out this post on Likey',
+							url: postUrl
+						});
+					} catch (error) {
+						// User cancelled or error occurred, fallback to clipboard
+						if (error.name !== 'AbortError') {
+							await navigator.clipboard.writeText(postUrl);
+							// Could add toast notification here: "Link copied to clipboard!"
+						}
+					}
 				} else {
-					navigator.clipboard.writeText(window.location.origin + '/post/' + postData.id);
+					// Fallback to clipboard
+					try {
+						await navigator.clipboard.writeText(postUrl);
+						// Could add toast notification here: "Link copied to clipboard!"
+					} catch (error) {
+						console.error('Failed to copy to clipboard:', error);
+						// Fallback: show the URL in a prompt
+						prompt('Copy this link to share:', postUrl);
+					}
 				}
 			}}
+			title="Share this post"
 		>
 			<Share2 size={20} />
 		</button>

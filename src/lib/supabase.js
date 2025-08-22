@@ -15,8 +15,8 @@ export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_K
  * @returns {Promise<{data: any, error: any}>}
  */
 export async function uploadImage(file, bucket = 'images', path) {
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file);
-  return { data, error };
+	const { data, error } = await supabase.storage.from(bucket).upload(path, file);
+	return { data, error };
 }
 
 /**
@@ -26,8 +26,8 @@ export async function uploadImage(file, bucket = 'images', path) {
  * @returns {string} Public URL
  */
 export function getImageUrl(bucket = 'images', path) {
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+	const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+	return data.publicUrl;
 }
 
 /**
@@ -38,21 +38,21 @@ export function getImageUrl(bucket = 'images', path) {
  * @returns {Promise<File>} Compressed image file
  */
 export async function compressImage(file, maxWidth = 1080, quality = 0.8) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    
-    img.onload = () => {
-      const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      canvas.toBlob(resolve, 'image/jpeg', quality);
-    };
-    
-    img.src = URL.createObjectURL(file);
-  });
+	return new Promise((resolve) => {
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		const img = new Image();
+
+		img.onload = () => {
+			const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+			canvas.width = img.width * ratio;
+			canvas.height = img.height * ratio;
+
+			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+			canvas.toBlob(resolve, 'image/jpeg', quality);
+		};
+
+		img.src = URL.createObjectURL(file);
+	});
 }

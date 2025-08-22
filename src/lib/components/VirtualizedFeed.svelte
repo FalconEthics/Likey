@@ -1,6 +1,6 @@
 <script>
-	import { onMount } from 'svelte';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
+	import { onMount } from 'svelte';
 	import {
 		posts,
 		feedLoading,
@@ -33,9 +33,8 @@
 	let searchTimeout;
 	let explorePosts = $state([]);
 	let parentRef = $state();
-	let useVirtualization = $state(false); // Enable when we have many posts
 
-	// Estimated post height for virtualization
+	// Estimated post height - adjust based on your typical post size
 	const estimateSize = () => 450;
 
 	/**
@@ -83,11 +82,6 @@
 
 			hasMore = data.length === postsPerPage;
 			page += 1;
-
-			// Enable virtualization when we have more than 50 posts
-			if ($posts.length > 50) {
-				useVirtualization = true;
-			}
 		} catch (error) {
 			console.error('Error loading posts:', error);
 		} finally {
@@ -96,16 +90,11 @@
 	}
 
 	/**
-	 * Handle infinite scroll
+	 * Load more posts when reaching the end
 	 */
-	function handleScroll() {
+	function loadMorePosts() {
 		if (hasMore && !$feedLoading) {
-			const scrollPosition = window.innerHeight + window.scrollY;
-			const documentHeight = document.documentElement.offsetHeight;
-
-			if (scrollPosition >= documentHeight - 1000) {
-				loadPosts(true);
-			}
+			loadPosts(true);
 		}
 	}
 
@@ -179,30 +168,31 @@
 		searchResults.set([]);
 	}
 
-	// Create virtualizer when needed
+	// Create virtualizer instance for posts
 	let virtualizer = $state();
 
 	$effect(() => {
-		if (useVirtualization && parentRef && $posts.length > 50) {
+		if (parentRef && $posts.length > 0) {
 			virtualizer = createVirtualizer({
 				count: $posts.length,
-				getScrollElement: () => parentRef,
+				getScrollElement: () => window,
 				estimateSize,
-				overscan: 10
+				overscan: 10 // Render 10 items outside the visible area
 			});
 		} else {
 			virtualizer = null;
 		}
 	});
 
-	// Check if we need to load more when using virtualization
+	// Check if we need to load more when reaching near the end
 	$effect(() => {
 		if (virtualizer) {
 			const items = virtualizer.getVirtualItems();
 			if (items.length > 0) {
 				const lastItem = items[items.length - 1];
+				// Load more when we're within 8 items of the end
 				if (lastItem.index >= $posts.length - 8 && hasMore && !$feedLoading) {
-					loadPosts(true);
+					loadMorePosts();
 				}
 			}
 		}
@@ -212,9 +202,7 @@
 		loadPosts();
 		loadSidebarData();
 
-		window.addEventListener('scroll', handleScroll);
 		return () => {
-			window.removeEventListener('scroll', handleScroll);
 			if (searchTimeout) {
 				clearTimeout(searchTimeout);
 			}
@@ -269,7 +257,7 @@
 		</button>
 	</div>
 
-	<!-- Posts -->
+	<!-- Posts with Virtualization -->
 	{#if $posts.length === 0 && !$feedLoading}
 		<div class="modern-empty-state">
 			<div class="empty-state-content">
@@ -290,15 +278,10 @@
 			</div>
 		</div>
 	{:else}
-		{#if useVirtualization && virtualizer}
-			<!-- Virtualized posts for performance -->
-			<div
-				bind:this={parentRef}
-				class="virtual-posts-container"
-				style="height: 600px; overflow-y: auto;"
-			>
+		<div bind:this={parentRef} class="virtual-container">
+			{#if virtualizer}
 				<div style="height: {virtualizer.getTotalSize()}px; width: 100%; position: relative;">
-					{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.index)}
+					{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.key)}
 						<div
 							style="position: absolute; top: 0; left: 0; width: 100%; height: {virtualItem.size}px; transform: translateY({virtualItem.start}px);"
 						>
@@ -308,27 +291,29 @@
 						</div>
 					{/each}
 				</div>
-			</div>
-		{:else}
-			<!-- Regular list for smaller feeds -->
-			<div class="space-y-6">
-				{#each $posts as post (post.id)}
-					<Post {post} />
-				{/each}
-			</div>
-		{/if}
+			{:else}
+				<!-- Fallback to regular list while virtualizer initializes -->
+				<div class="space-y-6">
+					{#each $posts as post (post.id)}
+						<Post {post} />
+					{/each}
+				</div>
+			{/if}
 
-		<!-- Loading indicator -->
-		{#if $feedLoading}
-			<div class="flex justify-center py-8">
-				<span class="loading loading-md loading-spinner"></span>
-			</div>
-		{/if}
+			<!-- Loading indicator -->
+			{#if $feedLoading}
+				<div class="flex justify-center py-8">
+					<span class="loading loading-md loading-spinner"></span>
+				</div>
+			{/if}
 
-		<!-- End of feed indicator -->
-		{#if !hasMore && $posts.length > 0}
-			<div class="py-8 text-center text-base-content/60">You've reached the end of your feed!</div>
-		{/if}
+			<!-- End of feed indicator -->
+			{#if !hasMore && $posts.length > 0}
+				<div class="py-8 text-center text-base-content/60">
+					You've reached the end of your feed!
+				</div>
+			{/if}
+		</div>
 	{/if}
 </div>
 
@@ -473,7 +458,7 @@
 			</button>
 		</div>
 
-		<!-- Posts -->
+		<!-- Posts with Virtualization -->
 		{#if $posts.length === 0 && !$feedLoading}
 			<div class="modern-empty-state">
 				<div class="empty-state-content">
@@ -494,11 +479,10 @@
 				</div>
 			</div>
 		{:else}
-			{#if useVirtualization && virtualizer}
-				<!-- Virtualized posts for performance -->
-				<div class="virtual-posts-container" style="height: 700px; overflow-y: auto;">
+			<div class="virtual-container">
+				{#if virtualizer}
 					<div style="height: {virtualizer.getTotalSize()}px; width: 100%; position: relative;">
-						{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.index)}
+						{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.key)}
 							<div
 								style="position: absolute; top: 0; left: 0; width: 100%; height: {virtualItem.size}px; transform: translateY({virtualItem.start}px);"
 							>
@@ -508,29 +492,29 @@
 							</div>
 						{/each}
 					</div>
-				</div>
-			{:else}
-				<!-- Regular list for smaller feeds -->
-				<div class="space-y-6">
-					{#each $posts as post (post.id)}
-						<Post {post} />
-					{/each}
-				</div>
-			{/if}
+				{:else}
+					<!-- Fallback to regular list while virtualizer initializes -->
+					<div class="space-y-6">
+						{#each $posts as post (post.id)}
+							<Post {post} />
+						{/each}
+					</div>
+				{/if}
 
-			<!-- Loading indicator -->
-			{#if $feedLoading}
-				<div class="flex justify-center py-8">
-					<span class="loading loading-md loading-spinner"></span>
-				</div>
-			{/if}
+				<!-- Loading indicator -->
+				{#if $feedLoading}
+					<div class="flex justify-center py-8">
+						<span class="loading loading-md loading-spinner"></span>
+					</div>
+				{/if}
 
-			<!-- End of feed indicator -->
-			{#if !hasMore && $posts.length > 0}
-				<div class="py-8 text-center text-base-content/60">
-					You've reached the end of your feed!
-				</div>
-			{/if}
+				<!-- End of feed indicator -->
+				{#if !hasMore && $posts.length > 0}
+					<div class="py-8 text-center text-base-content/60">
+						You've reached the end of your feed!
+					</div>
+				{/if}
+			</div>
 		{/if}
 	</div>
 
@@ -654,28 +638,10 @@
 </div>
 
 <style>
-	/* Virtual container styling */
-	.virtual-posts-container {
-		border-radius: 12px;
-		background: transparent;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-track {
-		background: hsl(var(--base-200));
-		border-radius: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-thumb {
-		background: hsl(var(--base-300));
-		border-radius: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-thumb:hover {
-		background: hsl(var(--base-content) / 0.3);
+	/* Virtual container styles */
+	.virtual-container {
+		position: relative;
+		width: 100%;
 	}
 
 	/* Modern Create Post Button */
@@ -786,11 +752,6 @@
 			opacity: 0.6;
 			filter: blur(12px);
 		}
-	}
-
-	/* Modern Posts Container */
-	:global(.space-y-6) {
-		position: relative;
 	}
 
 	/* Enhanced loading states */

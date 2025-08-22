@@ -38,7 +38,8 @@ export async function getOrCreateConversation(otherUserId) {
 		// First try to find existing conversation
 		const { data: existingConversation, error: findError } = await supabase
 			.from('conversations')
-			.select(`
+			.select(
+				`
 				*,
 				user1:user1_id (
 					id,
@@ -52,22 +53,26 @@ export async function getOrCreateConversation(otherUserId) {
 					display_name,
 					profile_pic_url
 				)
-			`)
-			.or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${currentUser.id})`)
+			`
+			)
+			.or(
+				`and(user1_id.eq.${currentUser.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${currentUser.id})`
+			)
 			.single();
 
 		if (existingConversation) {
 			// Determine which user is the "other" user
-			const otherUser = existingConversation.user1.id === currentUser.id 
-				? existingConversation.user2 
-				: existingConversation.user1;
-			
-			return { 
-				data: { 
-					...existingConversation, 
-					other_user: otherUser 
-				}, 
-				error: null 
+			const otherUser =
+				existingConversation.user1.id === currentUser.id
+					? existingConversation.user2
+					: existingConversation.user1;
+
+			return {
+				data: {
+					...existingConversation,
+					other_user: otherUser
+				},
+				error: null
 			};
 		}
 
@@ -78,7 +83,8 @@ export async function getOrCreateConversation(otherUserId) {
 				user1_id: currentUser.id,
 				user2_id: otherUserId
 			})
-			.select(`
+			.select(
+				`
 				*,
 				user1:user1_id (
 					id,
@@ -92,19 +98,20 @@ export async function getOrCreateConversation(otherUserId) {
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.single();
 
 		if (createError) throw createError;
 
 		const otherUser = newConversation.user2;
-		
-		return { 
-			data: { 
-				...newConversation, 
-				other_user: otherUser 
-			}, 
-			error: null 
+
+		return {
+			data: {
+				...newConversation,
+				other_user: otherUser
+			},
+			error: null
 		};
 	} catch (error) {
 		console.error('Error getting/creating conversation:', error);
@@ -125,7 +132,8 @@ export async function getUserConversations() {
 	try {
 		const { data, error } = await supabase
 			.from('conversations')
-			.select(`
+			.select(
+				`
 				*,
 				user1:user1_id (
 					id,
@@ -146,21 +154,22 @@ export async function getUserConversations() {
 					sender_id,
 					read
 				)
-			`)
+			`
+			)
 			.or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
 			.order('last_message_at', { ascending: false });
 
 		if (error) throw error;
 
 		// Process conversations to add other_user and last_message
-		const processedConversations = data.map(conversation => {
-			const otherUser = conversation.user1.id === currentUser.id 
-				? conversation.user2 
-				: conversation.user1;
-			
-			const lastMessage = conversation.messages.length > 0 
-				? conversation.messages[conversation.messages.length - 1]
-				: null;
+		const processedConversations = data.map((conversation) => {
+			const otherUser =
+				conversation.user1.id === currentUser.id ? conversation.user2 : conversation.user1;
+
+			const lastMessage =
+				conversation.messages.length > 0
+					? conversation.messages[conversation.messages.length - 1]
+					: null;
 
 			return {
 				...conversation,
@@ -211,7 +220,8 @@ export async function getConversationMessages(conversationId, limit = 50, offset
 		// Now fetch messages
 		const { data, error } = await supabase
 			.from('messages')
-			.select(`
+			.select(
+				`
 				*,
 				sender:sender_id (
 					id,
@@ -219,7 +229,8 @@ export async function getConversationMessages(conversationId, limit = 50, offset
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.eq('conversation_id', conversationId)
 			.order('created_at', { ascending: true })
 			.range(offset, offset + limit - 1);
@@ -271,7 +282,8 @@ export async function sendMessage(conversationId, content) {
 				sender_id: currentUser.id,
 				content: content.trim()
 			})
-			.select(`
+			.select(
+				`
 				*,
 				sender:sender_id (
 					id,
@@ -279,7 +291,8 @@ export async function sendMessage(conversationId, content) {
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.single();
 
 		if (error) throw error;
@@ -351,7 +364,7 @@ export async function markMessagesAsRead(conversationId) {
  */
 export function subscribeToMessages(conversationId, onMessage) {
 	console.log('Setting up message subscription for conversation:', conversationId);
-	
+
 	const channel = supabase
 		.channel(`messages:${conversationId}`)
 		.on(
@@ -364,17 +377,18 @@ export function subscribeToMessages(conversationId, onMessage) {
 			},
 			async (payload) => {
 				console.log('Real-time message received:', payload);
-				
+
 				if (!payload?.new?.id) {
 					console.warn('Invalid payload structure:', payload);
 					return;
 				}
-				
+
 				try {
 					// Fetch the full message with sender data
 					const { data, error } = await supabase
 						.from('messages')
-						.select(`
+						.select(
+							`
 							*,
 							sender:sender_id (
 								id,
@@ -382,7 +396,8 @@ export function subscribeToMessages(conversationId, onMessage) {
 								display_name,
 								profile_pic_url
 							)
-						`)
+						`
+						)
 						.eq('id', payload.new.id)
 						.single();
 
@@ -390,7 +405,7 @@ export function subscribeToMessages(conversationId, onMessage) {
 						console.error('Error fetching message for real-time update:', error);
 						return;
 					}
-					
+
 					if (data) {
 						onMessage(data);
 					}
@@ -402,7 +417,7 @@ export function subscribeToMessages(conversationId, onMessage) {
 		.subscribe((status) => {
 			console.log('Message subscription status:', status);
 		});
-	
+
 	return channel;
 }
 
@@ -431,7 +446,7 @@ export async function getUnreadMessageCount() {
 		}
 
 		// Get conversation IDs as array
-		const conversationIds = conversations.map(conv => conv.id);
+		const conversationIds = conversations.map((conv) => conv.id);
 
 		// Now get unread message count
 		const { data, error } = await supabase
@@ -496,7 +511,10 @@ export async function deleteMessage(messageId) {
 			.eq('id', message.conversation_id)
 			.single();
 
-		if (convError || (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)) {
+		if (
+			convError ||
+			(conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)
+		) {
 			return { success: false, error: 'Access denied' };
 		}
 
@@ -563,20 +581,24 @@ export async function editMessage(messageId, newContent) {
 			.eq('id', message.conversation_id)
 			.single();
 
-		if (convError || (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)) {
+		if (
+			convError ||
+			(conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)
+		) {
 			return { data: null, error: 'Access denied' };
 		}
 
 		// Update the message
 		const { data, error } = await supabase
 			.from('messages')
-			.update({ 
+			.update({
 				content: newContent.trim(),
 				edited_at: new Date().toISOString()
 			})
 			.eq('id', messageId)
 			.eq('sender_id', currentUser.id) // Extra security check
-			.select(`
+			.select(
+				`
 				*,
 				sender:sender_id (
 					id,
@@ -584,7 +606,8 @@ export async function editMessage(messageId, newContent) {
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.single();
 
 		if (error) throw error;
@@ -628,7 +651,10 @@ export async function forwardMessage(messageId, targetConversationId) {
 			.eq('id', message.conversation_id)
 			.single();
 
-		if (sourceError || (sourceConv.user1_id !== currentUser.id && sourceConv.user2_id !== currentUser.id)) {
+		if (
+			sourceError ||
+			(sourceConv.user1_id !== currentUser.id && sourceConv.user2_id !== currentUser.id)
+		) {
 			return { data: null, error: 'Access denied to source conversation' };
 		}
 
@@ -639,7 +665,10 @@ export async function forwardMessage(messageId, targetConversationId) {
 			.eq('id', targetConversationId)
 			.single();
 
-		if (targetError || (targetConv.user1_id !== currentUser.id && targetConv.user2_id !== currentUser.id)) {
+		if (
+			targetError ||
+			(targetConv.user1_id !== currentUser.id && targetConv.user2_id !== currentUser.id)
+		) {
 			return { data: null, error: 'Access denied to target conversation' };
 		}
 
@@ -652,7 +681,8 @@ export async function forwardMessage(messageId, targetConversationId) {
 				content: message.content,
 				forwarded_from: messageId
 			})
-			.select(`
+			.select(
+				`
 				*,
 				sender:sender_id (
 					id,
@@ -660,7 +690,8 @@ export async function forwardMessage(messageId, targetConversationId) {
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.single();
 
 		if (error) throw error;

@@ -4,17 +4,17 @@
 	import { supabase } from '../supabase.js';
 	import { formatRelativeTime } from '../utils.js';
 	import { createNotification } from '../notifications.js';
-	
+
 	// Lucide Icons
 	import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2 } from 'lucide-svelte';
-	
+
 	/**
 	 * @type {import('../stores.js').Post}
 	 */
 	const { post } = $props();
-	
+
 	const dispatch = createEventDispatcher();
-	
+
 	// Local reactive state for post data to avoid prop mutation
 	let postData = $state({ ...post });
 	let isLiking = $state(false);
@@ -24,20 +24,20 @@
 	let commentsLoading = $state(false);
 	let showOptions = $state(false);
 	let deleting = $state(false);
-	
+
 	// Update local state when prop changes
 	$effect(() => {
 		postData = { ...post };
 	});
-	
+
 	/**
 	 * Toggle like on post
 	 */
 	async function toggleLike() {
 		if (!$user || isLiking) return;
-		
+
 		isLiking = true;
-		
+
 		try {
 			if (postData.liked_by_user) {
 				// Unlike
@@ -46,25 +46,23 @@
 					.delete()
 					.eq('post_id', postData.id)
 					.eq('user_id', $user.id);
-				
+
 				if (error) throw error;
-				
+
 				postData.liked_by_user = false;
 				postData.like_count -= 1;
 			} else {
 				// Like
-				const { error } = await supabase
-					.from('likes')
-					.insert({
-						post_id: postData.id,
-						user_id: $user.id
-					});
-				
+				const { error } = await supabase.from('likes').insert({
+					post_id: postData.id,
+					user_id: $user.id
+				});
+
 				if (error) throw error;
-				
+
 				postData.liked_by_user = true;
 				postData.like_count += 1;
-				
+
 				// Create notification for the post owner
 				await createNotification(
 					postData.user_id,
@@ -80,7 +78,7 @@
 			isLiking = false;
 		}
 	}
-	
+
 	/**
 	 * Load comments for the post
 	 */
@@ -88,24 +86,26 @@
 		if (!showComments) {
 			showComments = true;
 			commentsLoading = true;
-			
+
 			try {
 				const { data, error } = await supabase
 					.from('comments')
-					.select(`
+					.select(
+						`
 						*,
 						profiles:user_id (
 							username,
 							display_name,
 							profile_pic_url
 						)
-					`)
+					`
+					)
 					.eq('post_id', postData.id)
 					.order('created_at', { ascending: true });
-				
+
 				if (error) throw error;
-				
-				comments = data.map(comment => ({
+
+				comments = data.map((comment) => ({
 					...comment,
 					user: comment.profiles
 				}));
@@ -118,16 +118,16 @@
 			showComments = false;
 		}
 	}
-	
+
 	/**
 	 * Add a new comment
 	 * @param {Event} event
 	 */
 	async function addComment(event) {
 		event.preventDefault();
-		
+
 		if (!$user || !newComment.trim()) return;
-		
+
 		try {
 			const { data, error } = await supabase
 				.from('comments')
@@ -136,27 +136,29 @@
 					user_id: $user.id,
 					content: newComment.trim()
 				})
-				.select(`
+				.select(
+					`
 					*,
 					profiles:user_id (
 						username,
 						display_name,
 						profile_pic_url
 					)
-				`)
+				`
+				)
 				.single();
-			
+
 			if (error) throw error;
-			
+
 			const commentWithUser = {
 				...data,
 				user: data.profiles
 			};
-			
+
 			comments = [...comments, commentWithUser];
 			postData.comment_count += 1;
 			newComment = '';
-			
+
 			// Create notification for the post owner
 			await createNotification(
 				postData.user_id,
@@ -169,18 +171,20 @@
 			console.error('Error adding comment:', error);
 		}
 	}
-	
+
 	/**
 	 * Delete post
 	 */
 	async function deletePost() {
 		if (!$user || postData.user_id !== $user.id || deleting) return;
-		
-		const confirmed = confirm('Are you sure you want to delete this post? This action cannot be undone.');
+
+		const confirmed = confirm(
+			'Are you sure you want to delete this post? This action cannot be undone.'
+		);
 		if (!confirmed) return;
-		
+
 		deleting = true;
-		
+
 		try {
 			// Delete post from database (this will cascade delete likes, comments, etc.)
 			const { error } = await supabase
@@ -188,12 +192,11 @@
 				.delete()
 				.eq('id', postData.id)
 				.eq('user_id', $user.id); // Extra security check
-			
+
 			if (error) throw error;
-			
+
 			// Dispatch event to parent components to remove from their local state
 			dispatch('postDeleted', { postId: postData.id });
-			
 		} catch (error) {
 			console.error('Error deleting post:', error);
 			alert('Failed to delete postData. Please try again.');
@@ -204,7 +207,7 @@
 	}
 </script>
 
-<article class="card bg-base-100 shadow-lg border border-base-300">
+<article class="card border border-base-300 bg-base-100 shadow-lg">
 	<!-- Post Header -->
 	<div class="flex items-center gap-3 p-4 pb-2">
 		<a href="/profile/{postData.user.username}" class="avatar">
@@ -212,38 +215,40 @@
 				{#if postData.user.profile_pic_url}
 					<img src={postData.user.profile_pic_url} alt={postData.user.display_name} />
 				{:else}
-					<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full">
+					<div
+						class="flex h-full w-full items-center justify-center bg-primary text-primary-content"
+					>
 						{postData.user.display_name?.charAt(0).toUpperCase() || 'U'}
 					</div>
 				{/if}
 			</div>
 		</a>
-		
+
 		<div class="flex-1">
 			<a href="/profile/{postData.user.username}" class="font-semibold hover:underline">
 				{postData.user.display_name}
 			</a>
 			<p class="text-sm text-base-content/60">@{postData.user.username}</p>
 		</div>
-		
+
 		<div class="flex items-center gap-2">
 			<time class="text-sm text-base-content/60" datetime={postData.created_at}>
 				{formatRelativeTime(postData.created_at)}
 			</time>
-			
+
 			<!-- Options Menu (only for post owner) -->
 			{#if $user && postData.user_id === $user.id}
 				<div class="dropdown dropdown-end">
-					<button class="btn btn-ghost btn-sm btn-circle" class:loading={deleting}>
+					<button class="btn btn-circle btn-ghost btn-sm" class:loading={deleting}>
 						{#if !deleting}
 							<MoreHorizontal size={16} />
 						{/if}
 					</button>
-					<ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
+					<ul class="dropdown-content menu w-32 rounded-box bg-base-100 p-2 shadow">
 						<li>
-							<button 
-								onclick={deletePost} 
-								class="text-error flex items-center gap-2"
+							<button
+								onclick={deletePost}
+								class="flex items-center gap-2 text-error"
 								disabled={deleting}
 							>
 								<Trash2 size={16} />
@@ -255,35 +260,35 @@
 			{/if}
 		</div>
 	</div>
-	
+
 	<!-- Post Images -->
 	{#if postData.image_urls && postData.image_urls.length > 0}
 		<div class="px-4">
 			{#if postData.image_urls.length === 1}
-				<img 
-					src={postData.image_urls[0]} 
-					alt="Post" 
-					class="w-full rounded-lg object-cover max-h-96"
+				<img
+					src={postData.image_urls[0]}
+					alt="Post"
+					class="max-h-96 w-full rounded-lg object-cover"
 					loading="lazy"
 				/>
 			{:else}
 				<div class="carousel w-full rounded-lg">
 					{#each postData.image_urls as imageUrl, index}
 						<div class="carousel-item w-full" id={`post-${postData.id}-image-${index}`}>
-							<img 
-								src={imageUrl} 
-								alt="Post {index + 1}" 
-								class="w-full object-cover max-h-96"
+							<img
+								src={imageUrl}
+								alt="Post {index + 1}"
+								class="max-h-96 w-full object-cover"
 								loading="lazy"
 							/>
 						</div>
 					{/each}
 				</div>
-				
+
 				{#if postData.image_urls.length > 1}
-					<div class="flex justify-center py-2 gap-1">
+					<div class="flex justify-center gap-1 py-2">
 						{#each postData.image_urls as _, index}
-							<a href={`#post-${postData.id}-image-${index}`} class="btn btn-xs btn-circle">
+							<a href={`#post-${postData.id}-image-${index}`} class="btn btn-circle btn-xs">
 								{index + 1}
 							</a>
 						{/each}
@@ -292,47 +297,43 @@
 			{/if}
 		</div>
 	{/if}
-	
+
 	<!-- Post Content -->
 	{#if postData.caption}
 		<div class="px-4 py-2">
 			<p class="text-sm">{postData.caption}</p>
 		</div>
 	{/if}
-	
+
 	<!-- Post Actions -->
-	<div class="flex items-center gap-4 px-4 py-3 border-t border-base-300">
+	<div class="flex items-center gap-4 border-t border-base-300 px-4 py-3">
 		<!-- Like Button -->
-		<button 
-			class="btn btn-ghost btn-sm gap-2"
+		<button
+			class="btn gap-2 btn-ghost btn-sm"
 			class:text-error={postData.liked_by_user}
 			onclick={toggleLike}
 			disabled={isLiking || !$user}
 		>
-			<Heart 
-				size={20} 
+			<Heart
+				size={20}
 				fill={postData.liked_by_user ? 'currentColor' : 'none'}
 				class={postData.liked_by_user ? 'text-red-500' : ''}
 			/>
 			{postData.like_count}
 		</button>
-		
+
 		<!-- Comment Button -->
-		<button 
-			class="btn btn-ghost btn-sm gap-2"
-			onclick={loadComments}
-			disabled={!$user}
-		>
+		<button class="btn gap-2 btn-ghost btn-sm" onclick={loadComments} disabled={!$user}>
 			<MessageCircle size={20} />
 			{postData.comment_count}
 		</button>
-		
+
 		<!-- Share Button -->
-		<button 
-			class="btn btn-ghost btn-sm gap-2"
+		<button
+			class="btn gap-2 btn-ghost btn-sm"
 			onclick={async () => {
 				const postUrl = `${window.location.origin}/post/${postData.id}`;
-				
+
 				if (navigator.share) {
 					try {
 						await navigator.share({
@@ -364,72 +365,91 @@
 			<Share2 size={20} />
 		</button>
 	</div>
-	
+
 	<!-- Comments Section -->
 	{#if showComments}
 		<div class="border-t border-base-300">
 			{#if commentsLoading}
 				<div class="flex justify-center py-4">
-					<span class="loading loading-spinner loading-sm"></span>
+					<span class="loading loading-sm loading-spinner"></span>
 				</div>
 			{:else}
 				<!-- Existing Comments -->
 				{#if comments.length > 0}
 					<div class="max-h-64 overflow-y-auto">
 						{#each comments as comment}
-							<div class="flex gap-3 p-4 border-b border-base-300 last:border-b-0">
+							<div class="flex gap-3 border-b border-base-300 p-4 last:border-b-0">
 								<div class="avatar">
-									<div class="w-8 h-8 rounded-full">
+									<div class="h-8 w-8 rounded-full">
 										{#if comment.user.profile_pic_url}
-											<img src={comment.user.profile_pic_url} alt={comment.user.display_name} class="rounded-full w-full h-full object-cover" />
+											<img
+												src={comment.user.profile_pic_url}
+												alt={comment.user.display_name}
+												class="h-full w-full rounded-full object-cover"
+											/>
 										{:else}
-											<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs rounded-full">
+											<div
+												class="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs text-primary-content"
+											>
 												{comment.user.display_name?.charAt(0).toUpperCase() || 'U'}
 											</div>
 										{/if}
 									</div>
 								</div>
-								
+
 								<div class="flex-1">
 									<div class="flex items-center gap-2">
-										<a href="/profile/{comment.user.username}" class="font-semibold text-sm hover:underline">
+										<a
+											href="/profile/{comment.user.username}"
+											class="text-sm font-semibold hover:underline"
+										>
 											{comment.user.display_name}
 										</a>
 										<time class="text-xs text-base-content/60">
 											{formatRelativeTime(comment.created_at)}
 										</time>
 									</div>
-									<p class="text-sm mt-1">{comment.content}</p>
+									<p class="mt-1 text-sm">{comment.content}</p>
 								</div>
 							</div>
 						{/each}
 					</div>
 				{/if}
-				
+
 				<!-- Add Comment Form -->
 				{#if $user}
 					<form onsubmit={addComment} class="flex gap-3 p-4">
 						<div class="avatar">
-							<div class="w-8 h-8 rounded-full">
+							<div class="h-8 w-8 rounded-full">
 								{#if $user.profile_pic_url}
-									<img src={$user.profile_pic_url} alt={$user.display_name} class="rounded-full w-full h-full object-cover" />
+									<img
+										src={$user.profile_pic_url}
+										alt={$user.display_name}
+										class="h-full w-full rounded-full object-cover"
+									/>
 								{:else}
-									<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs rounded-full">
+									<div
+										class="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs text-primary-content"
+									>
 										{$user.display_name?.charAt(0).toUpperCase() || 'U'}
 									</div>
 								{/if}
 							</div>
 						</div>
-						
-						<div class="flex-1 flex gap-2">
-							<input 
-								type="text" 
-								placeholder="Add a comment..." 
-								class="input input-sm input-bordered flex-1"
+
+						<div class="flex flex-1 gap-2">
+							<input
+								type="text"
+								placeholder="Add a comment..."
+								class="input-bordered input input-sm flex-1"
 								bind:value={newComment}
 								required
 							/>
-							<button type="submit" class="btn btn-primary btn-sm disabled:opacity-50 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed" disabled={!newComment.trim()}>
+							<button
+								type="submit"
+								class="btn btn-sm btn-primary disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-600 disabled:opacity-50"
+								disabled={!newComment.trim()}
+							>
 								Post
 							</button>
 						</div>

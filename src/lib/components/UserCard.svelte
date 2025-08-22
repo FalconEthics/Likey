@@ -4,7 +4,7 @@
 	import { createNotification } from '../notifications.js';
 	import { getOrCreateConversation } from '../messages.js';
 	import { goto } from '$app/navigation';
-	
+
 	// Lucide Icons
 	import { MessageCircle } from 'lucide-svelte';
 
@@ -21,9 +21,9 @@
 	 */
 	async function toggleFollow() {
 		if (!$user || followLoading) return;
-		
+
 		followLoading = true;
-		
+
 		try {
 			if (isFollowing) {
 				// Unfollow
@@ -32,25 +32,23 @@
 					.delete()
 					.eq('follower_id', $user.id)
 					.eq('following_id', profileUser.id);
-				
+
 				if (error) throw error;
-				
+
 				isFollowing = false;
 				profileUser.followers_count = Math.max(0, profileUser.followers_count - 1);
 			} else {
 				// Follow
-				const { error } = await supabase
-					.from('follows')
-					.insert({
-						follower_id: $user.id,
-						following_id: profileUser.id
-					});
-				
+				const { error } = await supabase.from('follows').insert({
+					follower_id: $user.id,
+					following_id: profileUser.id
+				});
+
 				if (error) throw error;
-				
+
 				isFollowing = true;
 				profileUser.followers_count += 1;
-				
+
 				// Create notification
 				await createNotification(
 					profileUser.id,
@@ -71,9 +69,9 @@
 	 */
 	async function startConversation() {
 		if (!$user) return;
-		
+
 		const { data, error } = await getOrCreateConversation(profileUser.id);
-		
+
 		if (!error && data) {
 			goto(`/messages/${data.id}`);
 		}
@@ -98,15 +96,17 @@
 	}
 </script>
 
-<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow h-full">
-	<div class="card-body p-4 text-center flex flex-col h-full">
+<div class="card h-full bg-base-100 shadow-lg transition-shadow hover:shadow-xl">
+	<div class="card-body flex h-full flex-col p-4 text-center">
 		<!-- Profile Picture -->
 		<a href="/profile/{profileUser.username}" class="avatar mx-auto">
 			<div class="w-16 rounded-full">
 				{#if profileUser.profile_pic_url}
 					<img src={profileUser.profile_pic_url} alt={profileUser.display_name} />
 				{:else}
-					<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xl">
+					<div
+						class="flex h-full w-full items-center justify-center bg-primary text-xl text-primary-content"
+					>
 						{profileUser.display_name?.charAt(0).toUpperCase() || 'U'}
 					</div>
 				{/if}
@@ -115,14 +115,14 @@
 
 		<!-- User Info -->
 		<div class="mt-3 flex-1">
-			<a href="/profile/{profileUser.username}" class="font-semibold hover:underline block">
+			<a href="/profile/{profileUser.username}" class="block font-semibold hover:underline">
 				{profileUser.display_name}
 			</a>
 			<p class="text-sm text-base-content/60">@{profileUser.username}</p>
-			
-			<div class="bio-container h-12 flex items-center justify-center">
+
+			<div class="bio-container flex h-12 items-center justify-center">
 				{#if profileUser.bio}
-					<p class="text-xs text-base-content/80 line-clamp-2">
+					<p class="line-clamp-2 text-xs text-base-content/80">
 						{profileUser.bio}
 					</p>
 				{/if}
@@ -130,7 +130,7 @@
 		</div>
 
 		<!-- Stats -->
-		<div class="flex justify-center gap-4 text-xs text-base-content/60 mt-2">
+		<div class="mt-2 flex justify-center gap-4 text-xs text-base-content/60">
 			<div>
 				<span class="font-semibold">{profileUser.followers_count || 0}</span>
 				<span>followers</span>
@@ -142,7 +142,7 @@
 		</div>
 
 		<!-- Recommendation Reason -->
-		<div class="reason-container h-8 flex items-center justify-center">
+		<div class="reason-container flex h-8 items-center justify-center">
 			{#if showReason && profileUser.recommendation_reason}
 				<div class="badge badge-ghost badge-sm">
 					{getReasonText(profileUser.recommendation_reason)}
@@ -153,19 +153,19 @@
 		<!-- Actions -->
 		<div class="action-container mt-4">
 			{#if $user && profileUser.id !== $user.id}
-				<div class="flex gap-2 h-10 items-center">
-					<button 
-						class="btn btn-primary btn-sm flex-1 h-full min-h-0 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white font-medium"
+				<div class="flex h-10 items-center gap-2">
+					<button
+						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
 						class:btn-outline={isFollowing}
 						class:loading={followLoading}
 						onclick={toggleFollow}
 						disabled={followLoading}
 					>
-						{followLoading ? '' : (isFollowing ? 'Following' : 'Follow')}
+						{followLoading ? '' : isFollowing ? 'Following' : 'Follow'}
 					</button>
-					
-					<button 
-						class="btn btn-ghost btn-sm w-10 h-full min-h-0 p-0 flex items-center justify-center border border-base-300 hover:bg-base-200"
+
+					<button
+						class="btn flex h-full min-h-0 w-10 items-center justify-center border border-base-300 p-0 btn-ghost btn-sm hover:bg-base-200"
 						onclick={startConversation}
 						title="Send message"
 					>
@@ -174,7 +174,10 @@
 				</div>
 			{:else if !$user}
 				<div class="flex h-10 items-center">
-					<a href="/" class="btn btn-primary btn-sm flex-1 h-full min-h-0 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white font-medium">
+					<a
+						href="/"
+						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
+					>
 						Sign in to follow
 					</a>
 				</div>

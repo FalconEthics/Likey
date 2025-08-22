@@ -1,16 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
 	import { user, trendingPosts, recommendedUsers, trendingUsers } from '$lib/stores.js';
-	import { 
-		getTrendingPosts, 
-		getUserRecommendations, 
-		getTrendingUsers, 
+	import {
+		getTrendingPosts,
+		getUserRecommendations,
+		getTrendingUsers,
 		getExplorePosts,
-		refreshTrendingPosts 
+		refreshTrendingPosts
 	} from '$lib/search.js';
 	import Post from '$lib/components/Post.svelte';
 	import UserCard from '$lib/components/UserCard.svelte';
-	
+
 	// Lucide Icons
 	import { RefreshCw, Flame, Users, Camera } from 'lucide-svelte';
 
@@ -23,7 +23,7 @@
 	 */
 	async function loadTrendingPosts() {
 		const { data, error } = await getTrendingPosts(20);
-		
+
 		if (!error && data) {
 			trendingPosts.set(data);
 		}
@@ -34,9 +34,9 @@
 	 */
 	async function loadRecommendedUsers() {
 		if (!$user) return;
-		
+
 		const { data, error } = await getUserRecommendations(10);
-		
+
 		if (!error && data) {
 			recommendedUsers.set(data);
 		}
@@ -47,7 +47,7 @@
 	 */
 	async function loadTrendingUsers() {
 		const { data, error } = await getTrendingUsers(15);
-		
+
 		if (!error && data) {
 			trendingUsers.set(data);
 		}
@@ -58,7 +58,7 @@
 	 */
 	async function loadExplorePosts() {
 		const { data, error } = await getExplorePosts(30);
-		
+
 		if (!error && data) {
 			explorePosts = data;
 		}
@@ -69,11 +69,11 @@
 	 */
 	async function refreshData() {
 		loading = true;
-		
+
 		try {
 			// Refresh trending posts calculation
 			await refreshTrendingPosts();
-			
+
 			// Load all data
 			await Promise.all([
 				loadTrendingPosts(),
@@ -105,17 +105,13 @@
 	<title>Explore - Likey</title>
 </svelte:head>
 
-<div class="max-w-6xl mx-auto pb-28">
+<div class="mx-auto max-w-6xl pb-28">
 	<!-- Header -->
-	<div class="flex items-center justify-between mb-6">
+	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-3xl font-bold">Explore</h1>
-		<button 
-			class="btn btn-outline btn-sm"
-			onclick={refreshData}
-			disabled={loading}
-		>
+		<button class="btn btn-outline btn-sm" onclick={refreshData} disabled={loading}>
 			{#if loading}
-				<span class="loading loading-spinner loading-sm"></span>
+				<span class="loading loading-sm loading-spinner"></span>
 			{:else}
 				<RefreshCw size={16} />
 			{/if}
@@ -124,25 +120,25 @@
 	</div>
 
 	<!-- Tabs -->
-	<div class="tabs tabs-bordered mb-6">
-		<button 
-			class="tab tab-lg gap-2"
+	<div class="tabs-bordered mb-6 tabs">
+		<button
+			class="tab-lg tab gap-2"
 			class:tab-active={activeTab === 'trending'}
 			onclick={() => switchTab('trending')}
 		>
 			<Flame size={18} />
 			Trending
 		</button>
-		<button 
-			class="tab tab-lg gap-2"
+		<button
+			class="tab-lg tab gap-2"
 			class:tab-active={activeTab === 'users'}
 			onclick={() => switchTab('users')}
 		>
 			<Users size={18} />
 			People
 		</button>
-		<button 
-			class="tab tab-lg gap-2"
+		<button
+			class="tab-lg tab gap-2"
 			class:tab-active={activeTab === 'latest'}
 			onclick={() => switchTab('latest')}
 		>
@@ -153,7 +149,7 @@
 
 	{#if loading}
 		<div class="flex justify-center py-12">
-			<span class="loading loading-spinner loading-lg"></span>
+			<span class="loading loading-lg loading-spinner"></span>
 		</div>
 	{:else}
 		<!-- Trending Tab -->
@@ -162,8 +158,8 @@
 				<!-- Recommended Users (if logged in) -->
 				{#if $user && $recommendedUsers.length > 0}
 					<div>
-						<h2 class="text-xl font-semibold mb-4">Suggested for you</h2>
-						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						<h2 class="mb-4 text-xl font-semibold">Suggested for you</h2>
+						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 							{#each $recommendedUsers as recommendedUser (recommendedUser.id)}
 								<UserCard user={recommendedUser} showReason={true} />
 							{/each}
@@ -173,10 +169,10 @@
 
 				<!-- Trending Posts -->
 				<div>
-					<h2 class="text-xl font-semibold mb-4">Trending Posts</h2>
+					<h2 class="mb-4 text-xl font-semibold">Trending Posts</h2>
 					{#if $trendingPosts.length === 0}
-						<div class="text-center py-8">
-							<div class="text-4xl mb-4">📈</div>
+						<div class="py-8 text-center">
+							<div class="mb-4 text-4xl">📈</div>
 							<p class="text-base-content/60">No trending posts yet. Check back later!</p>
 						</div>
 					{:else}
@@ -197,8 +193,8 @@
 				<!-- Recommended Users (if logged in) -->
 				{#if $user && $recommendedUsers.length > 0}
 					<div>
-						<h2 class="text-xl font-semibold mb-4">Recommended for you</h2>
-						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						<h2 class="mb-4 text-xl font-semibold">Recommended for you</h2>
+						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 							{#each $recommendedUsers as recommendedUser (recommendedUser.id)}
 								<UserCard user={recommendedUser} showReason={true} />
 							{/each}
@@ -208,14 +204,14 @@
 
 				<!-- Trending Users -->
 				<div>
-					<h2 class="text-xl font-semibold mb-4">Popular Users</h2>
+					<h2 class="mb-4 text-xl font-semibold">Popular Users</h2>
 					{#if $trendingUsers.length === 0}
-						<div class="text-center py-8">
-							<div class="text-4xl mb-4">👥</div>
+						<div class="py-8 text-center">
+							<div class="mb-4 text-4xl">👥</div>
 							<p class="text-base-content/60">No users to show yet.</p>
 						</div>
 					{:else}
-						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 							{#each $trendingUsers as trendingUser (trendingUser.id)}
 								<UserCard user={trendingUser} />
 							{/each}
@@ -228,15 +224,15 @@
 		<!-- Latest Tab -->
 		{#if activeTab === 'latest'}
 			<div>
-				<h2 class="text-xl font-semibold mb-4">Latest Posts</h2>
+				<h2 class="mb-4 text-xl font-semibold">Latest Posts</h2>
 				{#if explorePosts.length === 0}
-					<div class="text-center py-8">
+					<div class="py-8 text-center">
 						<Camera size={48} class="mx-auto mb-4 text-base-content/40" />
 						<p class="text-base-content/60">No posts to explore yet.</p>
 					</div>
 				{:else}
 					<!-- Simple rendering for explore posts (manageable quantity) -->
-					<div class="space-y-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
+					<div class="max-h-[calc(100vh-16rem)] space-y-6 overflow-y-auto">
 						{#each explorePosts as post (post.id)}
 							<Post {post} />
 						{/each}

@@ -6,26 +6,26 @@
 	import { createNotification } from '$lib/notifications.js';
 	import { getOrCreateConversation } from '$lib/messages.js';
 	import { goto } from '$app/navigation';
-	
+
 	// Lucide Icons
 	import { MessageCircle } from 'lucide-svelte';
-	
+
 	const { data } = $props();
 	let { profile } = data;
 	let posts = $state(data.posts);
-	
+
 	let isFollowing = $state(false);
 	let followLoading = $state(false);
-	
+
 	// Use $derived for Svelte 5 runes mode
 	let isCurrentUser = $derived($user?.id === profile.id);
-	
+
 	/**
 	 * Check if current user is following this profile
 	 */
 	async function checkFollowStatus() {
 		if (!$user || isCurrentUser) return;
-		
+
 		try {
 			const { data, error } = await supabase
 				.from('follows')
@@ -33,22 +33,22 @@
 				.eq('follower_id', $user.id)
 				.eq('following_id', profile.id)
 				.single();
-			
+
 			isFollowing = !!data;
 		} catch (error) {
 			// Not following or error
 			isFollowing = false;
 		}
 	}
-	
+
 	/**
 	 * Toggle follow status
 	 */
 	async function toggleFollow() {
 		if (!$user || isCurrentUser || followLoading) return;
-		
+
 		followLoading = true;
-		
+
 		try {
 			if (isFollowing) {
 				// Unfollow
@@ -57,25 +57,23 @@
 					.delete()
 					.eq('follower_id', $user.id)
 					.eq('following_id', profile.id);
-				
+
 				if (error) throw error;
-				
+
 				isFollowing = false;
 				profile.followers_count -= 1;
 			} else {
 				// Follow
-				const { error } = await supabase
-					.from('follows')
-					.insert({
-						follower_id: $user.id,
-						following_id: profile.id
-					});
-				
+				const { error } = await supabase.from('follows').insert({
+					follower_id: $user.id,
+					following_id: profile.id
+				});
+
 				if (error) throw error;
-				
+
 				isFollowing = true;
 				profile.followers_count += 1;
-				
+
 				// Create notification for the followed user
 				await createNotification(
 					profile.id,
@@ -96,36 +94,36 @@
 	 */
 	async function startConversation() {
 		if (!$user || isCurrentUser) return;
-		
+
 		const { data, error } = await getOrCreateConversation(profile.id);
-		
+
 		if (!error && data) {
 			goto(`/messages/${data.id}`);
 		}
 	}
-	
+
 	/**
 	 * Handle post deletion
 	 * @param {CustomEvent} event
 	 */
 	function handlePostDeleted(event) {
 		const { postId } = event.detail;
-		
+
 		// Remove post from local array
-		posts = posts.filter(post => post.id !== postId);
-		
+		posts = posts.filter((post) => post.id !== postId);
+
 		// Update profile post count
 		profile.posts_count = Math.max(0, profile.posts_count - 1);
 	}
-	
+
 	onMount(() => {
 		checkFollowStatus();
-		
+
 		// Update like status for posts based on current user
 		if ($user) {
-			posts = posts.map(post => ({
+			posts = posts.map((post) => ({
 				...post,
-				liked_by_user: post.likes?.some(like => like.user_id === $user.id) || false
+				liked_by_user: post.likes?.some((like) => like.user_id === $user.id) || false
 			}));
 		}
 	});
@@ -133,14 +131,14 @@
 
 <svelte:head>
 	<title>{profile.display_name} (@{profile.username}) - Likey</title>
-	<meta name="description" content="{profile.bio || `${profile.display_name}'s profile on Likey`}" />
+	<meta name="description" content={profile.bio || `${profile.display_name}'s profile on Likey`} />
 </svelte:head>
 
-<div class="max-w-4xl mx-auto pb-28 lg:pb-6 px-4">
+<div class="mx-auto max-w-4xl px-4 pb-28 lg:pb-6">
 	<!-- Profile Header -->
-	<div class="card bg-base-100 shadow-lg mb-6">
+	<div class="card mb-6 bg-base-100 shadow-lg">
 		<div class="card-body">
-			<div class="flex flex-col md:flex-row gap-6">
+			<div class="flex flex-col gap-6 md:flex-row">
 				<!-- Profile Picture -->
 				<div class="flex justify-center md:justify-start">
 					<div class="avatar">
@@ -148,42 +146,47 @@
 							{#if profile.profile_pic_url}
 								<img src={profile.profile_pic_url} alt={profile.display_name} />
 							{:else}
-								<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-3xl">
+								<div
+									class="flex h-full w-full items-center justify-center bg-primary text-3xl text-primary-content"
+								>
 									{profile.display_name?.charAt(0).toUpperCase() || 'U'}
 								</div>
 							{/if}
 						</div>
 					</div>
 				</div>
-				
+
 				<!-- Profile Info -->
 				<div class="flex-1 text-center md:text-left">
-					<div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+					<div class="mb-4 flex flex-col gap-4 md:flex-row md:items-center">
 						<div>
 							<h1 class="text-2xl font-bold">{profile.display_name}</h1>
 							<p class="text-base-content/60">@{profile.username}</p>
 						</div>
-						
+
 						<!-- Follow/Edit Button -->
 						{#if $user}
 							{#if isCurrentUser}
-								<a href="/settings" class="btn btn-outline min-h-[44px] h-11 px-6 border-[hsl(346_77%_49%)] text-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_49%)] hover:text-white font-medium">
+								<a
+									href="/settings"
+									class="btn h-11 min-h-[44px] border-[hsl(346_77%_49%)] px-6 font-medium text-[hsl(346_77%_49%)] btn-outline hover:bg-[hsl(346_77%_49%)] hover:text-white"
+								>
 									Edit Profile
 								</a>
 							{:else}
-								<div class="flex gap-2 items-center">
-									<button 
-										class="btn min-h-[44px] h-11 px-6 flex-1 min-w-[100px] font-medium border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white"
+								<div class="flex items-center gap-2">
+									<button
+										class="btn h-11 min-h-[44px] min-w-[100px] flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] px-6 font-medium text-white hover:bg-[hsl(346_77%_59%)]"
 										class:btn-outline={isFollowing}
 										class:loading={followLoading}
 										onclick={toggleFollow}
 										disabled={followLoading}
 									>
-										{followLoading ? 'Loading...' : (isFollowing ? 'Following' : 'Follow')}
+										{followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
 									</button>
-									
-									<button 
-										class="btn btn-ghost min-h-[44px] h-11 w-11 p-0 flex items-center justify-center border border-base-300 hover:bg-base-200"
+
+									<button
+										class="btn flex h-11 min-h-[44px] w-11 items-center justify-center border border-base-300 p-0 btn-ghost hover:bg-base-200"
 										onclick={startConversation}
 										title="Send message"
 									>
@@ -193,23 +196,29 @@
 							{/if}
 						{/if}
 					</div>
-					
+
 					<!-- Stats -->
-					<div class="flex justify-center md:justify-start gap-6 mb-4">
+					<div class="mb-4 flex justify-center gap-6 md:justify-start">
 						<div class="text-center">
-							<div class="font-bold text-lg">{profile.posts_count}</div>
+							<div class="text-lg font-bold">{profile.posts_count}</div>
 							<div class="text-sm text-base-content/60">Posts</div>
 						</div>
-						<a href="/users/{profile.username}/followers" class="text-center hover:bg-base-200 rounded-lg p-2 -m-2 transition-colors">
-							<div class="font-bold text-lg">{profile.followers_count}</div>
+						<a
+							href="/users/{profile.username}/followers"
+							class="-m-2 rounded-lg p-2 text-center transition-colors hover:bg-base-200"
+						>
+							<div class="text-lg font-bold">{profile.followers_count}</div>
 							<div class="text-sm text-base-content/60 hover:underline">Followers</div>
 						</a>
-						<a href="/users/{profile.username}/following" class="text-center hover:bg-base-200 rounded-lg p-2 -m-2 transition-colors">
-							<div class="font-bold text-lg">{profile.following_count}</div>
+						<a
+							href="/users/{profile.username}/following"
+							class="-m-2 rounded-lg p-2 text-center transition-colors hover:bg-base-200"
+						>
+							<div class="text-lg font-bold">{profile.following_count}</div>
 							<div class="text-sm text-base-content/60 hover:underline">Following</div>
 						</a>
 					</div>
-					
+
 					<!-- Bio -->
 					{#if profile.bio}
 						<p class="text-base-content/80">{profile.bio}</p>
@@ -218,24 +227,25 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- Posts Grid -->
 	<div class="space-y-6">
 		<div class="flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Posts</h2>
 			<div class="text-sm text-base-content/60">
-				{posts.length} {posts.length === 1 ? 'post' : 'posts'}
+				{posts.length}
+				{posts.length === 1 ? 'post' : 'posts'}
 			</div>
 		</div>
-		
+
 		{#if posts.length === 0}
-			<div class="text-center py-12">
-				<div class="text-6xl mb-4">📷</div>
-				<h3 class="text-xl font-semibold mb-2">
+			<div class="py-12 text-center">
+				<div class="mb-4 text-6xl">📷</div>
+				<h3 class="mb-2 text-xl font-semibold">
 					{isCurrentUser ? "You haven't" : `${profile.display_name} hasn't`} posted anything yet
 				</h3>
 				{#if isCurrentUser}
-					<p class="text-base-content/60 mb-4">Share your first post to get started!</p>
+					<p class="mb-4 text-base-content/60">Share your first post to get started!</p>
 				{/if}
 			</div>
 		{:else}

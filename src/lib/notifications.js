@@ -10,10 +10,10 @@ let notificationSubscription = null;
 export function initializeNotifications() {
 	const currentUser = get(user);
 	if (!currentUser) return;
-	
+
 	// Load existing notifications
 	loadNotifications();
-	
+
 	// Subscribe to real-time updates
 	subscribeToNotifications(currentUser.id);
 }
@@ -24,28 +24,30 @@ export function initializeNotifications() {
 async function loadNotifications() {
 	const currentUser = get(user);
 	if (!currentUser) return;
-	
+
 	try {
 		const { data, error } = await supabase
 			.from('notifications')
-			.select(`
+			.select(
+				`
 				*,
 				related_user:related_user_id (
 					username,
 					display_name,
 					profile_pic_url
 				)
-			`)
+			`
+			)
 			.eq('user_id', currentUser.id)
 			.order('created_at', { ascending: false })
 			.limit(50);
-		
+
 		if (error) throw error;
-		
+
 		notifications.set(data || []);
-		
+
 		// Count unread notifications
-		const unread = data?.filter(n => !n.read).length || 0;
+		const unread = data?.filter((n) => !n.read).length || 0;
 		unreadCount.set(unread);
 	} catch (error) {
 		console.error('Error loading notifications:', error);
@@ -61,7 +63,7 @@ function subscribeToNotifications(userId) {
 	if (notificationSubscription) {
 		notificationSubscription.unsubscribe();
 	}
-	
+
 	notificationSubscription = supabase
 		.channel('notifications')
 		.on(
@@ -76,24 +78,26 @@ function subscribeToNotifications(userId) {
 				// Fetch the full notification with related data
 				const { data, error } = await supabase
 					.from('notifications')
-					.select(`
+					.select(
+						`
 						*,
 						related_user:related_user_id (
 							username,
 							display_name,
 							profile_pic_url
 						)
-					`)
+					`
+					)
 					.eq('id', payload.new.id)
 					.single();
-				
+
 				if (!error && data) {
 					// Add to notifications store
-					notifications.update(current => [data, ...current]);
-					
+					notifications.update((current) => [data, ...current]);
+
 					// Update unread count
-					unreadCount.update(count => count + 1);
-					
+					unreadCount.update((count) => count + 1);
+
 					// Show browser notification if permission is granted
 					showBrowserNotification(data);
 				}
@@ -122,18 +126,16 @@ export async function markNotificationAsRead(notificationId) {
 			.from('notifications')
 			.update({ read: true })
 			.eq('id', notificationId);
-		
+
 		if (error) throw error;
-		
+
 		// Update local store
-		notifications.update(current => 
-			current.map(n => 
-				n.id === notificationId ? { ...n, read: true } : n
-			)
+		notifications.update((current) =>
+			current.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
 		);
-		
+
 		// Update unread count
-		unreadCount.update(count => Math.max(0, count - 1));
+		unreadCount.update((count) => Math.max(0, count - 1));
 	} catch (error) {
 		console.error('Error marking notification as read:', error);
 	}
@@ -145,21 +147,19 @@ export async function markNotificationAsRead(notificationId) {
 export async function markAllNotificationsAsRead() {
 	const currentUser = get(user);
 	if (!currentUser) return;
-	
+
 	try {
 		const { error } = await supabase
 			.from('notifications')
 			.update({ read: true })
 			.eq('user_id', currentUser.id)
 			.eq('read', false);
-		
+
 		if (error) throw error;
-		
+
 		// Update local store
-		notifications.update(current => 
-			current.map(n => ({ ...n, read: true }))
-		);
-		
+		notifications.update((current) => current.map((n) => ({ ...n, read: true })));
+
 		// Reset unread count
 		unreadCount.set(0);
 	} catch (error) {
@@ -175,22 +175,26 @@ export async function markAllNotificationsAsRead() {
  * @param {string} relatedUserId - ID of user who triggered the notification
  * @param {string} relatedPostId - ID of related post (optional)
  */
-export async function createNotification(userId, type, message, relatedUserId, relatedPostId = null) {
+export async function createNotification(
+	userId,
+	type,
+	message,
+	relatedUserId,
+	relatedPostId = null
+) {
 	// Don't notify users about their own actions
 	const currentUser = get(user);
 	if (currentUser?.id === userId) return;
-	
+
 	try {
-		const { error } = await supabase
-			.from('notifications')
-			.insert({
-				user_id: userId,
-				type,
-				message,
-				related_user_id: relatedUserId,
-				related_post_id: relatedPostId
-			});
-		
+		const { error } = await supabase.from('notifications').insert({
+			user_id: userId,
+			type,
+			message,
+			related_user_id: relatedUserId,
+			related_post_id: relatedPostId
+		});
+
 		if (error) throw error;
 	} catch (error) {
 		console.error('Error creating notification:', error);

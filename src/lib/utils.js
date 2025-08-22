@@ -7,23 +7,23 @@ const { debounce } = pkg;
  * @returns {string} Formatted relative time
  */
 export function formatRelativeTime(date) {
-  const now = new Date();
-  const target = new Date(date);
-  const diff = now - target;
-  
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const weeks = Math.floor(days / 7);
-  
-  if (seconds < 60) return 'just now';
-  if (minutes < 60) return `${minutes}m`;
-  if (hours < 24) return `${hours}h`;
-  if (days < 7) return `${days}d`;
-  if (weeks < 4) return `${weeks}w`;
-  
-  return target.toLocaleDateString();
+	const now = new Date();
+	const target = new Date(date);
+	const diff = now - target;
+
+	const seconds = Math.floor(diff / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+	const weeks = Math.floor(days / 7);
+
+	if (seconds < 60) return 'just now';
+	if (minutes < 60) return `${minutes}m`;
+	if (hours < 24) return `${hours}h`;
+	if (days < 7) return `${days}d`;
+	if (weeks < 4) return `${weeks}w`;
+
+	return target.toLocaleDateString();
 }
 
 /**
@@ -32,8 +32,8 @@ export function formatRelativeTime(date) {
  * @returns {string[]} Array of hashtags
  */
 export function extractHashtags(text) {
-  const hashtagRegex = /#[a-zA-Z0-9_]+/g;
-  return text.match(hashtagRegex) || [];
+	const hashtagRegex = /#[a-zA-Z0-9_]+/g;
+	return text.match(hashtagRegex) || [];
 }
 
 /**
@@ -43,16 +43,16 @@ export function extractHashtags(text) {
  * @returns {string} Unique filename
  */
 export function generateImagePath(userId, originalName) {
-  const timestamp = Date.now();
-  const extension = originalName.split('.').pop();
-  return `${userId}/${timestamp}.${extension}`;
+	const timestamp = Date.now();
+	const extension = originalName.split('.').pop();
+	return `${userId}/${timestamp}.${extension}`;
 }
 
 /**
  * Debounced search function
  */
 export const debouncedSearch = debounce((searchTerm, callback) => {
-  callback(searchTerm);
+	callback(searchTerm);
 }, 300);
 
 /**
@@ -61,13 +61,14 @@ export const debouncedSearch = debounce((searchTerm, callback) => {
  * @returns {{ valid: boolean, error?: string }}
  */
 export function validateUsername(username) {
-  if (!username) return { valid: false, error: 'Username is required' };
-  if (username.length < 3) return { valid: false, error: 'Username must be at least 3 characters' };
-  if (username.length > 20) return { valid: false, error: 'Username must be less than 20 characters' };
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    return { valid: false, error: 'Username can only contain letters, numbers, and underscores' };
-  }
-  return { valid: true };
+	if (!username) return { valid: false, error: 'Username is required' };
+	if (username.length < 3) return { valid: false, error: 'Username must be at least 3 characters' };
+	if (username.length > 20)
+		return { valid: false, error: 'Username must be less than 20 characters' };
+	if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+		return { valid: false, error: 'Username can only contain letters, numbers, and underscores' };
+	}
+	return { valid: true };
 }
 
 /**
@@ -76,10 +77,10 @@ export function validateUsername(username) {
  * @returns {{ valid: boolean, error?: string }}
  */
 export function validateEmail(email) {
-  if (!email) return { valid: false, error: 'Email is required' };
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) return { valid: false, error: 'Invalid email format' };
-  return { valid: true };
+	if (!email) return { valid: false, error: 'Email is required' };
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailRegex.test(email)) return { valid: false, error: 'Invalid email format' };
+	return { valid: true };
 }
 
 /**
@@ -89,6 +90,6 @@ export function validateEmail(email) {
  * @returns {string} Truncated text
  */
 export function truncateText(text, maxLength = 150) {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
+	if (text.length <= maxLength) return text;
+	return text.substring(0, maxLength) + '...';
 }

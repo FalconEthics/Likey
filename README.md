@@ -63,6 +63,7 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 ### 🎯 Key Features
 
 #### Core Social Features
+
 - **📱 User Authentication**: Secure email/password authentication with Supabase Auth
 - **👤 Profile Management**: Customizable profiles with usernames, display names, bios, and profile pictures
 - **📸 Photo Sharing**: Upload and share multiple photos per post with automatic compression
@@ -72,6 +73,7 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 - **🔔 Real-time Notifications**: Instant notifications for likes, comments, and new followers
 
 #### Advanced Features
+
 - **💬 Direct Messaging**: Real-time 1:1 chat with message history and context menus
 - **📈 Trending Algorithm**: Score-based trending posts with time decay
 - **🔍 Explore Page**: Discover trending posts, popular users, and latest content
@@ -84,14 +86,14 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 
 ### Built With
 
-* ![SvelteKit][SvelteKit.com] - SvelteKit 5 with modern runes syntax and server-side rendering
-* ![TypeScript][TypeScript.com] - JSDoc type annotations for type safety without TypeScript overhead
-* ![Supabase][Supabase.com] - PostgreSQL database with real-time subscriptions, auth, and storage
-* ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
-* ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
-* ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
-* ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
-* ![Vercel][Vercel.com] - Seamless deployment and hosting platform
+- ![SvelteKit][SvelteKit.com] - SvelteKit 5 with modern runes syntax and server-side rendering
+- ![TypeScript][TypeScript.com] - JSDoc type annotations for type safety without TypeScript overhead
+- ![Supabase][Supabase.com] - PostgreSQL database with real-time subscriptions, auth, and storage
+- ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
+- ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
+- ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
+- ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
+- ![Vercel][Vercel.com] - Seamless deployment and hosting platform
 
 <p align="right"><a href="#readme-top">˄ back to top</a></p>
 
@@ -104,10 +106,13 @@ Get a local copy up and running with these simple steps.
 ### Prerequisites
 
 - **Bun** (recommended) or Node.js 18+
+
   ```sh
   curl -fsSL https://bun.sh/install | bash
   ```
+
   or
+
   ```sh
   npm install -g npm@latest
   ```
@@ -117,16 +122,19 @@ Get a local copy up and running with these simple steps.
 ### Installation Steps
 
 1. **Clone the repository**
+
    ```sh
    git clone https://github.com/soumikdas/Likey.git
    ```
 
 2. **Navigate to project directory**
+
    ```sh
    cd Likey
    ```
 
 3. **Install dependencies**
+
    ```sh
    bun install
    # or
@@ -134,35 +142,39 @@ Get a local copy up and running with these simple steps.
    ```
 
 4. **Set up environment variables**
+
    ```sh
    cp .env.example .env.local
    ```
-   
+
    Fill in your Supabase credentials:
+
    ```env
    PUBLIC_SUPABASE_URL=your_supabase_project_url
    PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
 5. **Set up database schema**
-   
+
    **Option A: Using Supabase CLI (Recommended)**
+
    ```sh
    # Install Supabase CLI
    bun install -g supabase
-   
+
    # Link to your project
    supabase link --project-ref YOUR_PROJECT_REF
-   
+
    # Deploy schema
    supabase db push
    ```
-   
+
    **Option B: Manual Setup**
    - Copy contents of `database-setup.sql`
    - Run in Supabase SQL Editor
 
 6. **Start development server**
+
    ```sh
    bun run dev
    # or
@@ -186,27 +198,32 @@ Get a local copy up and running with these simple steps.
 ### 📱 Core Workflows
 
 **Content Creation**:
+
 - Upload multiple images per post with automatic compression
 - Add captions and share with your followers
 - Real-time post visibility in followers' feeds
 
 **Social Interaction**:
+
 - Like and comment on posts with instant updates
 - Follow/unfollow users with live count updates
 - Receive real-time notifications for all interactions
 
 **Discovery**:
+
 - Explore trending posts based on engagement algorithms
 - Find new users through intelligent recommendations
 - Search users by username or display name
 
 **Messaging**:
+
 - Send direct messages with real-time delivery
 - Edit messages within 5 minutes of sending
 - Forward messages to other conversations
 - Context menu for message actions
 
 **Profile Management**:
+
 - Customize profile with bio, profile picture, and theme preferences
 - View followers, following, and post statistics
 - Manage account settings and privacy
@@ -261,6 +278,7 @@ src/
 ### Database Schema
 
 **Core Tables**:
+
 - `profiles` - User profile information
 - `posts` - User posts with metadata
 - `post_images` - Multiple images per post
@@ -272,6 +290,7 @@ src/
 - `messages` - Individual chat messages
 
 **Advanced Features**:
+
 - `trending_posts` - Algorithmic trending calculation
 - `user_recommendations` - Intelligent user suggestions
 - Row Level Security (RLS) on all tables
@@ -283,18 +302,21 @@ src/
 ## 🔒 Security Features
 
 ### Authentication & Authorization
+
 - **Supabase Auth**: Industry-standard authentication with JWT tokens
 - **Row Level Security**: Database-level access control for all tables
 - **Profile Protection**: Users can only modify their own data
 - **Secure Sessions**: Automatic session management with refresh tokens
 
 ### Data Security
+
 - **Input Validation**: Comprehensive validation on all user inputs
 - **Image Security**: File type validation and automatic compression
 - **SQL Injection Protection**: Parameterized queries through Supabase
 - **CSRF Protection**: Built-in protection through Supabase client
 
 ### Privacy Features
+
 - **Conversation Privacy**: Only participants can access message threads
 - **Profile Visibility**: Configurable privacy settings
 - **Secure File Upload**: Validated image uploads with size limits
@@ -305,6 +327,7 @@ src/
 ## ⚡ Performance
 
 ### Optimization Features
+
 - **Infinite Scroll**: Efficient pagination for large datasets
 - **Image Compression**: Automatic client-side image optimization
 - **Real-time Efficiency**: Selective subscriptions for relevant data only
@@ -312,6 +335,7 @@ src/
 - **Code Splitting**: Route-based code splitting with SvelteKit
 
 ### Modern Web Standards
+
 - **SvelteKit 5**: Latest framework features with optimal bundle sizes
 - **Vite Build**: Lightning-fast development and production builds
 - **Modern CSS**: Tailwind CSS v4 with advanced features
@@ -328,6 +352,7 @@ src/
    - Import project in Vercel dashboard
 
 2. **Environment Variables**
+
    ```
    PUBLIC_SUPABASE_URL=your_project_url
    PUBLIC_SUPABASE_ANON_KEY=your_anon_key
@@ -340,11 +365,13 @@ src/
 ### Manual Deployment
 
 1. **Build the project**
+
    ```sh
    bun run build
    ```
 
 2. **Preview locally**
+
    ```sh
    bun run preview
    ```
@@ -446,6 +473,7 @@ Perfect for learning modern web development patterns and building production-rea
 <p align="right"><a href="#readme-top">˄ back to top</a></p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/soumikdas/Likey.svg?style=for-the-badge
 [contributors-url]: https://github.com/soumikdas/Likey/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/soumikdas/Likey.svg?style=for-the-badge
@@ -458,7 +486,6 @@ Perfect for learning modern web development patterns and building production-rea
 [license-url]: https://github.com/soumikdas/Likey/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
-
 [SvelteKit.com]: https://img.shields.io/badge/SvelteKit_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white
 [TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white

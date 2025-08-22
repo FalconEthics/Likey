@@ -3,10 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { user, currentMessages, currentConversationId } from '$lib/stores.js';
-	import { 
-		getConversationMessages, 
-		sendMessage, 
-		markMessagesAsRead, 
+	import {
+		getConversationMessages,
+		sendMessage,
+		markMessagesAsRead,
 		subscribeToMessages,
 		deleteMessage,
 		editMessage,
@@ -14,9 +14,17 @@
 	} from '$lib/messages.js';
 	import { formatRelativeTime } from '$lib/utils.js';
 	import ForwardMessageModal from '$lib/components/ForwardMessageModal.svelte';
-	
+
 	// Lucide Icons
-	import { ArrowLeft, Send, MessageCircle, MoreVertical, Edit, Trash2, Forward } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		Send,
+		MessageCircle,
+		MoreVertical,
+		Edit,
+		Trash2,
+		Forward
+	} from 'lucide-svelte';
 
 	let conversationId = $page.params.conversationId;
 	let messageInput = $state('');
@@ -25,14 +33,14 @@
 	let messagesContainer = $state();
 	let messageSubscription = null;
 	let otherUser = $state(null);
-	
+
 	// Message management state
 	let editingMessageId = $state(null);
 	let editingContent = $state('');
 	let showContextMenu = $state(null); // messageId or null
 	let deletingMessageId = $state(null);
 	let forwardingMessageId = $state(null);
-	
+
 	// Forward modal state
 	let showForwardModal = $state(false);
 	let forwardMessage = $state(null);
@@ -52,9 +60,9 @@
 	 */
 	async function loadMessages() {
 		loading = true;
-		
+
 		const { data, error } = await getConversationMessages(conversationId);
-		
+
 		if (error) {
 			// Handle access denied or conversation not found
 			if (error === 'Access denied' || error === 'Conversation not found') {
@@ -66,10 +74,10 @@
 			loading = false;
 			return;
 		}
-		
+
 		if (data) {
 			currentMessages.set(data);
-			
+
 			// Get other user info from first message
 			if (data.length > 0) {
 				const firstMessage = data[0];
@@ -77,18 +85,18 @@
 					otherUser = firstMessage.sender;
 				} else {
 					// Find a message from the other user
-					const otherMessage = data.find(msg => msg.sender.id !== $user.id);
+					const otherMessage = data.find((msg) => msg.sender.id !== $user.id);
 					otherUser = otherMessage ? otherMessage.sender : null;
 				}
 			}
-			
+
 			// Mark messages as read
 			await markMessagesAsRead(conversationId);
-			
+
 			// Force scroll to bottom on initial load
 			await forceScrollToBottom();
 		}
-		
+
 		loading = false;
 	}
 
@@ -98,13 +106,13 @@
 	 */
 	async function handleSendMessage(event) {
 		event.preventDefault();
-		
+
 		if (!messageInput.trim() || sending) return;
-		
+
 		sending = true;
 		const content = messageInput.trim();
 		messageInput = '';
-		
+
 		// Optimistically add message to local state
 		const tempMessage = {
 			id: 'temp-' + Date.now(),
@@ -119,19 +127,17 @@
 			conversation_id: conversationId,
 			sending: true // Mark as optimistic
 		};
-		
-		currentMessages.update(messages => [...messages, tempMessage]);
+
+		currentMessages.update((messages) => [...messages, tempMessage]);
 		await tick();
 		scrollToBottom();
-		
+
 		const { data, error } = await sendMessage(conversationId, content);
-		
+
 		if (!error && data) {
 			// Replace temp message with real message
-			currentMessages.update(messages => 
-				messages.map(msg => 
-					msg.id === tempMessage.id ? data : msg
-				)
+			currentMessages.update((messages) =>
+				messages.map((msg) => (msg.id === tempMessage.id ? data : msg))
 			);
 		} else {
 			// Handle access denied errors
@@ -140,15 +146,13 @@
 				goto('/messages'); // Redirect to messages list
 				return;
 			}
-			
+
 			// Remove temp message and restore input on error
-			currentMessages.update(messages => 
-				messages.filter(msg => msg.id !== tempMessage.id)
-			);
+			currentMessages.update((messages) => messages.filter((msg) => msg.id !== tempMessage.id));
 			messageInput = content;
 			console.error('Failed to send message:', error);
 		}
-		
+
 		sending = false;
 	}
 
@@ -158,28 +162,26 @@
 	 */
 	function handleNewMessage(message) {
 		console.log('Received real-time message:', message);
-		
+
 		// Check if this message already exists (avoid duplicates)
-		const messageExists = $currentMessages.some(msg => msg.id === message.id);
+		const messageExists = $currentMessages.some((msg) => msg.id === message.id);
 		if (messageExists) {
 			console.log('Message already exists, skipping');
 			return;
 		}
-		
+
 		// Remove any temp messages from the sender (if it was us)
 		if (message.sender.id === $user.id) {
-			currentMessages.update(messages => 
-				messages.filter(msg => !msg.sending)
-			);
+			currentMessages.update((messages) => messages.filter((msg) => !msg.sending));
 		}
-		
-		currentMessages.update(messages => [...messages, message]);
-		
+
+		currentMessages.update((messages) => [...messages, message]);
+
 		// Mark as read if not from current user
 		if (message.sender.id !== $user.id) {
 			markMessagesAsRead(conversationId);
 		}
-		
+
 		tick().then(() => scrollToBottom());
 	}
 
@@ -201,12 +203,12 @@
 	async function forceScrollToBottom() {
 		await tick();
 		scrollToBottom();
-		
+
 		// Fallback: try again after a short delay
 		setTimeout(() => {
 			scrollToBottom();
 		}, 100);
-		
+
 		// Final fallback: try once more after DOM updates
 		setTimeout(() => {
 			scrollToBottom();
@@ -223,7 +225,7 @@
 		const now = new Date();
 		const diffMs = now - date;
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-		
+
 		if (diffDays === 0) {
 			return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 		} else if (diffDays === 1) {
@@ -249,17 +251,15 @@
 	 */
 	async function saveEditMessage(event) {
 		event.preventDefault();
-		
+
 		if (!editingContent.trim() || !editingMessageId) return;
-		
+
 		const { data, error } = await editMessage(editingMessageId, editingContent);
-		
+
 		if (!error && data) {
 			// Update message in local state
-			currentMessages.update(messages => 
-				messages.map(msg => 
-					msg.id === editingMessageId ? data : msg
-				)
+			currentMessages.update((messages) =>
+				messages.map((msg) => (msg.id === editingMessageId ? data : msg))
 			);
 			cancelEdit();
 		} else {
@@ -283,22 +283,20 @@
 	async function handleDeleteMessage(messageId) {
 		const confirmed = confirm('Delete this message? This action cannot be undone.');
 		if (!confirmed) return;
-		
+
 		deletingMessageId = messageId;
 		showContextMenu = null;
-		
+
 		const { success, error } = await deleteMessage(messageId);
-		
+
 		if (success) {
 			// Remove message from local state
-			currentMessages.update(messages => 
-				messages.filter(msg => msg.id !== messageId)
-			);
+			currentMessages.update((messages) => messages.filter((msg) => msg.id !== messageId));
 		} else {
 			console.error('Failed to delete message:', error);
 			alert(error || 'Failed to delete message');
 		}
-		
+
 		deletingMessageId = null;
 	}
 
@@ -380,7 +378,9 @@
 	$effect(() => {
 		if ($currentMessages.length > 0 && messagesContainer) {
 			// Only auto-scroll if user is near the bottom (not scrolled up to read old messages)
-			const isNearBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= messagesContainer.scrollHeight - 100;
+			const isNearBottom =
+				messagesContainer.scrollTop + messagesContainer.clientHeight >=
+				messagesContainer.scrollHeight - 100;
 			if (isNearBottom || $currentMessages.length === 1) {
 				scrollToBottom();
 			}
@@ -390,7 +390,7 @@
 	onMount(() => {
 		if ($user && conversationId) {
 			loadMessages();
-			
+
 			// Subscribe to real-time messages
 			messageSubscription = subscribeToMessages(conversationId, handleNewMessage);
 		}
@@ -410,58 +410,56 @@
 </svelte:head>
 
 {#if $user}
-	<div 
-		class="max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col pb-32 lg:pb-6" 
+	<div
+		class="mx-auto flex min-h-[calc(100vh-8rem)] max-w-4xl flex-col pb-32 lg:pb-6"
 		onclick={handleClickOutside}
 		onkeydown={handleClickOutside}
 		role="main"
 	>
 		<!-- Header -->
-		<div class="flex items-center gap-4 p-4 border-b border-base-300/50 bg-base-100/95 backdrop-blur-xl sticky top-0 z-10">
-			<button 
-				class="btn btn-ghost btn-circle"
-				onclick={() => goto('/messages')}
-			>
+		<div
+			class="sticky top-0 z-10 flex items-center gap-4 border-b border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+		>
+			<button class="btn btn-circle btn-ghost" onclick={() => goto('/messages')}>
 				<ArrowLeft size={20} />
 			</button>
-			
+
 			{#if otherUser}
 				<div class="avatar">
 					<div class="w-10 rounded-full">
 						{#if otherUser.profile_pic_url}
 							<img src={otherUser.profile_pic_url} alt={otherUser.display_name} />
 						{:else}
-							<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full">
+							<div
+								class="flex h-full w-full items-center justify-center bg-primary text-primary-content"
+							>
 								{otherUser.display_name?.charAt(0).toUpperCase() || 'U'}
 							</div>
 						{/if}
 					</div>
 				</div>
-				
+
 				<div>
 					<h2 class="font-semibold">{otherUser.display_name}</h2>
 					<p class="text-sm text-base-content/60">@{otherUser.username}</p>
 				</div>
 			{:else}
-				<div class="skeleton h-10 w-10 rounded-full"></div>
+				<div class="h-10 w-10 skeleton rounded-full"></div>
 				<div>
-					<div class="skeleton h-4 w-24 mb-1"></div>
-					<div class="skeleton h-3 w-16"></div>
+					<div class="mb-1 h-4 w-24 skeleton"></div>
+					<div class="h-3 w-16 skeleton"></div>
 				</div>
 			{/if}
 		</div>
 
 		<!-- Messages -->
-		<div 
-			class="flex-1 p-4 space-y-4" 
-			bind:this={messagesContainer}
-		>
+		<div class="flex-1 space-y-4 p-4" bind:this={messagesContainer}>
 			{#if loading}
 				<div class="flex justify-center py-8">
-					<span class="loading loading-spinner loading-md"></span>
+					<span class="loading loading-md loading-spinner"></span>
 				</div>
 			{:else if $currentMessages.length === 0}
-				<div class="text-center py-8">
+				<div class="py-8 text-center">
 					<MessageCircle size={48} class="mx-auto mb-4 text-base-content/40" />
 					<p class="text-base-content/60">No messages yet. Start the conversation!</p>
 				</div>
@@ -470,7 +468,7 @@
 					{@const isCurrentUser = message.sender.id === $user.id}
 					{@const prevMessage = index > 0 ? $currentMessages[index - 1] : null}
 					{@const showAvatar = !prevMessage || prevMessage.sender.id !== message.sender.id}
-					
+
 					<div class="flex gap-3" class:justify-end={isCurrentUser}>
 						{#if !isCurrentUser}
 							<!-- Avatar for incoming messages -->
@@ -479,9 +477,14 @@
 									<div class="avatar">
 										<div class="w-8 rounded-full">
 											{#if message.sender.profile_pic_url}
-												<img src={message.sender.profile_pic_url} alt={message.sender.display_name} />
+												<img
+													src={message.sender.profile_pic_url}
+													alt={message.sender.display_name}
+												/>
 											{:else}
-												<div class="bg-primary text-primary-content flex items-center justify-center w-full h-full text-xs">
+												<div
+													class="flex h-full w-full items-center justify-center bg-primary text-xs text-primary-content"
+												>
 													{message.sender.display_name?.charAt(0).toUpperCase() || 'U'}
 												</div>
 											{/if}
@@ -492,29 +495,29 @@
 								{/if}
 							</div>
 						{/if}
-						
+
 						<!-- Message Bubble -->
-						<div class="max-w-xs lg:max-w-md relative" class:ml-auto={isCurrentUser} class:mr-3={isCurrentUser}>
+						<div
+							class="relative max-w-xs lg:max-w-md"
+							class:ml-auto={isCurrentUser}
+							class:mr-3={isCurrentUser}
+						>
 							{#if editingMessageId === message.id}
 								<!-- Edit Mode -->
 								<form onsubmit={saveEditMessage} class="space-y-2">
-									<textarea 
+									<textarea
 										bind:value={editingContent}
-										class="textarea textarea-bordered textarea-sm w-full resize-none"
+										class="textarea-bordered textarea w-full resize-none textarea-sm"
 										rows="2"
 										required
 									></textarea>
-									<div class="flex gap-2 justify-end">
-										<button 
-											type="button" 
-											class="btn btn-ghost btn-xs"
-											onclick={cancelEdit}
-										>
+									<div class="flex justify-end gap-2">
+										<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}>
 											Cancel
 										</button>
-										<button 
-											type="submit" 
-											class="btn btn-primary btn-xs"
+										<button
+											type="submit"
+											class="btn btn-xs btn-primary"
 											disabled={!editingContent.trim()}
 										>
 											Save
@@ -524,8 +527,8 @@
 							{:else}
 								<!-- Normal Message Display -->
 								<div class="relative">
-									<div 
-										class="px-4 py-3 rounded-2xl relative cursor-pointer select-none context-menu-container modern-message-bubble"
+									<div
+										class="context-menu-container modern-message-bubble relative cursor-pointer rounded-2xl px-4 py-3 select-none"
 										class:current-user={isCurrentUser}
 										class:other-user={!isCurrentUser}
 										class:opacity-70={message.sending}
@@ -539,37 +542,39 @@
 										<p class="text-sm" class:opacity-70={message.sending}>
 											{message.content}
 											{#if message.edited_at}
-												<span class="text-xs opacity-60 ml-2">(edited)</span>
+												<span class="ml-2 text-xs opacity-60">(edited)</span>
 											{/if}
 											{#if message.forwarded_from}
-												<span class="text-xs opacity-60 ml-2">↻ forwarded</span>
+												<span class="ml-2 text-xs opacity-60">↻ forwarded</span>
 											{/if}
 										</p>
 										{#if message.sending}
-											<div class="absolute -bottom-1 -right-1">
-												<span class="loading loading-spinner loading-xs"></span>
+											<div class="absolute -right-1 -bottom-1">
+												<span class="loading loading-xs loading-spinner"></span>
 											</div>
 										{/if}
 									</div>
-									
+
 									<!-- Context Menu (shows for all messages) -->
 									{#if showContextMenu === message.id && !message.sending}
 										<div class="absolute top-0 right-0 z-20">
-											<div class="menu p-2 shadow-lg bg-base-100 rounded-box w-36 border border-base-300">
+											<div
+												class="menu w-36 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+											>
 												{#if isCurrentUser && canModifyMessage(message.created_at)}
 													<li>
-														<button 
+														<button
 															onclick={() => startEditMessage(message)}
-															class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left"
+															class="flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm hover:bg-base-200"
 														>
 															<Edit size={14} />
 															Edit
 														</button>
 													</li>
 													<li>
-														<button 
+														<button
 															onclick={() => handleDeleteMessage(message.id)}
-															class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left text-error"
+															class="flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm text-error hover:bg-base-200"
 															class:loading={deletingMessageId === message.id}
 															disabled={deletingMessageId === message.id}
 														>
@@ -581,9 +586,9 @@
 													</li>
 												{/if}
 												<li>
-													<button 
+													<button
 														onclick={() => startForwardMessage(message)}
-														class="flex items-center gap-2 text-sm p-2 hover:bg-base-200 rounded-lg w-full text-left"
+														class="flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm hover:bg-base-200"
 													>
 														<Forward size={14} />
 														Forward
@@ -594,9 +599,9 @@
 									{/if}
 								</div>
 							{/if}
-							
+
 							{#if showAvatar || index === $currentMessages.length - 1}
-								<p class="text-xs text-base-content/60 mt-1" class:text-right={isCurrentUser}>
+								<p class="mt-1 text-xs text-base-content/60" class:text-right={isCurrentUser}>
 									{formatMessageTime(message.created_at)}
 								</p>
 							{/if}
@@ -607,24 +612,26 @@
 		</div>
 
 		<!-- Message Input -->
-		<div class="p-4 border-t border-base-300/50 bg-base-100/95 backdrop-blur-xl sticky bottom-0 z-10">
+		<div
+			class="sticky bottom-0 z-10 border-t border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+		>
 			<form onsubmit={handleSendMessage} class="flex gap-2">
-				<input 
-					type="text" 
-					placeholder="Type a message..." 
-					class="input input-bordered flex-1 bg-base-200/50 focus:bg-base-200/80"
+				<input
+					type="text"
+					placeholder="Type a message..."
+					class="input-bordered input flex-1 bg-base-200/50 focus:bg-base-200/80"
 					bind:value={messageInput}
 					disabled={sending}
 					autocomplete="off"
 				/>
-				<button 
-					type="submit" 
-					class="btn btn-primary disabled:opacity-50 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed"
+				<button
+					type="submit"
+					class="btn btn-primary disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-600 disabled:opacity-50"
 					class:loading={sending}
 					disabled={sending || !messageInput.trim()}
 				>
 					{#if sending}
-						<span class="loading loading-spinner loading-sm"></span>
+						<span class="loading loading-sm loading-spinner"></span>
 					{:else}
 						<Send size={20} />
 					{/if}
@@ -635,7 +642,7 @@
 
 	<!-- Forward Message Modal -->
 	{#if forwardMessage}
-		<ForwardMessageModal 
+		<ForwardMessageModal
 			bind:show={showForwardModal}
 			messageId={forwardMessage.id}
 			messageContent={forwardMessage.content}
@@ -649,15 +656,15 @@
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
 	}
-	
+
 	.overflow-y-auto::-webkit-scrollbar {
 		width: 6px;
 	}
-	
+
 	.overflow-y-auto::-webkit-scrollbar-track {
 		background: transparent;
 	}
-	
+
 	.overflow-y-auto::-webkit-scrollbar-thumb {
 		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 3px;
@@ -671,9 +678,7 @@
 	}
 
 	.modern-message-bubble.current-user {
-		background: linear-gradient(135deg, 
-			hsl(346 77% 49%) 0%, 
-			hsl(340 70% 65%) 100%);
+		background: linear-gradient(135deg, hsl(346 77% 49%) 0%, hsl(340 70% 65%) 100%);
 		color: white;
 		box-shadow: 0 4px 12px hsl(346 77% 49% / 0.3);
 	}
@@ -694,17 +699,17 @@
 	}
 
 	/* Dark theme adjustments */
-	[data-theme="dark"] .modern-message-bubble.other-user {
+	[data-theme='dark'] .modern-message-bubble.other-user {
 		background: hsl(var(--base-300) / 0.6);
 		border: 1px solid hsl(var(--base-300) / 0.3);
 	}
 
-	[data-theme="dark"] .modern-message-bubble:hover {
+	[data-theme='dark'] .modern-message-bubble:hover {
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 	}
 
 	/* Enhanced message input styling for dark theme */
-	[data-theme="dark"] .input:focus {
+	[data-theme='dark'] .input:focus {
 		background: hsl(var(--base-200) / 0.9);
 		border-color: hsl(346 77% 65% / 0.5);
 	}

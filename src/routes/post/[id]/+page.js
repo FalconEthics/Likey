@@ -13,7 +13,8 @@ export async function load({ params }) {
 		// Fetch the post with user data and engagement counts
 		const { data: post, error: postError } = await supabase
 			.from('posts')
-			.select(`
+			.select(
+				`
 				*,
 				profiles:user_id (
 					id,
@@ -23,7 +24,8 @@ export async function load({ params }) {
 				),
 				like_count:likes(count),
 				comment_count:comments(count)
-			`)
+			`
+			)
 			.eq('id', postId)
 			.single();
 
@@ -33,7 +35,9 @@ export async function load({ params }) {
 		}
 
 		// Check if current user liked this post (if authenticated)
-		const { data: { user } } = await supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await supabase.auth.getUser();
 		let liked_by_user = false;
 
 		if (user) {
@@ -43,7 +47,7 @@ export async function load({ params }) {
 				.eq('post_id', postId)
 				.eq('user_id', user.id)
 				.single();
-			
+
 			liked_by_user = !!likeData;
 		}
 

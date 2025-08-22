@@ -31,7 +31,8 @@ export async function searchUsers(query, limit = 20) {
 		// Use full-text search for better results
 		const { data, error } = await supabase
 			.from('profiles')
-			.select(`
+			.select(
+				`
 				id,
 				username,
 				display_name,
@@ -41,7 +42,8 @@ export async function searchUsers(query, limit = 20) {
 				follows:follows!following_id (
 					follower_id
 				)
-			`)
+			`
+			)
 			.or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
 			.order('followers_count', { ascending: false })
 			.limit(limit);
@@ -49,11 +51,11 @@ export async function searchUsers(query, limit = 20) {
 		if (error) throw error;
 
 		// Add is_following flag
-		const results = data.map(profile => ({
+		const results = data.map((profile) => ({
 			...profile,
-			is_following: currentUser ? 
-				profile.follows.some(follow => follow.follower_id === currentUser.id) : 
-				false
+			is_following: currentUser
+				? profile.follows.some((follow) => follow.follower_id === currentUser.id)
+				: false
 		}));
 
 		return { data: results, error: null };
@@ -72,7 +74,8 @@ export async function getTrendingPosts(limit = 20) {
 	try {
 		const { data, error } = await supabase
 			.from('trending_posts')
-			.select(`
+			.select(
+				`
 				post_id,
 				score,
 				posts:post_id (
@@ -86,7 +89,8 @@ export async function getTrendingPosts(limit = 20) {
 						user_id
 					)
 				)
-			`)
+			`
+			)
 			.order('score', { ascending: false })
 			.limit(limit);
 
@@ -95,13 +99,13 @@ export async function getTrendingPosts(limit = 20) {
 		// Process posts to add user data and like status
 		const currentUser = get(user);
 		const posts = data
-			.filter(item => item.posts) // Filter out null posts
-			.map(item => ({
+			.filter((item) => item.posts) // Filter out null posts
+			.map((item) => ({
 				...item.posts,
 				user: item.posts.profiles,
-				liked_by_user: currentUser ? 
-					item.posts.likes.some(like => like.user_id === currentUser.id) : 
-					false
+				liked_by_user: currentUser
+					? item.posts.likes.some((like) => like.user_id === currentUser.id)
+					: false
 			}));
 
 		return { data: posts, error: null };
@@ -131,7 +135,8 @@ export async function getUserRecommendations(limit = 10) {
 		// Get the recommendations
 		const { data, error } = await supabase
 			.from('user_recommendations')
-			.select(`
+			.select(
+				`
 				*,
 				recommended_user:recommended_user_id (
 					id,
@@ -141,14 +146,15 @@ export async function getUserRecommendations(limit = 10) {
 					profile_pic_url,
 					followers_count
 				)
-			`)
+			`
+			)
 			.eq('user_id', currentUser.id)
 			.order('score', { ascending: false })
 			.limit(limit);
 
 		if (error) throw error;
 
-		const recommendations = data.map(rec => ({
+		const recommendations = data.map((rec) => ({
 			...rec.recommended_user,
 			recommendation_reason: rec.reason,
 			recommendation_score: rec.score
@@ -173,7 +179,8 @@ export async function getTrendingUsers(limit = 15) {
 		// Get users with highest recent engagement
 		const { data, error } = await supabase
 			.from('profiles')
-			.select(`
+			.select(
+				`
 				id,
 				username,
 				display_name,
@@ -184,7 +191,8 @@ export async function getTrendingUsers(limit = 15) {
 				follows:follows!following_id (
 					follower_id
 				)
-			`)
+			`
+			)
 			.order('followers_count', { ascending: false })
 			.limit(limit * 2); // Get more than needed to filter out current user and followed users
 
@@ -192,13 +200,14 @@ export async function getTrendingUsers(limit = 15) {
 
 		// Filter out current user and already followed users
 		const filteredUsers = data
-			.filter(profile => {
+			.filter((profile) => {
 				if (currentUser && profile.id === currentUser.id) return false;
-				if (currentUser && profile.follows.some(follow => follow.follower_id === currentUser.id)) return false;
+				if (currentUser && profile.follows.some((follow) => follow.follower_id === currentUser.id))
+					return false;
 				return true;
 			})
 			.slice(0, limit)
-			.map(profile => ({
+			.map((profile) => ({
 				...profile,
 				is_following: false
 			}));
@@ -217,7 +226,7 @@ export async function getTrendingUsers(limit = 15) {
 export async function refreshTrendingPosts() {
 	try {
 		const { error } = await supabase.rpc('refresh_trending_posts');
-		
+
 		if (error) throw error;
 
 		return { success: true, error: null };
@@ -238,7 +247,8 @@ export async function getExplorePosts(limit = 30) {
 	try {
 		const { data, error } = await supabase
 			.from('posts')
-			.select(`
+			.select(
+				`
 				*,
 				profiles:user_id (
 					username,
@@ -248,7 +258,8 @@ export async function getExplorePosts(limit = 30) {
 				likes:likes!left (
 					user_id
 				)
-			`)
+			`
+			)
 			.order('like_count', { ascending: false })
 			.order('created_at', { ascending: false })
 			.limit(limit);
@@ -256,12 +267,12 @@ export async function getExplorePosts(limit = 30) {
 		if (error) throw error;
 
 		// Process posts
-		const posts = data.map(post => ({
+		const posts = data.map((post) => ({
 			...post,
 			user: post.profiles,
-			liked_by_user: currentUser ? 
-				post.likes.some(like => like.user_id === currentUser.id) : 
-				false
+			liked_by_user: currentUser
+				? post.likes.some((like) => like.user_id === currentUser.id)
+				: false
 		}));
 
 		return { data: posts, error: null };

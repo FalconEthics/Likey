@@ -22,7 +22,9 @@ export async function load({ params }) {
 	}
 
 	// Get current user info if authenticated
-	const { data: { user: currentUser } } = await supabase.auth.getUser();
+	const {
+		data: { user: currentUser }
+	} = await supabase.auth.getUser();
 	let currentUserProfile = null;
 
 	if (currentUser) {

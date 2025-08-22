@@ -8,8 +8,9 @@
 		getExplorePosts,
 		refreshTrendingPosts
 	} from '$lib/search.js';
-	import Post from '$lib/components/Post.svelte';
-	import UserCard from '$lib/components/UserCard.svelte';
+	import TrendingSection from '$lib/components/explore/TrendingSection.svelte';
+	import PeopleSection from '$lib/components/explore/PeopleSection.svelte';
+	import LatestSection from '$lib/components/explore/LatestSection.svelte';
 
 	// Lucide Icons
 	import { RefreshCw, Flame, Users, Camera } from 'lucide-svelte';
@@ -154,91 +155,17 @@
 	{:else}
 		<!-- Trending Tab -->
 		{#if activeTab === 'trending'}
-			<div class="space-y-8">
-				<!-- Recommended Users (if logged in) -->
-				{#if $user && $recommendedUsers.length > 0}
-					<div>
-						<h2 class="mb-4 text-xl font-semibold">Suggested for you</h2>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-							{#each $recommendedUsers as recommendedUser (recommendedUser.id)}
-								<UserCard user={recommendedUser} showReason={true} />
-							{/each}
-						</div>
-					</div>
-				{/if}
-
-				<!-- Trending Posts -->
-				<div>
-					<h2 class="mb-4 text-xl font-semibold">Trending Posts</h2>
-					{#if $trendingPosts.length === 0}
-						<div class="py-8 text-center">
-							<div class="mb-4 text-4xl">📈</div>
-							<p class="text-base-content/60">No trending posts yet. Check back later!</p>
-						</div>
-					{:else}
-						<!-- Use simple rendering for trending posts (limited quantity) -->
-						<div class="space-y-6">
-							{#each $trendingPosts as post (post.id)}
-								<Post {post} />
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
+			<TrendingSection {loading} onRefresh={refreshData} />
 		{/if}
 
 		<!-- Users Tab -->
 		{#if activeTab === 'users'}
-			<div class="space-y-8">
-				<!-- Recommended Users (if logged in) -->
-				{#if $user && $recommendedUsers.length > 0}
-					<div>
-						<h2 class="mb-4 text-xl font-semibold">Recommended for you</h2>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-							{#each $recommendedUsers as recommendedUser (recommendedUser.id)}
-								<UserCard user={recommendedUser} showReason={true} />
-							{/each}
-						</div>
-					</div>
-				{/if}
-
-				<!-- Trending Users -->
-				<div>
-					<h2 class="mb-4 text-xl font-semibold">Popular Users</h2>
-					{#if $trendingUsers.length === 0}
-						<div class="py-8 text-center">
-							<div class="mb-4 text-4xl">👥</div>
-							<p class="text-base-content/60">No users to show yet.</p>
-						</div>
-					{:else}
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-							{#each $trendingUsers as trendingUser (trendingUser.id)}
-								<UserCard user={trendingUser} />
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
+			<PeopleSection {loading} />
 		{/if}
 
 		<!-- Latest Tab -->
 		{#if activeTab === 'latest'}
-			<div>
-				<h2 class="mb-4 text-xl font-semibold">Latest Posts</h2>
-				{#if explorePosts.length === 0}
-					<div class="py-8 text-center">
-						<Camera size={48} class="mx-auto mb-4 text-base-content/40" />
-						<p class="text-base-content/60">No posts to explore yet.</p>
-					</div>
-				{:else}
-					<!-- Simple rendering for explore posts (manageable quantity) -->
-					<div class="max-h-[calc(100vh-16rem)] space-y-6 overflow-y-auto">
-						{#each explorePosts as post (post.id)}
-							<Post {post} />
-						{/each}
-					</div>
-				{/if}
-			</div>
+			<LatestSection bind:explorePosts {loading} onRefresh={refreshData} />
 		{/if}
 	{/if}
 </div>

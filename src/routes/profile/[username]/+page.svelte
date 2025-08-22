@@ -2,13 +2,13 @@
 	import { onMount } from 'svelte';
 	import { user } from '$lib/stores.js';
 	import { supabase } from '$lib/supabase.js';
-	import Post from '$lib/components/Post.svelte';
+	import VirtualizedPostList from '$lib/components/VirtualizedPostList.svelte';
 	import { createNotification } from '$lib/notifications.js';
 	import { getOrCreateConversation } from '$lib/messages.js';
 	import { goto } from '$app/navigation';
 
 	// Lucide Icons
-	import { MessageCircle } from 'lucide-svelte';
+	import { MessageCircle, Camera } from 'lucide-svelte';
 
 	const { data } = $props();
 	let { profile } = data;
@@ -228,7 +228,7 @@
 		</div>
 	</div>
 
-	<!-- Posts Grid -->
+	<!-- Posts Section -->
 	<div class="space-y-6">
 		<div class="flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Posts</h2>
@@ -238,20 +238,20 @@
 			</div>
 		</div>
 
-		{#if posts.length === 0}
-			<div class="py-12 text-center">
-				<div class="mb-4 text-6xl">📷</div>
-				<h3 class="mb-2 text-xl font-semibold">
-					{isCurrentUser ? "You haven't" : `${profile.display_name} hasn't`} posted anything yet
-				</h3>
-				{#if isCurrentUser}
-					<p class="mb-4 text-base-content/60">Share your first post to get started!</p>
-				{/if}
-			</div>
-		{:else}
-			{#each posts as post (post.id)}
-				<Post {post} on:postDeleted={handlePostDeleted} />
-			{/each}
-		{/if}
+		<VirtualizedPostList
+			bind:posts
+			loading={false}
+			hasMore={false}
+			emptyStateIcon={Camera}
+			emptyStateTitle={isCurrentUser ? "You haven't posted anything yet" : `${profile.display_name} hasn't posted anything yet`}
+			emptyStateDescription={isCurrentUser ? "Share your first post to get started!" : "Check back later for new posts!"}
+			showCreateButton={false}
+			showHeader={false}
+			showRefreshButton={false}
+			virtualizationThreshold={30}
+			containerHeight="auto"
+			containerClass="profile-posts-container"
+			on:postDeleted={handlePostDeleted}
+		/>
 	</div>
 </div>

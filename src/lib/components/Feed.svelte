@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import {
 		posts,
 		feedLoading,
@@ -14,7 +13,7 @@
 		searchLoading
 	} from '../stores.js';
 	import { supabase } from '../supabase.js';
-	import Post from './Post.svelte';
+	import VirtualizedPostList from './VirtualizedPostList.svelte';
 	import {
 		getTrendingPosts,
 		getUserRecommendations,
@@ -32,11 +31,6 @@
 	const postsPerPage = 20; // Increased for better virtualization
 	let searchTimeout;
 	let explorePosts = $state([]);
-	let parentRef = $state();
-	let useVirtualization = $state(false); // Enable when we have many posts
-
-	// Estimated post height for virtualization
-	const estimateSize = () => 450;
 
 	/**
 	 * Load posts from the database
@@ -83,29 +77,10 @@
 
 			hasMore = data.length === postsPerPage;
 			page += 1;
-
-			// Enable virtualization when we have more than 50 posts
-			if ($posts.length > 50) {
-				useVirtualization = true;
-			}
 		} catch (error) {
 			console.error('Error loading posts:', error);
 		} finally {
 			feedLoading.set(false);
-		}
-	}
-
-	/**
-	 * Handle infinite scroll
-	 */
-	function handleScroll() {
-		if (hasMore && !$feedLoading) {
-			const scrollPosition = window.innerHeight + window.scrollY;
-			const documentHeight = document.documentElement.offsetHeight;
-
-			if (scrollPosition >= documentHeight - 1000) {
-				loadPosts(true);
-			}
 		}
 	}
 
@@ -179,42 +154,22 @@
 		searchResults.set([]);
 	}
 
-	// Create virtualizer when needed
-	let virtualizer = $state();
-
-	$effect(() => {
-		if (useVirtualization && parentRef && $posts.length > 50) {
-			virtualizer = createVirtualizer({
-				count: $posts.length,
-				getScrollElement: () => parentRef,
-				estimateSize,
-				overscan: 10
-			});
-		} else {
-			virtualizer = null;
-		}
-	});
-
-	// Check if we need to load more when using virtualization
-	$effect(() => {
-		if (virtualizer) {
-			const items = virtualizer.getVirtualItems();
-			if (items.length > 0) {
-				const lastItem = items[items.length - 1];
-				if (lastItem.index >= $posts.length - 8 && hasMore && !$feedLoading) {
-					loadPosts(true);
-				}
-			}
-		}
-	});
+	/**
+	 * Refresh feed data
+	 */
+	function refreshFeed() {
+		page = 0;
+		hasMore = true;
+		posts.set([]);
+		loadPosts();
+		loadSidebarData();
+	}
 
 	onMount(() => {
 		loadPosts();
 		loadSidebarData();
 
-		window.addEventListener('scroll', handleScroll);
 		return () => {
-			window.removeEventListener('scroll', handleScroll);
 			if (searchTimeout) {
 				clearTimeout(searchTimeout);
 			}
@@ -224,7 +179,7 @@
 
 <!-- Modern Mobile Layout -->
 <div class="mx-auto max-w-2xl px-4 pb-28 lg:hidden">
-	<!-- Modern Header Section -->
+	<!-- Mobile Header -->
 	<div
 		class="sticky top-16 z-40 -mx-4 mb-6 border-b border-base-300/50 bg-base-100/80 px-4 py-4 backdrop-blur-xl"
 	>
@@ -235,12 +190,7 @@
 			</div>
 			<button
 				class="btn btn-circle btn-ghost"
-				onclick={() => {
-					page = 0;
-					hasMore = true;
-					posts.set([]);
-					loadPosts();
-				}}
+				onclick={refreshFeed}
 				disabled={$feedLoading}
 				title="Refresh feed"
 			>
@@ -269,67 +219,21 @@
 		</button>
 	</div>
 
-	<!-- Posts -->
-	{#if $posts.length === 0 && !$feedLoading}
-		<div class="modern-empty-state">
-			<div class="empty-state-content">
-				<div class="empty-state-icon">
-					<Camera size={48} />
-					<div class="empty-state-glow"></div>
-				</div>
-				<h3 class="empty-state-title">Your feed awaits</h3>
-				<p class="empty-state-description">
-					Follow some amazing creators or share your first moment to see posts here!
-				</p>
-				<div class="empty-state-actions">
-					<button class="btn btn-sm btn-primary" onclick={() => showCreatePost.set(true)}>
-						<Plus size={16} />
-						Create your first post
-					</button>
-				</div>
-			</div>
-		</div>
-	{:else}
-		{#if useVirtualization && virtualizer}
-			<!-- Virtualized posts for performance -->
-			<div
-				bind:this={parentRef}
-				class="virtual-posts-container"
-				style="height: 600px; overflow-y: auto;"
-			>
-				<div style="height: {virtualizer.getTotalSize()}px; width: 100%; position: relative;">
-					{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.index)}
-						<div
-							style="position: absolute; top: 0; left: 0; width: 100%; height: {virtualItem.size}px; transform: translateY({virtualItem.start}px);"
-						>
-							<div class="mb-6">
-								<Post post={$posts[virtualItem.index]} />
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<!-- Regular list for smaller feeds -->
-			<div class="space-y-6">
-				{#each $posts as post (post.id)}
-					<Post {post} />
-				{/each}
-			</div>
-		{/if}
-
-		<!-- Loading indicator -->
-		{#if $feedLoading}
-			<div class="flex justify-center py-8">
-				<span class="loading loading-md loading-spinner"></span>
-			</div>
-		{/if}
-
-		<!-- End of feed indicator -->
-		{#if !hasMore && $posts.length > 0}
-			<div class="py-8 text-center text-base-content/60">You've reached the end of your feed!</div>
-		{/if}
-	{/if}
+	<!-- Mobile Posts -->
+	<VirtualizedPostList
+		bind:posts={$posts}
+		loading={$feedLoading}
+		{hasMore}
+		emptyStateIcon={Camera}
+		emptyStateTitle="Your feed awaits"
+		emptyStateDescription="Follow some amazing creators or share your first moment to see posts here!"
+		showCreateButton={true}
+		showHeader={false}
+		onLoadMore={() => loadPosts(true)}
+		onCreatePost={() => showCreatePost.set(true)}
+		virtualizationThreshold={50}
+		containerHeight="600px"
+	/>
 </div>
 
 <!-- Desktop Layout with Sidebars -->
@@ -427,7 +331,7 @@
 
 	<!-- Main Content -->
 	<div class="col-span-6 pb-24">
-		<!-- Modern Header Section -->
+		<!-- Desktop Header -->
 		<div
 			class="sticky top-4 z-40 mb-6 rounded-2xl border border-base-300/50 bg-base-100/80 p-6 backdrop-blur-xl"
 		>
@@ -438,13 +342,7 @@
 				</div>
 				<button
 					class="btn btn-circle btn-ghost"
-					onclick={() => {
-						page = 0;
-						hasMore = true;
-						posts.set([]);
-						loadPosts();
-						loadSidebarData();
-					}}
+					onclick={refreshFeed}
 					disabled={$feedLoading}
 					title="Refresh feed"
 				>
@@ -473,65 +371,21 @@
 			</button>
 		</div>
 
-		<!-- Posts -->
-		{#if $posts.length === 0 && !$feedLoading}
-			<div class="modern-empty-state">
-				<div class="empty-state-content">
-					<div class="empty-state-icon">
-						<Camera size={48} />
-						<div class="empty-state-glow"></div>
-					</div>
-					<h3 class="empty-state-title">Your feed awaits</h3>
-					<p class="empty-state-description">
-						Follow some amazing creators or share your first moment to see posts here!
-					</p>
-					<div class="empty-state-actions">
-						<button class="btn btn-sm btn-primary" onclick={() => showCreatePost.set(true)}>
-							<Plus size={16} />
-							Create your first post
-						</button>
-					</div>
-				</div>
-			</div>
-		{:else}
-			{#if useVirtualization && virtualizer}
-				<!-- Virtualized posts for performance -->
-				<div class="virtual-posts-container" style="height: 700px; overflow-y: auto;">
-					<div style="height: {virtualizer.getTotalSize()}px; width: 100%; position: relative;">
-						{#each virtualizer.getVirtualItems() as virtualItem (virtualItem.index)}
-							<div
-								style="position: absolute; top: 0; left: 0; width: 100%; height: {virtualItem.size}px; transform: translateY({virtualItem.start}px);"
-							>
-								<div class="mb-6">
-									<Post post={$posts[virtualItem.index]} />
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{:else}
-				<!-- Regular list for smaller feeds -->
-				<div class="space-y-6">
-					{#each $posts as post (post.id)}
-						<Post {post} />
-					{/each}
-				</div>
-			{/if}
-
-			<!-- Loading indicator -->
-			{#if $feedLoading}
-				<div class="flex justify-center py-8">
-					<span class="loading loading-md loading-spinner"></span>
-				</div>
-			{/if}
-
-			<!-- End of feed indicator -->
-			{#if !hasMore && $posts.length > 0}
-				<div class="py-8 text-center text-base-content/60">
-					You've reached the end of your feed!
-				</div>
-			{/if}
-		{/if}
+		<!-- Desktop Posts -->
+		<VirtualizedPostList
+			bind:posts={$posts}
+			loading={$feedLoading}
+			{hasMore}
+			emptyStateIcon={Camera}
+			emptyStateTitle="Your feed awaits"
+			emptyStateDescription="Follow some amazing creators or share your first moment to see posts here!"
+			showCreateButton={true}
+			showHeader={false}
+			onLoadMore={() => loadPosts(true)}
+			onCreatePost={() => showCreatePost.set(true)}
+			virtualizationThreshold={50}
+			containerHeight="700px"
+		/>
 	</div>
 
 	<!-- Right Sidebar -->
@@ -654,29 +508,6 @@
 </div>
 
 <style>
-	/* Virtual container styling */
-	.virtual-posts-container {
-		border-radius: 12px;
-		background: transparent;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-track {
-		background: hsl(var(--base-200));
-		border-radius: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-thumb {
-		background: hsl(var(--base-300));
-		border-radius: 6px;
-	}
-
-	.virtual-posts-container::-webkit-scrollbar-thumb:hover {
-		background: hsl(var(--base-content) / 0.3);
-	}
 
 	/* Modern Create Post Button */
 	.modern-create-post {
@@ -788,11 +619,6 @@
 		}
 	}
 
-	/* Modern Posts Container */
-	:global(.space-y-6) {
-		position: relative;
-	}
-
 	/* Enhanced loading states */
 	:global(.loading) {
 		color: hsl(var(--primary));
@@ -810,84 +636,6 @@
 		box-shadow:
 			0 8px 30px rgba(0, 0, 0, 0.3),
 			0 0 0 2px hsl(var(--primary) / 0.4);
-	}
-
-	/* Modern Empty State */
-	.modern-empty-state {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 400px;
-		padding: 2rem;
-	}
-
-	.empty-state-content {
-		text-align: center;
-		max-width: 320px;
-	}
-
-	.empty-state-icon {
-		position: relative;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 80px;
-		height: 80px;
-		background: linear-gradient(135deg, hsl(var(--base-200)) 0%, hsl(var(--base-300)) 100%);
-		border-radius: 24px;
-		margin-bottom: 24px;
-		color: hsl(var(--base-content) / 0.4);
-	}
-
-	.empty-state-glow {
-		position: absolute;
-		inset: -4px;
-		background: linear-gradient(
-			135deg,
-			hsl(var(--primary) / 0.1) 0%,
-			hsl(340 70% 65% / 0.1) 50%,
-			hsl(348 80% 70% / 0.1) 100%
-		);
-		border-radius: 28px;
-		opacity: 0.3;
-		filter: blur(8px);
-		animation: gentle-glow 3s ease-in-out infinite;
-		z-index: -1;
-	}
-
-	.empty-state-title {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: hsl(var(--base-content));
-		margin-bottom: 12px;
-		background: linear-gradient(135deg, hsl(var(--base-content)) 0%, hsl(var(--primary)) 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	.empty-state-description {
-		color: hsl(var(--base-content) / 0.6);
-		font-size: 1rem;
-		line-height: 1.6;
-		margin-bottom: 24px;
-	}
-
-	.empty-state-actions {
-		display: flex;
-		justify-content: center;
-	}
-
-	@keyframes gentle-glow {
-		0%,
-		100% {
-			opacity: 0.2;
-			filter: blur(8px);
-		}
-		50% {
-			opacity: 0.4;
-			filter: blur(12px);
-		}
 	}
 
 	/* Desktop Create Post Button */
@@ -926,18 +674,5 @@
 			font-size: 0.85rem;
 		}
 
-		.empty-state-icon {
-			width: 64px;
-			height: 64px;
-			border-radius: 20px;
-		}
-
-		.empty-state-title {
-			font-size: 1.25rem;
-		}
-
-		.empty-state-description {
-			font-size: 0.9rem;
-		}
 	}
 </style>

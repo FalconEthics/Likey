@@ -136,7 +136,7 @@
 	<meta name="description" content="{profile.bio || `${profile.display_name}'s profile on Likey`}" />
 </svelte:head>
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto pb-28 lg:pb-6 px-4">
 	<!-- Profile Header -->
 	<div class="card bg-base-100 shadow-lg mb-6">
 		<div class="card-body">
@@ -167,14 +167,13 @@
 						<!-- Follow/Edit Button -->
 						{#if $user}
 							{#if isCurrentUser}
-								<a href="/settings" class="btn btn-outline">
+								<a href="/settings" class="btn btn-outline min-h-[44px] h-11 px-6 border-[hsl(346_77%_49%)] text-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_49%)] hover:text-white font-medium">
 									Edit Profile
 								</a>
 							{:else}
-								<div class="flex gap-2">
+								<div class="flex gap-2 items-center">
 									<button 
-										class="btn"
-										class:btn-primary={!isFollowing}
+										class="btn min-h-[44px] h-11 px-6 flex-1 min-w-[100px] font-medium border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white"
 										class:btn-outline={isFollowing}
 										class:loading={followLoading}
 										onclick={toggleFollow}
@@ -184,7 +183,7 @@
 									</button>
 									
 									<button 
-										class="btn btn-ghost"
+										class="btn btn-ghost min-h-[44px] h-11 w-11 p-0 flex items-center justify-center border border-base-300 hover:bg-base-200"
 										onclick={startConversation}
 										title="Send message"
 									>

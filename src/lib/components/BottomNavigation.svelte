@@ -78,12 +78,12 @@
   
   .nav-container {
     position: relative;
-    max-width: 320px;
+    max-width: min(85vw, 420px);
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 20px;
+    padding: 8px 24px;
   }
   
   /* Glassmorphism background */
@@ -280,15 +280,15 @@
   }
   
   /* Tablet responsive */
-  @media (min-width: 768px) {
+  @media (min-width: 768px) and (max-width: 1023px) {
     .nav-container {
-      max-width: min(90vw, 500px);
-      padding: 10px 32px;
+      max-width: min(75vw, 600px);
+      padding: 12px 40px;
     }
     
     .nav-item {
-      padding: 12px 16px;
-      min-width: 80px;
+      padding: 14px 20px;
+      min-width: 90px;
     }
     
     .nav-icon-wrapper {

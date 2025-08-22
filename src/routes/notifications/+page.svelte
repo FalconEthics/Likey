@@ -53,13 +53,13 @@
 </svelte:head>
 
 {#if $user}
-	<div class="max-w-2xl mx-auto pb-28 lg:pb-6">
-		<div class="flex items-center justify-between mb-6">
+	<div class="max-w-2xl mx-auto pb-28 lg:pb-6 px-4">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
 			<h1 class="text-3xl font-bold bg-gradient-to-r from-[hsl(346_77%_49%)] to-[hsl(340_70%_65%)] bg-clip-text text-transparent">Notifications</h1>
 			
 			{#if $notifications.some(n => !n.read)}
 				<button 
-					class="btn btn-outline btn-sm border-[hsl(346_77%_49%)] text-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_49%)] hover:text-white"
+					class="btn btn-outline btn-sm border-[hsl(346_77%_49%)] text-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_49%)] hover:text-white w-fit self-start sm:self-auto"
 					onclick={markAllNotificationsAsRead}
 				>
 					Mark all as read

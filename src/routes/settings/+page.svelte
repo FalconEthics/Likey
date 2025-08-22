@@ -144,7 +144,7 @@
 </svelte:head>
 
 {#if $user}
-	<div class="max-w-2xl mx-auto">
+	<div class="max-w-2xl mx-auto pb-28 lg:pb-6 px-4">
 		<h1 class="text-3xl font-bold mb-6">Settings</h1>
 		
 		<div class="card bg-base-100 shadow-lg">
@@ -212,6 +212,7 @@
 					<div class="form-control">
 						<label class="label" for="username">
 							<span class="label-text">Username</span>
+							<span class="label-text-alt text-warning">Username cannot be changed</span>
 						</label>
 						<input 
 							id="username"
@@ -220,27 +221,22 @@
 							value={$user.username}
 							disabled
 						/>
-						<div class="label">
-							<span class="label-text-alt">Username cannot be changed</span>
-						</div>
 					</div>
 					
 					<!-- Bio -->
 					<div class="form-control">
 						<label class="label" for="bio">
 							<span class="label-text">Bio</span>
+							<span class="label-text-alt">{bio.length}/160 characters</span>
 						</label>
 						<textarea 
 							id="bio"
-							class="textarea textarea-bordered h-24" 
+							class="textarea textarea-bordered h-24 mt-2" 
 							placeholder="Tell us about yourself..."
 							bind:value={bio}
 							disabled={loading}
 							maxlength="160"
 						></textarea>
-						<div class="label">
-							<span class="label-text-alt">{bio.length}/160 characters</span>
-						</div>
 					</div>
 					
 					<!-- Save Button -->

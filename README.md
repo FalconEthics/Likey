@@ -1,262 +1,469 @@
-# Likey - Social Media Platform
+<a name="readme-top"></a>
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-A modern Instagram-like social media platform built with SvelteKit, Supabase, and DaisyUI.
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/soumikdas/Likey">
+    <img src="src/lib/assets/Likey.png" alt="Logo" width="100" height="100">
+  </a>
 
-## 🚀 Features
+<h3 align="center">Likey - Social Media Platform</h3>
 
-### Core Features (MVP)
-- **User Authentication** - Sign up/login with email & password using Supabase Auth
-- **Profile Management** - Customizable profiles with usernames, display names, bios, and profile pictures
-- **Photo Sharing** - Upload and share multiple photos per post with automatic compression
-- **Feed System** - Home feed with infinite scroll showing posts from followed users
-- **Social Interactions** - Like and comment on posts
-- **Following System** - Follow/unfollow users with real-time follower counts
-- **Real-time Notifications** - Instant notifications for likes, comments, and new followers
+  <p align="center">
+    A modern, production-ready Instagram-like social media platform built with SvelteKit 5, Supabase, and modern web technologies.
+  <p align="center">
+    <a href="https://likey-social.vercel.app/">View Demo</a>
+    ·
+    <a href="https://github.com/soumikdas/Likey/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/soumikdas/Likey/issues">Request Feature</a>
+  </p>
+</div>
 
-### Extended Features
-- **Direct Messaging** - Real-time 1:1 chat with message history
-- **Trending Posts** - Algorithm-based trending content with time decay
-- **Explore Page** - Discover trending posts, popular users, and latest content
-- **User Recommendations** - Mutual follower-based user suggestions
-- **Profile Search** - Find users by username or display name with real-time results
-- **Virtualized Feed** - High-performance scrolling for thousands of posts
-- **Icon System** - Lucide Svelte icons throughout the interface
-- **Responsive Design** - Works perfectly on desktop and mobile
-- **Dark/Light Mode** - Theme switching with persistence
-- **Image Optimization** - Automatic image compression before upload
-- **Real-time Updates** - Live updates using Supabase Realtime
-- **PWA Support** - Installable as a mobile app
+## <a href="https://likey-social.vercel.app/">🚀 Live Demo</a>
 
-## 🛠 Tech Stack
+<!-- ABOUT THE PROJECT -->
 
-- **Runtime**: Bun
-- **Frontend**: SvelteKit 5+ with modern syntax
-- **Styling**: Tailwind CSS + DaisyUI
-- **Backend**: Supabase (PostgreSQL + Auth + Storage + Realtime)
+## About The Project
+
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#key-features">Key Features</a></li>
+      </ul>
+    </li>
+    <li><a href="#installation">Installation</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#security-features">Security Features</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+<!-- Add screenshot here when available -->
+<!-- <img src="src/assets/screenshot.png"> -->
+
+Likey is a production-ready, modern social media platform that recreates the Instagram experience with cutting-edge web technologies. Built with SvelteKit 5's latest features, real-time capabilities through Supabase, and optimized for performance and user experience.
+
+### 🎯 Key Features
+
+#### Core Social Features
+- **📱 User Authentication**: Secure email/password authentication with Supabase Auth
+- **👤 Profile Management**: Customizable profiles with usernames, display names, bios, and profile pictures
+- **📸 Photo Sharing**: Upload and share multiple photos per post with automatic compression
+- **🏠 Feed System**: Infinite scroll home feed with posts from followed users
+- **❤️ Social Interactions**: Like and comment on posts with real-time updates
+- **👥 Following System**: Follow/unfollow users with live follower counts
+- **🔔 Real-time Notifications**: Instant notifications for likes, comments, and new followers
+
+#### Advanced Features
+- **💬 Direct Messaging**: Real-time 1:1 chat with message history and context menus
+- **📈 Trending Algorithm**: Score-based trending posts with time decay
+- **🔍 Explore Page**: Discover trending posts, popular users, and latest content
+- **🎯 User Recommendations**: Intelligent user suggestions based on mutual connections
+- **⚡ Search System**: Real-time user search with debounced queries
+- **🎨 Modern UI/UX**: Glassmorphism design with smooth animations and transitions
+- **🌙 Theme Support**: Light/dark mode with system preference detection
+- **📱 Responsive Design**: Mobile-first design with desktop enhancements
+- **🔄 Real-time Updates**: Live updates using Supabase Realtime subscriptions
+
+### Built With
+
+* ![SvelteKit][SvelteKit.com] - SvelteKit 5 with modern runes syntax and server-side rendering
+* ![TypeScript][TypeScript.com] - JSDoc type annotations for type safety without TypeScript overhead
+* ![Supabase][Supabase.com] - PostgreSQL database with real-time subscriptions, auth, and storage
+* ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
+* ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
+* ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
+* ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
+* ![Vercel][Vercel.com] - Seamless deployment and hosting platform
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+<!-- INSTALLATION -->
+
+## Installation
+
+Get a local copy up and running with these simple steps.
+
+### Prerequisites
+
+- **Bun** (recommended) or Node.js 18+
+  ```sh
+  curl -fsSL https://bun.sh/install | bash
+  ```
+  or
+  ```sh
+  npm install -g npm@latest
+  ```
+
+- **Supabase Account** - Sign up at [supabase.com](https://supabase.com)
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```sh
+   git clone https://github.com/soumikdas/Likey.git
+   ```
+
+2. **Navigate to project directory**
+   ```sh
+   cd Likey
+   ```
+
+3. **Install dependencies**
+   ```sh
+   bun install
+   # or
+   npm install
+   ```
+
+4. **Set up environment variables**
+   ```sh
+   cp .env.example .env.local
+   ```
+   
+   Fill in your Supabase credentials:
+   ```env
+   PUBLIC_SUPABASE_URL=your_supabase_project_url
+   PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+5. **Set up database schema**
+   
+   **Option A: Using Supabase CLI (Recommended)**
+   ```sh
+   # Install Supabase CLI
+   bun install -g supabase
+   
+   # Link to your project
+   supabase link --project-ref YOUR_PROJECT_REF
+   
+   # Deploy schema
+   supabase db push
+   ```
+   
+   **Option B: Manual Setup**
+   - Copy contents of `database-setup.sql`
+   - Run in Supabase SQL Editor
+
+6. **Start development server**
+   ```sh
+   bun run dev
+   # or
+   npm run dev
+   ```
+
+7. **Open your browser** and navigate to `http://localhost:5173`
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+## Usage
+
+### 🚀 Getting Started
+
+1. **Create Account**: Sign up with email and password
+2. **Set Up Profile**: Add display name, username, bio, and profile picture
+3. **Explore Content**: Browse trending posts and discover new users
+4. **Start Posting**: Share photos with captions and engage with the community
+5. **Build Network**: Follow interesting users and get recommendations
+
+### 📱 Core Workflows
+
+**Content Creation**:
+- Upload multiple images per post with automatic compression
+- Add captions and share with your followers
+- Real-time post visibility in followers' feeds
+
+**Social Interaction**:
+- Like and comment on posts with instant updates
+- Follow/unfollow users with live count updates
+- Receive real-time notifications for all interactions
+
+**Discovery**:
+- Explore trending posts based on engagement algorithms
+- Find new users through intelligent recommendations
+- Search users by username or display name
+
+**Messaging**:
+- Send direct messages with real-time delivery
+- Edit messages within 5 minutes of sending
+- Forward messages to other conversations
+- Context menu for message actions
+
+**Profile Management**:
+- Customize profile with bio, profile picture, and theme preferences
+- View followers, following, and post statistics
+- Manage account settings and privacy
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+## 🏗️ Architecture
+
+### Tech Stack Details
+
+- **Frontend**: SvelteKit 5 with modern runes syntax (`$state`, `$derived`, `$effect`)
+- **Backend**: Supabase PostgreSQL with Row Level Security (RLS)
+- **Real-time**: Supabase Realtime for live updates
+- **Storage**: Supabase Storage for image hosting
+- **Styling**: Tailwind CSS v4 with DaisyUI components
 - **Icons**: Lucide Svelte for consistent SVG icons
-- **Virtualization**: @tanstack/svelte-virtual for performance
-- **Animation**: Motion for smooth transitions
-- **Utilities**: Lodash for utility functions
+- **Build**: Vite with SWC compiler for optimal performance
+- **Runtime**: Bun for development and package management
+- **Deployment**: Vercel with automatic deployments
 
-## 📋 Prerequisites
-
-- Node.js 18+ or Bun
-- Supabase account
-- Git
-- Supabase CLI (for database setup)
-
-## 🚀 Quick Start
-
-### 1. Clone the Repository
-
-```bash
-git clone <your-repo-url>
-cd likey
-```
-
-### 2. Install Dependencies
-
-```bash
-bun install
-# or
-npm install
-```
-
-### 3. Set Up Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Settings > API to get your project URL and anon key
-3. Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
-
-```bash
-cp .env.example .env.local
-```
-
-```env
-PUBLIC_SUPABASE_URL=your_supabase_project_url
-PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 4. Set Up Database
-
-#### Option 1: Using Supabase CLI (Recommended)
-
-1. Install Supabase CLI:
-```bash
-npm install -g supabase
-# or
-bun install -g supabase
-```
-
-2. Set up the database schema:
-```bash
-# Link to your Supabase project (replace YOUR_PROJECT_REF with your project ID)
-supabase link --project-ref YOUR_PROJECT_REF
-
-# Deploy the complete database schema
-supabase db push
-```
-
-That's it! This will create all tables, RLS policies, functions, triggers, and storage buckets automatically.
-
-#### Option 2: Manual Setup
-
-If you prefer manual setup:
-
-1. Go to your Supabase project dashboard
-2. Navigate to the SQL Editor  
-3. Copy and paste the contents of `supabase/migrations/20250820190123_remote_schema.sql`
-4. Run the SQL commands to create all tables, functions, triggers, and policies
-
-### 5. Verify Setup
-
-1. Check that the `images` storage bucket was created automatically
-2. Verify all tables are present in your Database dashboard
-3. Test that you can sign up and create a profile
-
-### 6. Start Development Server
-
-```bash
-bun run dev
-# or
-npm run dev
-```
-
-Visit `http://localhost:5173` to see your app!
-
-## 📁 Project Structure
+### Project Structure
 
 ```
 src/
 ├── lib/
 │   ├── components/          # Reusable Svelte components
-│   │   ├── Navigation.svelte
-│   │   ├── Post.svelte
-│   │   ├── Feed.svelte          # Standard feed component
-│   │   ├── VirtualizedFeed.svelte # High-performance virtualized feed
-│   │   ├── FeedComparison.svelte  # A/B testing component
-│   │   ├── UserCard.svelte
-│   │   ├── LoginModal.svelte
-│   │   ├── SignupModal.svelte
-│   │   └── CreatePostModal.svelte
+│   │   ├── Navigation.svelte     # Top navigation with auth state
+│   │   ├── BottomNavigation.svelte # Mobile navigation
+│   │   ├── Post.svelte           # Post component with interactions
+│   │   ├── Feed.svelte           # Infinite scroll feed
+│   │   ├── UserCard.svelte       # User profile cards
+│   │   └── Modals/               # Authentication and post modals
 │   ├── auth.js             # Authentication logic
-│   ├── supabase.js         # Supabase client configuration
-│   ├── stores.js           # Svelte stores for state management
-│   ├── utils.js            # Utility functions
-│   ├── notifications.js    # Real-time notifications
+│   ├── supabase.js         # Supabase client and utilities
+│   ├── stores.js           # Centralized state management
+│   ├── notifications.js    # Real-time notification system
 │   ├── messages.js         # Direct messaging API
-│   └── search.js           # Search and trending functionality
-├── routes/                 # SvelteKit routes
-│   ├── +layout.svelte      # Main layout
-│   ├── +page.svelte        # Home page (uses VirtualizedFeed)
-│   ├── profile/[username]/ # User profiles
-│   ├── settings/           # User settings
-│   ├── notifications/      # Notifications page
-│   ├── messages/           # Direct messaging interface
-│   │   ├── +page.svelte         # Messages list
-│   │   └── [conversationId]/    # Individual chat
-│   └── explore/            # Explore page with trending content
-└── app.css                 # Global styles
+│   ├── search.js           # Search and trending algorithms
+│   └── utils.js            # Utility functions
+├── routes/                 # SvelteKit file-based routing
+│   ├── +layout.svelte           # Main app layout
+│   ├── +page.svelte             # Home feed
+│   ├── profile/[username]/      # Dynamic user profiles
+│   ├── post/[id]/               # Individual post pages
+│   ├── messages/                # Messaging interface
+│   ├── notifications/           # Notifications page
+│   ├── explore/                 # Discovery and trending
+│   └── settings/                # User settings
+└── app.css                 # Global styles with Tailwind
 ```
 
-## 🎨 Customization
+### Database Schema
 
-### Themes
+**Core Tables**:
+- `profiles` - User profile information
+- `posts` - User posts with metadata
+- `post_images` - Multiple images per post
+- `likes` - Post likes with user tracking
+- `comments` - Post comments with threading support
+- `follows` - User follow relationships
+- `notifications` - Real-time notification system
+- `conversations` - Direct message conversations
+- `messages` - Individual chat messages
 
-The app uses DaisyUI themes. You can customize themes in `tailwind.config.js`:
+**Advanced Features**:
+- `trending_posts` - Algorithmic trending calculation
+- `user_recommendations` - Intelligent user suggestions
+- Row Level Security (RLS) on all tables
+- Real-time subscriptions for live updates
+- Automated triggers for notification generation
 
-```js
-daisyui: {
-  themes: ['light', 'dark', 'cupcake', 'cyberpunk'], // Add your themes
-}
-```
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
-### Styling
+## 🔒 Security Features
 
-- Global styles in `src/app.css`
-- Component-specific styles using Tailwind classes
-- DaisyUI components for consistent UI elements
+### Authentication & Authorization
+- **Supabase Auth**: Industry-standard authentication with JWT tokens
+- **Row Level Security**: Database-level access control for all tables
+- **Profile Protection**: Users can only modify their own data
+- **Secure Sessions**: Automatic session management with refresh tokens
+
+### Data Security
+- **Input Validation**: Comprehensive validation on all user inputs
+- **Image Security**: File type validation and automatic compression
+- **SQL Injection Protection**: Parameterized queries through Supabase
+- **CSRF Protection**: Built-in protection through Supabase client
+
+### Privacy Features
+- **Conversation Privacy**: Only participants can access message threads
+- **Profile Visibility**: Configurable privacy settings
+- **Secure File Upload**: Validated image uploads with size limits
+- **Real-time Security**: RLS policies applied to real-time subscriptions
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+## ⚡ Performance
+
+### Optimization Features
+- **Infinite Scroll**: Efficient pagination for large datasets
+- **Image Compression**: Automatic client-side image optimization
+- **Real-time Efficiency**: Selective subscriptions for relevant data only
+- **Responsive Images**: Multiple resolutions for different screen sizes
+- **Code Splitting**: Route-based code splitting with SvelteKit
+
+### Modern Web Standards
+- **SvelteKit 5**: Latest framework features with optimal bundle sizes
+- **Vite Build**: Lightning-fast development and production builds
+- **Modern CSS**: Tailwind CSS v4 with advanced features
+- **Progressive Enhancement**: Works without JavaScript for core features
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add your environment variables in Vercel dashboard
-4. Deploy automatically
+1. **Connect Repository**
+   - Push code to GitHub
+   - Import project in Vercel dashboard
 
-### Other Platforms
+2. **Environment Variables**
+   ```
+   PUBLIC_SUPABASE_URL=your_project_url
+   PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   ```
 
-The app uses the Vercel adapter by default. For other platforms:
+3. **Deploy**
+   - Automatic deployments on every push to main
+   - Preview deployments for pull requests
 
-1. Install the appropriate SvelteKit adapter
-2. Update `svelte.config.js`
-3. Follow platform-specific deployment instructions
+### Manual Deployment
 
-## 📱 PWA Features
+1. **Build the project**
+   ```sh
+   bun run build
+   ```
 
-The app is ready for PWA implementation:
+2. **Preview locally**
+   ```sh
+   bun run preview
+   ```
 
-- Add `app.webmanifest` for app metadata
-- Implement service worker for offline functionality
-- Add installation prompts
+3. **Deploy to your platform** using the generated build artifacts
 
-## 🔒 Security Features
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
-- Row Level Security (RLS) enabled on all tables
-- Input validation and sanitization
-- Secure file uploads with type checking
-- Rate limiting ready for implementation
-- CSRF protection through Supabase
+## 🌟 Key Innovations
 
-## 🤝 Contributing
+- **Modern Svelte 5**: Utilizes latest Svelte features including runes and modern syntax
+- **Real-time Everything**: Live updates for posts, messages, notifications, and user interactions
+- **Intelligent Algorithms**: Score-based trending and recommendation systems
+- **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement
+- **Type Safety**: Comprehensive JSDoc annotations without TypeScript overhead
+- **Performance Optimized**: Infinite scroll, image compression, and efficient real-time subscriptions
+- **Production Ready**: Complete with security, error handling, and deployment configuration
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
-## 📄 License
+<!-- CONTRIBUTING -->
 
-MIT License - feel free to use this project for personal or commercial purposes.
+## Contributing
 
-## 🆘 Troubleshooting
+Contributions make the open source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-### Common Issues
+### Development Setup
 
-1. **Supabase CLI setup issues**: 
-   - Make sure you're logged in: `supabase login`
-   - Verify project link: `supabase projects list`
-   - Check you have the correct project reference ID
+1. Fork the Project
+2. Create your Feature Branch
+   ```sh
+   git checkout -b feature/AmazingFeature
+   ```
+3. Install dependencies
+   ```sh
+   bun install
+   ```
+4. Set up your local environment following the installation guide
+5. Make your changes and test thoroughly
+6. Commit your Changes
+   ```sh
+   git commit -m 'Add some AmazingFeature'
+   ```
+7. Push to the Branch
+   ```sh
+   git push origin feature/AmazingFeature
+   ```
+8. Open a Pull Request
 
-2. **Database migration fails**: 
-   - Ensure your Supabase project is empty before running `supabase db push`
-   - Check your internet connection
-   - Verify project permissions in Supabase dashboard
+### Development Guidelines
 
-3. **Supabase connection issues**: Verify your environment variables in `.env.local`
+- Follow Svelte 5 modern syntax (use `$state`, `$derived`, `$effect`)
+- Use JSDoc for type annotations
+- Test your changes across different screen sizes
+- Ensure real-time features work correctly
+- Follow the existing code style and component patterns
 
-4. **Image upload fails**: Check storage policies and bucket configuration
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
-5. **Real-time not working**: The migrations include all necessary RLS policies for real-time
+<!-- LICENSE -->
 
-6. **Build errors**: Make sure all dependencies are installed with `bun install`
+## License
 
-### Getting Help
+Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-- Check the browser console for errors
-- Verify Supabase logs in the dashboard
-- Ensure all database tables are created correctly
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
 
-## 🎯 Next Steps
+<!-- CONTACT -->
 
-- [ ] Add story features
-- [ ] Create admin dashboard
-- [ ] Add content moderation
-- [ ] Implement analytics
-- [ ] Add push notifications
-- [ ] Group messaging
-- [ ] Video/voice calls
-- [ ] Advanced search filters
+## Contact
+
+<ul>
+<li><a href="https://www.linkedin.com/in/soumik-das-profile/"> LinkedIn Profile</a></li>
+<li><a href="https://mrsoumikdas.com/"> Portfolio Site</a></li>
+<li><a href="https://www.instagram.com/account.soumik.das/"> Instagram Handle</a></li>
+</ul>
+
+Project Link: [https://github.com/soumikdas/Likey](https://github.com/soumikdas/Likey)
+
+~ Check out my other projects: [https://github.com/FalconEthics](https://github.com/FalconEthics)
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+<!-- ACKNOWLEDGMENTS -->
+
+## Acknowledgments
+
+This project showcases modern full-stack development with cutting-edge technologies. It demonstrates expertise in:
+
+- **Modern Frontend Development**: SvelteKit 5, Tailwind CSS, and responsive design
+- **Real-time Applications**: Supabase Realtime for live user interactions
+- **Database Design**: PostgreSQL with Row Level Security and complex relationships
+- **Performance Optimization**: Infinite scroll, image compression, and efficient data loading
+- **User Experience**: Mobile-first design with progressive enhancement
+- **Production Deployment**: Vercel integration with CI/CD workflows
+
+Perfect for learning modern web development patterns and building production-ready social applications.
+
+<p align="right"><a href="#readme-top">˄ back to top</a></p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/soumikdas/Likey.svg?style=for-the-badge
+[contributors-url]: https://github.com/soumikdas/Likey/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/soumikdas/Likey.svg?style=for-the-badge
+[forks-url]: https://github.com/soumikdas/Likey/network/members
+[stars-shield]: https://img.shields.io/github/stars/soumikdas/Likey.svg?style=for-the-badge
+[stars-url]: https://github.com/soumikdas/Likey/stargazers
+[issues-shield]: https://img.shields.io/github/issues/soumikdas/Likey.svg?style=for-the-badge
+[issues-url]: https://github.com/soumikdas/Likey/issues
+[license-shield]: https://img.shields.io/github/license/soumikdas/Likey.svg?style=for-the-badge
+[license-url]: https://github.com/soumikdas/Likey/blob/main/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
+
+[SvelteKit.com]: https://img.shields.io/badge/SvelteKit_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white
+[TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+[Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white
+[Tailwind.com]: https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
+[Bun.com]: https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white
+[Lucide.com]: https://img.shields.io/badge/Lucide-000000?style=for-the-badge&logo=lucide&logoColor=white
+[Vite.com]: https://img.shields.io/badge/Vite-646cff?style=for-the-badge&logo=vite&logoColor=white
+[Vercel.com]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white

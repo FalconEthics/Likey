@@ -153,9 +153,9 @@
 		<!-- Actions -->
 		<div class="action-container mt-4">
 			{#if $user && profileUser.id !== $user.id}
-				<div class="flex gap-2 h-10">
+				<div class="flex gap-2 h-10 items-center">
 					<button 
-						class="btn btn-primary btn-sm flex-1 h-full"
+						class="btn btn-primary btn-sm flex-1 h-full min-h-0 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white font-medium"
 						class:btn-outline={isFollowing}
 						class:loading={followLoading}
 						onclick={toggleFollow}
@@ -165,7 +165,7 @@
 					</button>
 					
 					<button 
-						class="btn btn-ghost btn-sm aspect-square h-full"
+						class="btn btn-ghost btn-sm w-10 h-full min-h-0 p-0 flex items-center justify-center border border-base-300 hover:bg-base-200"
 						onclick={startConversation}
 						title="Send message"
 					>
@@ -173,8 +173,8 @@
 					</button>
 				</div>
 			{:else if !$user}
-				<div class="flex h-10">
-					<a href="/" class="btn btn-primary btn-sm flex-1 h-full">
+				<div class="flex h-10 items-center">
+					<a href="/" class="btn btn-primary btn-sm flex-1 h-full min-h-0 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] hover:bg-[hsl(346_77%_59%)] text-white font-medium">
 						Sign in to follow
 					</a>
 				</div>

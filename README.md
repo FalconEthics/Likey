@@ -92,6 +92,7 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 - ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
 - ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
 - ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
+- **TanStack Virtual** - High-performance virtualization for rendering large lists
 - ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
 - ![Vercel][Vercel.com] - Seamless deployment and hosting platform
 
@@ -253,8 +254,13 @@ src/
 │   │   ├── Navigation.svelte     # Top navigation with auth state
 │   │   ├── BottomNavigation.svelte # Mobile navigation
 │   │   ├── Post.svelte           # Post component with interactions
-│   │   ├── Feed.svelte           # Infinite scroll feed
+│   │   ├── Feed.svelte           # Virtualized infinite scroll feed
+│   │   ├── VirtualizedPostList.svelte # Common virtualized list component
 │   │   ├── UserCard.svelte       # User profile cards
+│   │   ├── explore/              # Explore page components
+│   │   │   ├── TrendingSection.svelte
+│   │   │   ├── PeopleSection.svelte
+│   │   │   └── LatestSection.svelte
 │   │   └── Modals/               # Authentication and post modals
 │   ├── auth.js             # Authentication logic
 │   ├── supabase.js         # Supabase client and utilities
@@ -328,7 +334,11 @@ src/
 
 ### Optimization Features
 
-- **Infinite Scroll**: Efficient pagination for large datasets
+- **Virtualized Lists**: Smart virtualization using TanStack Virtual for high-performance rendering of large post feeds
+  - Automatic threshold-based activation (50+ posts for feed, 20-30+ for other sections)
+  - Seamless switching between regular and virtualized modes
+  - Optimized memory usage and smooth scrolling for thousands of posts
+- **Infinite Scroll**: Efficient pagination for large datasets with virtualized loading
 - **Image Compression**: Automatic client-side image optimization
 - **Real-time Efficiency**: Selective subscriptions for relevant data only
 - **Responsive Images**: Multiple resolutions for different screen sizes
@@ -387,7 +397,7 @@ src/
 - **Intelligent Algorithms**: Score-based trending and recommendation systems
 - **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement
 - **Type Safety**: Comprehensive JSDoc annotations without TypeScript overhead
-- **Performance Optimized**: Infinite scroll, image compression, and efficient real-time subscriptions
+- **Performance Optimized**: Advanced virtualization, infinite scroll, image compression, and efficient real-time subscriptions
 - **Production Ready**: Complete with security, error handling, and deployment configuration
 
 <p align="right"><a href="#readme-top">˄ back to top</a></p>

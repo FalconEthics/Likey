@@ -9,7 +9,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/soumikdas/Likey">
+  <a href="https://github.com/FalconEthics/Likey">
     <img src="src/lib/assets/Likey.png" alt="Logo" width="100" height="100">
   </a>
 
@@ -18,15 +18,15 @@
   <p align="center">
     A modern, production-ready Instagram-like social media platform built with SvelteKit 5, Supabase, and modern web technologies.
   <p align="center">
-    <a href="https://likey-social.vercel.app/">View Demo</a>
+    <a href="https://likey-social-media-app.vercel.app/">View Demo</a>
     ·
-    <a href="https://github.com/soumikdas/Likey/issues">Report Bug</a>
+    <a href="https://github.com/FalconEthics/Likey/issues">Report Bug</a>
     ·
-    <a href="https://github.com/soumikdas/Likey/issues">Request Feature</a>
+    <a href="https://github.com/FalconEthics/Likey/issues">Request Feature</a>
   </p>
 </div>
 
-## <a href="https://likey-social.vercel.app/">🚀 Live Demo</a>
+## <a href="https://likey-social-media-app.vercel.app/">🚀 Live Demo</a>
 
 <!-- ABOUT THE PROJECT -->
 

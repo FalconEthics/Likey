@@ -172,7 +172,7 @@
 	<div class="navbar-start">
 		<a href="/" class="btn flex items-center gap-2 text-xl font-bold btn-ghost">
 			<img src={LikeyLogo} alt="Likey" class="likey-logo h-8 w-8 rounded-lg" />
-			<span class="likey-gradient-text hidden sm:block">Likey</span>
+			<span class="likey-gradient-text">Likey</span>
 		</a>
 	</div>
 
@@ -399,14 +399,48 @@
 			0 0 0 1px rgba(255, 255, 255, 0.1);
 		overflow: hidden;
 		max-height: 400px;
+		min-width: 320px;
+		width: 320px;
 	}
 
-	[data-theme='dark'] .modern-dropdown {
-		background: rgba(20, 20, 30, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+	:global([data-theme='dark']) .modern-dropdown {
+		background: rgba(18, 18, 20, 0.95) !important;
+		border: 1px solid rgba(255, 255, 255, 0.15) !important;
 		box-shadow:
-			0 20px 40px rgba(0, 0, 0, 0.4),
-			0 0 0 1px rgba(255, 255, 255, 0.1);
+			0 20px 40px rgba(0, 0, 0, 0.6),
+			0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+		backdrop-filter: blur(20px);
+	}
+
+	:global([data-theme='dark']) .modern-dropdown-header {
+		background: rgba(24, 24, 27, 0.8) !important;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+		color: rgba(255, 255, 255, 0.9) !important;
+	}
+
+	:global([data-theme='dark']) .modern-dropdown-footer {
+		background: rgba(24, 24, 27, 0.8) !important;
+		border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+	}
+
+	:global([data-theme='dark']) .modern-view-all-btn {
+		color: hsl(346 77% 65%) !important;
+	}
+
+	:global([data-theme='dark']) .modern-view-all-btn:hover {
+		background: hsl(346 77% 65% / 0.15) !important;
+	}
+
+	:global([data-theme='dark']) .modern-notification-item {
+		color: rgba(255, 255, 255, 0.9) !important;
+	}
+
+	:global([data-theme='dark']) .modern-notification-item:hover {
+		background: rgba(255, 255, 255, 0.05) !important;
+	}
+
+	:global([data-theme='dark']) .modern-empty-state {
+		color: rgba(255, 255, 255, 0.7) !important;
 	}
 
 	.modern-dropdown-header {

@@ -1,6 +1,6 @@
 <script>
 	import { page } from '$app/stores';
-	import { unreadMessageCount } from '../stores.js';
+	import { unreadMessageCount, theme } from '../stores.js';
 
 	// Lucide Icons
 	import { Home, Search, MessageCircle } from 'lucide-svelte';
@@ -10,7 +10,7 @@
 </script>
 
 <!-- Modern Bottom Navigation - All screens -->
-<nav class="modern-bottom-nav">
+<nav class="modern-bottom-nav" class:dark-theme={$theme === 'dark'}>
 	<div class="nav-container">
 		<div class="nav-background"></div>
 
@@ -53,20 +53,44 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 12px 16px 20px;
+		padding: 12px 16px 12px;
 		background: transparent;
 	}
 
-	/* Hide on desktop - navigation is handled by top nav */
+	/* Desktop adaptations */
 	@media (min-width: 1024px) {
 		.modern-bottom-nav {
-			display: none;
+			padding: 12px 24px 14px;
+		}
+
+		.nav-container {
+			max-width: min(70vw, 600px);
+			padding: 12px 32px;
+		}
+
+		.nav-item {
+			padding: 8px 16px;
+			min-width: 80px;
+		}
+
+		.nav-icon-wrapper {
+			width: 48px;
+			height: 48px;
+		}
+
+		.home-icon {
+			width: 52px;
+			height: 52px;
+		}
+
+		.nav-label {
+			font-size: 0.8rem;
 		}
 	}
 
 	.nav-container {
 		position: relative;
-		max-width: min(85vw, 420px);
+		max-width: min(92vw, 420px);
 		margin: 0 auto;
 		display: flex;
 		align-items: center;
@@ -88,26 +112,58 @@
 	}
 
 	/* Dark theme background */
-	[data-theme='dark'] .nav-background {
-		background: rgba(24, 24, 27, 0.9);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+	:global([data-theme='dark']) .nav-background {
+		background: rgba(24, 24, 27, 0.95) !important;
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08) !important;
 		box-shadow:
-			0 -2px 16px rgba(0, 0, 0, 0.4),
-			0 -4px 24px rgba(0, 0, 0, 0.2);
+			0 -2px 20px rgba(0, 0, 0, 0.6),
+			0 -4px 32px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 	}
 
 	/* Dark theme nav items */
-	[data-theme='dark'] .nav-item {
-		color: rgba(255, 255, 255, 0.7);
+	:global([data-theme='dark']) .nav-item {
+		color: rgba(255, 255, 255, 0.7) !important;
 	}
 
-	[data-theme='dark'] .nav-item.active {
-		color: hsl(346 77% 65%);
+	:global([data-theme='dark']) .nav-item.active {
+		color: hsl(346 77% 65%) !important;
 	}
 
-	[data-theme='dark'] .nav-item.active .nav-label {
-		color: hsl(346 77% 65%);
+	:global([data-theme='dark']) .nav-item.active .nav-label {
+		color: hsl(346 77% 65%) !important;
 		text-shadow: 0 0 8px hsl(346 77% 65% / 0.3);
+	}
+
+	:global([data-theme='dark']) .nav-item:hover:not(.active) {
+		color: rgba(255, 255, 255, 0.9) !important;
+	}
+
+	/* Alternative dark theme approach using component class */
+	.modern-bottom-nav.dark-theme .nav-background {
+		background: rgba(24, 24, 27, 0.95) !important;
+		border: 1px solid rgba(255, 255, 255, 0.08) !important;
+		box-shadow:
+			0 -2px 20px rgba(0, 0, 0, 0.6),
+			0 -4px 32px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	}
+
+	.modern-bottom-nav.dark-theme .nav-item {
+		color: rgba(255, 255, 255, 0.7) !important;
+	}
+
+	.modern-bottom-nav.dark-theme .nav-item.active {
+		color: hsl(346 77% 65%) !important;
+	}
+
+	.modern-bottom-nav.dark-theme .nav-item.active .nav-label {
+		color: hsl(346 77% 65%) !important;
+	}
+
+	.modern-bottom-nav.dark-theme .nav-item:hover:not(.active) {
+		color: rgba(255, 255, 255, 0.9) !important;
 	}
 
 	/* Navigation items */

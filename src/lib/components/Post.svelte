@@ -24,11 +24,21 @@
 	let commentsLoading = $state(false);
 	let showOptions = $state(false);
 	let deleting = $state(false);
+	let currentImageIndex = $state(0);
 
 	// Update local state when prop changes
 	$effect(() => {
 		postData = { ...post };
+		currentImageIndex = 0; // Reset image index when post changes
 	});
+
+	/**
+	 * Change to specific image
+	 * @param {number} index
+	 */
+	function changeImage(index) {
+		currentImageIndex = index;
+	}
 
 	/**
 	 * Toggle like on post
@@ -272,25 +282,26 @@
 					loading="lazy"
 				/>
 			{:else}
-				<div class="carousel w-full rounded-lg">
-					{#each postData.image_urls as imageUrl, index}
-						<div class="carousel-item w-full" id={`post-${postData.id}-image-${index}`}>
-							<img
-								src={imageUrl}
-								alt="Post {index + 1}"
-								class="max-h-96 w-full object-cover"
-								loading="lazy"
-							/>
-						</div>
-					{/each}
+				<div class="relative w-full rounded-lg overflow-hidden">
+					<img
+						src={postData.image_urls[currentImageIndex]}
+						alt="Post {currentImageIndex + 1}"
+						class="max-h-96 w-full object-cover transition-opacity duration-300"
+						loading="lazy"
+					/>
 				</div>
 
 				{#if postData.image_urls.length > 1}
 					<div class="flex justify-center gap-1 py-2">
 						{#each postData.image_urls as _, index}
-							<a href={`#post-${postData.id}-image-${index}`} class="btn btn-circle btn-xs">
+							<button 
+								onclick={() => changeImage(index)}
+								class="btn btn-circle btn-xs"
+								class:btn-primary={currentImageIndex === index}
+								class:btn-outline={currentImageIndex !== index}
+							>
 								{index + 1}
-							</a>
+							</button>
 						{/each}
 					</div>
 				{/if}

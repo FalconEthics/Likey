@@ -92,12 +92,17 @@
 
 			// Mark messages as read
 			await markMessagesAsRead(conversationId);
-
-			// Force scroll to bottom on initial load
-			await forceScrollToBottom();
 		}
 
 		loading = false;
+
+		// Wait for loading to finish and DOM to update, then scroll to bottom
+		if (data && data.length > 0) {
+			await tick(); // Wait for DOM updates
+			setTimeout(() => {
+				forceScrollToBottom();
+			}, 100); // Additional delay to ensure all messages are rendered
+		}
 	}
 
 	/**
@@ -202,17 +207,20 @@
 	 */
 	async function forceScrollToBottom() {
 		await tick();
+		
+		// Immediate scroll
 		scrollToBottom();
 
-		// Fallback: try again after a short delay
-		setTimeout(() => {
-			scrollToBottom();
-		}, 100);
-
-		// Final fallback: try once more after DOM updates
-		setTimeout(() => {
-			scrollToBottom();
-		}, 300);
+		// Multiple attempts to ensure we scroll to bottom after all content loads
+		const scrollAttempts = [50, 150, 300, 500];
+		
+		scrollAttempts.forEach(delay => {
+			setTimeout(() => {
+				if (messagesContainer) {
+					messagesContainer.scrollTop = messagesContainer.scrollHeight;
+				}
+			}, delay);
+		});
 	}
 
 	/**
@@ -376,13 +384,19 @@
 
 	// Effect to scroll to bottom when messages change
 	$effect(() => {
-		if ($currentMessages.length > 0 && messagesContainer) {
-			// Only auto-scroll if user is near the bottom (not scrolled up to read old messages)
+		if ($currentMessages.length > 0 && messagesContainer && !loading) {
+			// For initial load, always scroll to bottom
+			// For subsequent messages, only scroll if user is near bottom
+			const isInitialLoad = messagesContainer.scrollTop === 0 && messagesContainer.scrollHeight > messagesContainer.clientHeight;
 			const isNearBottom =
 				messagesContainer.scrollTop + messagesContainer.clientHeight >=
 				messagesContainer.scrollHeight - 100;
-			if (isNearBottom || $currentMessages.length === 1) {
-				scrollToBottom();
+			
+			if (isInitialLoad || isNearBottom) {
+				// Use a small delay to ensure DOM is fully updated
+				setTimeout(() => {
+					scrollToBottom();
+				}, 50);
 			}
 		}
 	});
@@ -411,14 +425,14 @@
 
 {#if $user}
 	<div
-		class="mx-auto flex min-h-[calc(100vh-8rem)] max-w-4xl flex-col pb-32 lg:pb-6"
+		class="mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl flex-col"
 		onclick={handleClickOutside}
 		onkeydown={handleClickOutside}
 		role="main"
 	>
 		<!-- Header -->
 		<div
-			class="sticky top-0 z-10 flex items-center gap-4 border-b border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+			class="sticky top-0 z-50 flex items-center gap-4 border-b border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
 		>
 			<button class="btn btn-circle btn-ghost" onclick={() => goto('/messages')}>
 				<ArrowLeft size={20} />
@@ -453,7 +467,10 @@
 		</div>
 
 		<!-- Messages -->
-		<div class="flex-1 space-y-4 p-4" bind:this={messagesContainer}>
+		<div 
+			class="flex-1 space-y-4 p-4 overflow-y-auto scroll-smooth" 
+			bind:this={messagesContainer}
+		>
 			{#if loading}
 				<div class="flex justify-center py-8">
 					<span class="loading loading-md loading-spinner"></span>
@@ -613,7 +630,7 @@
 
 		<!-- Message Input -->
 		<div
-			class="sticky bottom-0 z-10 border-t border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+			class="sticky bottom-0 z-50 border-t border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
 		>
 			<form onsubmit={handleSendMessage} class="flex gap-2">
 				<input
@@ -651,10 +668,11 @@
 {/if}
 
 <style>
-	/* Hide scrollbar but keep functionality */
+	/* Messages container scroll styling */
 	.overflow-y-auto {
 		scrollbar-width: thin;
-		scrollbar-color: transparent transparent;
+		scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+		scroll-behavior: smooth;
 	}
 
 	.overflow-y-auto::-webkit-scrollbar {
@@ -668,6 +686,24 @@
 	.overflow-y-auto::-webkit-scrollbar-thumb {
 		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 3px;
+		transition: background-color 0.2s ease;
+	}
+
+	.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(0, 0, 0, 0.3);
+	}
+
+	/* Dark theme scrollbar */
+	[data-theme='dark'] .overflow-y-auto {
+		scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+	}
+
+	[data-theme='dark'] .overflow-y-auto::-webkit-scrollbar-thumb {
+		background-color: rgba(255, 255, 255, 0.2);
+	}
+
+	[data-theme='dark'] .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(255, 255, 255, 0.3);
 	}
 
 	/* Modern Message Bubbles */

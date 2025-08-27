@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import '../app.css';
 	import favicon from '$lib/assets/Likey.png';
 	import Navigation from '$lib/components/Navigation.svelte';
@@ -118,7 +119,7 @@
 		{/if}
 	</main>
 
-	{#if $user}
+	{#if $user && !$page.url.pathname.startsWith('/messages/')}
 		<BottomNavigation />
 	{/if}
 </div>

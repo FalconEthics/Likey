@@ -5,7 +5,30 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/publi
  * Supabase client instance
  * @type {import('@supabase/supabase-js').SupabaseClient}
  */
-export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+	global: {
+		headers: {
+			'X-Client-Info': 'likey-web'
+		},
+		fetch: (url, options = {}) => {
+			// Ensure all headers are ASCII-safe
+			if (options.headers) {
+				const cleanHeaders = {};
+				for (const [key, value] of Object.entries(options.headers)) {
+					// Remove any non-ASCII characters from header values
+					cleanHeaders[key] = String(value).replace(/[^\x00-\x7F]/g, "");
+				}
+				options.headers = cleanHeaders;
+			}
+			return fetch(url, options);
+		}
+	},
+	auth: {
+		detectSessionInUrl: true,
+		persistSession: true,
+		autoRefreshToken: true
+	}
+});
 
 /**
  * Upload an image file to Supabase Storage

@@ -1,7 +1,37 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import devtoolsJson from 'vite-plugin-devtools-json';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-})
+	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
+	test: {
+		expect: { requireAssertions: true },
+		projects: [
+			{
+				extends: './vite.config.js',
+				test: {
+					name: 'client',
+					environment: 'browser',
+					browser: {
+						enabled: true,
+						provider: 'playwright',
+						instances: [{ browser: 'chromium' }]
+					},
+					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+					exclude: ['src/lib/server/**'],
+					setupFiles: ['./vitest-setup-client.js']
+				}
+			},
+			{
+				extends: './vite.config.js',
+				test: {
+					name: 'server',
+					environment: 'bun',
+					include: ['src/**/*.{test,spec}.{js,ts}'],
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+				}
+			}
+		]
+	}
+});

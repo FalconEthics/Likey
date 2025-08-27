@@ -1,0 +1,722 @@
+import { supabase } from './supabase.js';
+import { user } from './stores.js';
+import { get } from 'svelte/store';
+
+/**
+ * @typedef {Object} Conversation
+ * @property {string} id
+ * @property {string} user1_id
+ * @property {string} user2_id
+ * @property {string} last_message_at
+ * @property {Object} other_user
+ * @property {Object} last_message
+ */
+
+/**
+ * @typedef {Object} Message
+ * @property {string} id
+ * @property {string} conversation_id
+ * @property {string} sender_id
+ * @property {string} content
+ * @property {boolean} read
+ * @property {string} created_at
+ * @property {Object} sender
+ */
+
+/**
+ * Get or create a conversation between current user and another user
+ * @param {string} otherUserId - ID of the other user
+ * @returns {Promise<{data: Conversation, error: any}>}
+ */
+export async function getOrCreateConversation(otherUserId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First try to find existing conversation
+		const { data: existingConversation, error: findError } = await supabase
+			.from('conversations')
+			.select(
+				`
+				*,
+				user1:user1_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				),
+				user2:user2_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.or(
+				`and(user1_id.eq.${currentUser.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${currentUser.id})`
+			)
+			.single();
+
+		if (existingConversation) {
+			// Determine which user is the "other" user
+			const otherUser =
+				existingConversation.user1.id === currentUser.id
+					? existingConversation.user2
+					: existingConversation.user1;
+
+			return {
+				data: {
+					...existingConversation,
+					other_user: otherUser
+				},
+				error: null
+			};
+		}
+
+		// Create new conversation if none exists
+		const { data: newConversation, error: createError } = await supabase
+			.from('conversations')
+			.insert({
+				user1_id: currentUser.id,
+				user2_id: otherUserId
+			})
+			.select(
+				`
+				*,
+				user1:user1_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				),
+				user2:user2_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.single();
+
+		if (createError) throw createError;
+
+		const otherUser = newConversation.user2;
+
+		return {
+			data: {
+				...newConversation,
+				other_user: otherUser
+			},
+			error: null
+		};
+	} catch (error) {
+		console.error('Error getting/creating conversation:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Get all conversations for the current user
+ * @returns {Promise<{data: Conversation[], error: any}>}
+ */
+export async function getUserConversations() {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: [], error: 'Not authenticated' };
+	}
+
+	try {
+		const { data, error } = await supabase
+			.from('conversations')
+			.select(
+				`
+				*,
+				user1:user1_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				),
+				user2:user2_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				),
+				messages (
+					id,
+					content,
+					created_at,
+					sender_id,
+					read
+				)
+			`
+			)
+			.or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
+			.order('last_message_at', { ascending: false });
+
+		if (error) throw error;
+
+		// Process conversations to add other_user and last_message
+		const processedConversations = data.map((conversation) => {
+			const otherUser =
+				conversation.user1.id === currentUser.id ? conversation.user2 : conversation.user1;
+
+			const lastMessage =
+				conversation.messages.length > 0
+					? conversation.messages[conversation.messages.length - 1]
+					: null;
+
+			return {
+				...conversation,
+				other_user: otherUser,
+				last_message: lastMessage
+			};
+		});
+
+		return { data: processedConversations, error: null };
+	} catch (error) {
+		console.error('Error getting conversations:', error);
+		return { data: [], error: error.message };
+	}
+}
+
+/**
+ * Get messages for a conversation (with access validation)
+ * @param {string} conversationId - Conversation ID
+ * @param {number} limit - Number of messages to fetch
+ * @param {number} offset - Offset for pagination
+ * @returns {Promise<{data: Message[], error: any}>}
+ */
+export async function getConversationMessages(conversationId, limit = 50, offset = 0) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: [], error: 'Not authenticated' };
+	}
+
+	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { data: [], error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized access attempt to conversation:', conversationId);
+			return { data: [], error: 'Access denied' };
+		}
+
+		// Now fetch messages
+		const { data, error } = await supabase
+			.from('messages')
+			.select(
+				`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.eq('conversation_id', conversationId)
+			.order('created_at', { ascending: true })
+			.range(offset, offset + limit - 1);
+
+		if (error) throw error;
+
+		return { data: data || [], error: null };
+	} catch (error) {
+		console.error('Error getting messages:', error);
+		return { data: [], error: error.message };
+	}
+}
+
+/**
+ * Send a message (with access validation)
+ * @param {string} conversationId - Conversation ID
+ * @param {string} content - Message content
+ * @returns {Promise<{data: Message, error: any}>}
+ */
+export async function sendMessage(conversationId, content) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { data: null, error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized send attempt to conversation:', conversationId);
+			return { data: null, error: 'Access denied' };
+		}
+
+		const { data, error } = await supabase
+			.from('messages')
+			.insert({
+				conversation_id: conversationId,
+				sender_id: currentUser.id,
+				content: content.trim()
+			})
+			.select(
+				`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.single();
+
+		if (error) throw error;
+
+		// Update conversation last_message_at
+		await supabase
+			.from('conversations')
+			.update({ last_message_at: new Date().toISOString() })
+			.eq('id', conversationId);
+
+		return { data, error: null };
+	} catch (error) {
+		console.error('Error sending message:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Mark messages as read (with access validation)
+ * @param {string} conversationId - Conversation ID
+ * @returns {Promise<{success: boolean, error: any}>}
+ */
+export async function markMessagesAsRead(conversationId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { success: false, error: 'Not authenticated' };
+	}
+
+	try {
+		// First verify user has access to this conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', conversationId)
+			.single();
+
+		if (convError) {
+			console.error('Error checking conversation access:', convError);
+			return { success: false, error: 'Conversation not found' };
+		}
+
+		// Verify current user is part of this conversation
+		if (conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id) {
+			console.warn('Unauthorized read attempt on conversation:', conversationId);
+			return { success: false, error: 'Access denied' };
+		}
+
+		const { error } = await supabase
+			.from('messages')
+			.update({ read: true })
+			.eq('conversation_id', conversationId)
+			.neq('sender_id', currentUser.id)
+			.eq('read', false);
+
+		if (error) throw error;
+
+		return { success: true, error: null };
+	} catch (error) {
+		console.error('Error marking messages as read:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Subscribe to real-time messages for a conversation
+ * @param {string} conversationId - Conversation ID
+ * @param {Function} onMessage - Callback for new messages
+ * @returns {Object} Subscription object
+ */
+export function subscribeToMessages(conversationId, onMessage) {
+	console.log('Setting up message subscription for conversation:', conversationId);
+
+	const channel = supabase
+		.channel(`messages:${conversationId}`)
+		.on(
+			'postgres_changes',
+			{
+				event: 'INSERT',
+				schema: 'public',
+				table: 'messages',
+				filter: `conversation_id=eq.${conversationId}`
+			},
+			async (payload) => {
+				console.log('Real-time message received:', payload);
+
+				if (!payload?.new?.id) {
+					console.warn('Invalid payload structure:', payload);
+					return;
+				}
+
+				try {
+					// Fetch the full message with sender data
+					const { data, error } = await supabase
+						.from('messages')
+						.select(
+							`
+							*,
+							sender:sender_id (
+								id,
+								username,
+								display_name,
+								profile_pic_url
+							)
+						`
+						)
+						.eq('id', payload.new.id)
+						.single();
+
+					if (error) {
+						console.error('Error fetching message for real-time update:', error);
+						return;
+					}
+
+					if (data) {
+						onMessage(data);
+					}
+				} catch (error) {
+					console.error('Error in message subscription handler:', error);
+				}
+			}
+		)
+		.subscribe((status) => {
+			console.log('Message subscription status:', status);
+		});
+
+	return channel;
+}
+
+/**
+ * Get unread message count for current user
+ * @returns {Promise<{count: number, error: any}>}
+ */
+export async function getUnreadMessageCount() {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { count: 0, error: 'Not authenticated' };
+	}
+
+	try {
+		// First, get the user's conversation IDs
+		const { data: conversations, error: convError } = await supabase
+			.from('conversations')
+			.select('id')
+			.or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`);
+
+		if (convError) throw convError;
+
+		// If no conversations, return 0
+		if (!conversations || conversations.length === 0) {
+			return { count: 0, error: null };
+		}
+
+		// Get conversation IDs as array
+		const conversationIds = conversations.map((conv) => conv.id);
+
+		// Now get unread message count
+		const { data, error } = await supabase
+			.from('messages')
+			.select('id', { count: 'exact', head: true })
+			.neq('sender_id', currentUser.id)
+			.eq('read', false)
+			.in('conversation_id', conversationIds);
+
+		if (error) throw error;
+
+		return { count: data || 0, error: null };
+	} catch (error) {
+		console.error('Error getting unread count:', error);
+		return { count: 0, error: error.message };
+	}
+}
+
+/**
+ * Delete a message (only if sent by current user and within 2 minutes)
+ * @param {string} messageId - Message ID
+ * @returns {Promise<{success: boolean, error: any}>}
+ */
+export async function deleteMessage(messageId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { success: false, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to check ownership and timestamp
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, sender_id, created_at, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for deletion:', fetchError);
+			return { success: false, error: 'Message not found' };
+		}
+
+		// Check if current user is the sender
+		if (message.sender_id !== currentUser.id) {
+			console.warn('Unauthorized delete attempt by user:', currentUser.id);
+			return { success: false, error: 'You can only delete your own messages' };
+		}
+
+		// Check if message is within 5 minutes
+		const messageTime = new Date(message.created_at);
+		const now = new Date();
+		const diffMinutes = (now - messageTime) / (1000 * 60);
+
+		if (diffMinutes > 5) {
+			return { success: false, error: 'You can only delete messages within 5 minutes of sending' };
+		}
+
+		// Verify user has access to the conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (
+			convError ||
+			(conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)
+		) {
+			return { success: false, error: 'Access denied' };
+		}
+
+		// Delete the message
+		const { error } = await supabase
+			.from('messages')
+			.delete()
+			.eq('id', messageId)
+			.eq('sender_id', currentUser.id); // Extra security check
+
+		if (error) throw error;
+
+		return { success: true, error: null };
+	} catch (error) {
+		console.error('Error deleting message:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Edit a message (only if sent by current user and within 2 minutes)
+ * @param {string} messageId - Message ID
+ * @param {string} newContent - New message content
+ * @returns {Promise<{data: Message, error: any}>}
+ */
+export async function editMessage(messageId, newContent) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to check ownership and timestamp
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, sender_id, created_at, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for editing:', fetchError);
+			return { data: null, error: 'Message not found' };
+		}
+
+		// Check if current user is the sender
+		if (message.sender_id !== currentUser.id) {
+			console.warn('Unauthorized edit attempt by user:', currentUser.id);
+			return { data: null, error: 'You can only edit your own messages' };
+		}
+
+		// Check if message is within 5 minutes
+		const messageTime = new Date(message.created_at);
+		const now = new Date();
+		const diffMinutes = (now - messageTime) / (1000 * 60);
+
+		if (diffMinutes > 5) {
+			return { data: null, error: 'You can only edit messages within 5 minutes of sending' };
+		}
+
+		// Verify user has access to the conversation
+		const { data: conversation, error: convError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (
+			convError ||
+			(conversation.user1_id !== currentUser.id && conversation.user2_id !== currentUser.id)
+		) {
+			return { data: null, error: 'Access denied' };
+		}
+
+		// Update the message
+		const { data, error } = await supabase
+			.from('messages')
+			.update({
+				content: newContent.trim(),
+				edited_at: new Date().toISOString()
+			})
+			.eq('id', messageId)
+			.eq('sender_id', currentUser.id) // Extra security check
+			.select(
+				`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.single();
+
+		if (error) throw error;
+
+		return { data, error: null };
+	} catch (error) {
+		console.error('Error editing message:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Forward a message to another conversation
+ * @param {string} messageId - Message ID to forward
+ * @param {string} targetConversationId - Target conversation ID
+ * @returns {Promise<{data: Message, error: any}>}
+ */
+export async function forwardMessage(messageId, targetConversationId) {
+	const currentUser = get(user);
+	if (!currentUser) {
+		return { data: null, error: 'Not authenticated' };
+	}
+
+	try {
+		// First get the message to forward
+		const { data: message, error: fetchError } = await supabase
+			.from('messages')
+			.select('id, content, conversation_id')
+			.eq('id', messageId)
+			.single();
+
+		if (fetchError) {
+			console.error('Error fetching message for forwarding:', fetchError);
+			return { data: null, error: 'Message not found' };
+		}
+
+		// Verify user has access to the source conversation
+		const { data: sourceConv, error: sourceError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', message.conversation_id)
+			.single();
+
+		if (
+			sourceError ||
+			(sourceConv.user1_id !== currentUser.id && sourceConv.user2_id !== currentUser.id)
+		) {
+			return { data: null, error: 'Access denied to source conversation' };
+		}
+
+		// Verify user has access to the target conversation
+		const { data: targetConv, error: targetError } = await supabase
+			.from('conversations')
+			.select('id, user1_id, user2_id')
+			.eq('id', targetConversationId)
+			.single();
+
+		if (
+			targetError ||
+			(targetConv.user1_id !== currentUser.id && targetConv.user2_id !== currentUser.id)
+		) {
+			return { data: null, error: 'Access denied to target conversation' };
+		}
+
+		// Send the forwarded message
+		const { data, error } = await supabase
+			.from('messages')
+			.insert({
+				conversation_id: targetConversationId,
+				sender_id: currentUser.id,
+				content: message.content,
+				forwarded_from: messageId
+			})
+			.select(
+				`
+				*,
+				sender:sender_id (
+					id,
+					username,
+					display_name,
+					profile_pic_url
+				)
+			`
+			)
+			.single();
+
+		if (error) throw error;
+
+		// Update target conversation last_message_at
+		await supabase
+			.from('conversations')
+			.update({ last_message_at: new Date().toISOString() })
+			.eq('id', targetConversationId);
+
+		return { data, error: null };
+	} catch (error) {
+		console.error('Error forwarding message:', error);
+		return { data: null, error: error.message };
+	}
+}
+
+/**
+ * Check if a message can be edited or deleted (within 5 minutes)
+ * @param {string} createdAt - Message creation timestamp
+ * @returns {boolean}
+ */
+export function canModifyMessage(createdAt) {
+	const messageTime = new Date(createdAt);
+	const now = new Date();
+	const diffMinutes = (now - messageTime) / (1000 * 60);
+	return diffMinutes <= 5;
+}

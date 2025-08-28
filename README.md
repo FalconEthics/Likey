@@ -89,10 +89,13 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 - ![SvelteKit][SvelteKit.com] - SvelteKit 5 with modern runes syntax and server-side rendering
 - ![TypeScript][TypeScript.com] - JSDoc type annotations for type safety without TypeScript overhead
 - ![Supabase][Supabase.com] - PostgreSQL database with real-time subscriptions, auth, and storage
-- ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
+- ![Tailwind][Tailwind.com] - Tailwind CSS v4 with utility-first styling
+- ![DaisyUI][DaisyUI.com] - Beautiful component library built on Tailwind CSS
+- ![TanStack][TanStack.com] - High-performance virtualization for rendering large lists
 - ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
 - ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
-- **TanStack Virtual** - High-performance virtualization for rendering large lists
+- ![Lodash][Lodash.com] - Modern JavaScript utility library for data manipulation
+- ![Framer Motion][Motion.com] - Production-ready motion library for React and Svelte
 - ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
 - ![Vercel][Vercel.com] - Seamless deployment and hosting platform
 
@@ -500,7 +503,11 @@ Perfect for learning modern web development patterns and building production-rea
 [TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white
 [Tailwind.com]: https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
+[DaisyUI.com]: https://img.shields.io/badge/DaisyUI-5A67D8?style=for-the-badge&logo=css3&logoColor=white
+[TanStack.com]: https://img.shields.io/badge/TanStack_Virtual-FF4154?style=for-the-badge&logo=react&logoColor=white
 [Bun.com]: https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white
 [Lucide.com]: https://img.shields.io/badge/Lucide-000000?style=for-the-badge&logo=lucide&logoColor=white
+[Lodash.com]: https://img.shields.io/badge/Lodash-3492FF?style=for-the-badge&logo=lodash&logoColor=white
+[Motion.com]: https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white
 [Vite.com]: https://img.shields.io/badge/Vite-646cff?style=for-the-badge&logo=vite&logoColor=white
 [Vercel.com]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white

@@ -55,8 +55,7 @@
   </ol>
 </details>
 
-<!-- Add screenshot here when available -->
-<!-- <img src="src/assets/screenshot.png"> -->
+[![Likey Screenshot][product-screenshot]](https://likey-social-media-app.vercel.app/)
 
 Likey is a production-ready, modern social media platform that recreates the Instagram experience with cutting-edge web technologies. Built with SvelteKit 5's latest features, real-time capabilities through Supabase, and optimized for performance and user experience.
 

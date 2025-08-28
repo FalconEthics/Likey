@@ -501,7 +501,7 @@ Perfect for learning modern web development patterns and building production-rea
 [license-url]: https://github.com/FalconEthics/Likey/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
-[product-screenshot]: ./public/screenshot.png
+[product-screenshot]: ./static/screenshot.png
 [SvelteKit.com]: https://img.shields.io/badge/SvelteKit_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white
 [TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white

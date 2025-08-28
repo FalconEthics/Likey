@@ -490,19 +490,19 @@ Perfect for learning modern web development patterns and building production-rea
 <p align="right"><a href="#readme-top">˄ back to top</a></p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/soumikdas/Likey.svg?style=for-the-badge
-[contributors-url]: https://github.com/soumikdas/Likey/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/soumikdas/Likey.svg?style=for-the-badge
-[forks-url]: https://github.com/soumikdas/Likey/network/members
-[stars-shield]: https://img.shields.io/github/stars/soumikdas/Likey.svg?style=for-the-badge
-[stars-url]: https://github.com/soumikdas/Likey/stargazers
-[issues-shield]: https://img.shields.io/github/issues/soumikdas/Likey.svg?style=for-the-badge
-[issues-url]: https://github.com/soumikdas/Likey/issues
-[license-shield]: https://img.shields.io/github/license/soumikdas/Likey.svg?style=for-the-badge
-[license-url]: https://github.com/soumikdas/Likey/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/FalconEthics/Likey.svg?style=for-the-badge
+[contributors-url]: https://github.com/FalconEthics/Likey/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/FalconEthics/Likey.svg?style=for-the-badge
+[forks-url]: https://github.com/FalconEthics/Likey/network/members
+[stars-shield]: https://img.shields.io/github/stars/FalconEthics/Likey.svg?style=for-the-badge
+[stars-url]: https://github.com/FalconEthics/Likey/stargazers
+[issues-shield]: https://img.shields.io/github/issues/FalconEthics/Likey.svg?style=for-the-badge
+[issues-url]: https://github.com/FalconEthics/Likey/issues
+[license-shield]: https://img.shields.io/github/license/FalconEthics/Likey.svg?style=for-the-badge
+[license-url]: https://github.com/FalconEthics/Likey/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
+[product-screenshot]: ./public/screenshot.png
 [SvelteKit.com]: https://img.shields.io/badge/SvelteKit_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white
 [TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white

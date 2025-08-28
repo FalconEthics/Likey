@@ -217,8 +217,8 @@
 
 		<form onsubmit={handleSignup} class="space-y-4">
 			<div class="form-control">
-				<label class="label" for="signup-email">
-					<span class="label-text">Email</span>
+				<label class="label flex-col !items-start" for="signup-email">
+					<span class="label-text mb-2">Email</span>
 				</label>
 				<input
 					id="signup-email"
@@ -231,15 +231,15 @@
 					disabled={loading}
 				/>
 				{#if errors.email}
-					<div class="label">
+					<div class="label flex-col !items-start">
 						<span class="label-text-alt text-error">{errors.email}</span>
 					</div>
 				{/if}
 			</div>
 
 			<div class="form-control">
-				<label class="label" for="signup-password">
-					<span class="label-text">Password</span>
+				<label class="label flex-col !items-start" for="signup-password">
+					<span class="label-text mb-2">Password</span>
 				</label>
 				<input
 					id="signup-password"
@@ -252,15 +252,15 @@
 					disabled={loading}
 				/>
 				{#if errors.password}
-					<div class="label">
+					<div class="label flex-col !items-start">
 						<span class="label-text-alt text-error">{errors.password}</span>
 					</div>
 				{/if}
 			</div>
 
 			<div class="form-control">
-				<label class="label" for="signup-confirm-password">
-					<span class="label-text">Confirm Password</span>
+				<label class="label flex-col !items-start" for="signup-confirm-password">
+					<span class="label-text mb-2">Confirm Password</span>
 				</label>
 				<input
 					id="signup-confirm-password"
@@ -273,7 +273,7 @@
 					disabled={loading}
 				/>
 				{#if errors.confirmPassword}
-					<div class="label">
+					<div class="label flex-col !items-start">
 						<span class="label-text-alt text-error">{errors.confirmPassword}</span>
 					</div>
 				{/if}

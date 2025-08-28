@@ -271,8 +271,8 @@
 
 			<!-- Caption -->
 			<div class="form-control">
-				<label class="label" for="caption">
-					<span class="label-text">Caption</span>
+				<label class="label flex-col !items-start" for="caption">
+					<span class="label-text mb-2">Caption</span>
 				</label>
 				<textarea
 					id="caption"
@@ -282,7 +282,7 @@
 					disabled={uploading}
 					maxlength="2200"
 				></textarea>
-				<div class="label">
+				<div class="label flex-col !items-end">
 					<span class="label-text-alt text-base-content/60">
 						{caption.length}/2200 characters
 					</span>

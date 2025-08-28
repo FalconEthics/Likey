@@ -163,8 +163,8 @@
 
 			<form onsubmit={handleLogin} class="space-y-4">
 				<div class="form-control">
-					<label class="label" for="email">
-						<span class="label-text">Email</span>
+					<label class="label flex-col !items-start" for="email">
+						<span class="label-text mb-2">Email</span>
 					</label>
 					<input
 						id="email"
@@ -177,8 +177,8 @@
 				</div>
 
 				<div class="form-control">
-					<label class="label" for="password">
-						<span class="label-text">Password</span>
+					<label class="label flex-col !items-start" for="password">
+						<span class="label-text mb-2">Password</span>
 					</label>
 					<input
 						id="password"
@@ -222,8 +222,8 @@
 		{:else}
 			<form onsubmit={handleResetPassword} class="space-y-4">
 				<div class="form-control">
-					<label class="label" for="reset-email">
-						<span class="label-text">Email</span>
+					<label class="label flex-col !items-start" for="reset-email">
+						<span class="label-text mb-2">Email</span>
 					</label>
 					<input
 						id="reset-email"

@@ -164,8 +164,8 @@
 				<form onsubmit={saveProfile} class="space-y-6">
 					<!-- Profile Picture -->
 					<div class="form-control">
-						<label class="label" for="profile-pic-input">
-							<span class="label-text">Profile Picture</span>
+						<label class="label flex-col !items-start" for="profile-pic-input">
+							<span class="label-text mb-2">Profile Picture</span>
 						</label>
 						<div class="flex items-center gap-4">
 							<div class="avatar">
@@ -194,8 +194,8 @@
 
 					<!-- Display Name -->
 					<div class="form-control">
-						<label class="label" for="display-name">
-							<span class="label-text">Display Name</span>
+						<label class="label flex-col !items-start" for="display-name">
+							<span class="label-text mb-2">Display Name</span>
 						</label>
 						<input
 							id="display-name"
@@ -210,8 +210,8 @@
 
 					<!-- Username (read-only) -->
 					<div class="form-control">
-						<label class="label" for="username">
-							<span class="label-text">Username</span>
+						<label class="label flex-col !items-start" for="username">
+							<span class="label-text mb-2">Username</span>
 							<span class="label-text-alt text-warning">Username cannot be changed</span>
 						</label>
 						<input
@@ -225,13 +225,13 @@
 
 					<!-- Bio -->
 					<div class="form-control">
-						<label class="label" for="bio">
-							<span class="label-text">Bio</span>
+						<label class="label flex-col !items-start" for="bio">
+							<span class="label-text mb-2">Bio</span>
 							<span class="label-text-alt">{bio.length}/160 characters</span>
 						</label>
 						<textarea
 							id="bio"
-							class="textarea-bordered textarea mt-2 h-24"
+							class="textarea-bordered textarea h-24"
 							placeholder="Tell us about yourself..."
 							bind:value={bio}
 							disabled={loading}

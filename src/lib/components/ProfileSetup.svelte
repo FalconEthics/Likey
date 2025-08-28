@@ -109,8 +109,8 @@
 
 		<form onsubmit={handleCreateProfile} class="space-y-4">
 			<div class="form-control">
-				<label class="label" for="username">
-					<span class="label-text">Username</span>
+				<label class="label flex-col !items-start" for="username">
+					<span class="label-text mb-2">Username</span>
 				</label>
 				<input
 					id="username"
@@ -124,8 +124,8 @@
 			</div>
 
 			<div class="form-control">
-				<label class="label" for="display-name">
-					<span class="label-text">Display Name</span>
+				<label class="label flex-col !items-start" for="display-name">
+					<span class="label-text mb-2">Display Name</span>
 				</label>
 				<input
 					id="display-name"

@@ -333,7 +333,7 @@
 	<div class="col-span-6 pb-24">
 		<!-- Desktop Header -->
 		<div
-			class="sticky top-4 z-40 mb-6 rounded-2xl border border-base-300/50 bg-base-100/80 p-6 backdrop-blur-xl"
+			class=" top-0 z-40 mb-6 rounded-2xl border border-base-300/50 bg-base-100/80 p-6 backdrop-blur-xl"
 		>
 			<div class="flex items-center justify-between">
 				<div>

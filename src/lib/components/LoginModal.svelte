@@ -162,28 +162,28 @@
 			<div class="divider">Or continue with email</div>
 
 			<form onsubmit={handleLogin} class="space-y-4">
-				<div class="form-control">
-					<label class="label" for="email">
-						<span class="label-text">Email</span>
+				<div class="space-y-2">
+					<label for="email" class="block text-sm font-medium">
+						Email
 					</label>
 					<input
 						id="email"
 						type="email"
-						class="input-bordered input"
+						class="input-bordered input w-full"
 						bind:value={email}
 						required
 						disabled={loading}
 					/>
 				</div>
 
-				<div class="form-control">
-					<label class="label" for="password">
-						<span class="label-text">Password</span>
+				<div class="space-y-2">
+					<label for="password" class="block text-sm font-medium">
+						Password
 					</label>
 					<input
 						id="password"
 						type="password"
-						class="input-bordered input"
+						class="input-bordered input w-full"
 						bind:value={password}
 						required
 						disabled={loading}
@@ -221,14 +221,14 @@
 			</form>
 		{:else}
 			<form onsubmit={handleResetPassword} class="space-y-4">
-				<div class="form-control">
-					<label class="label" for="reset-email">
-						<span class="label-text">Email</span>
+				<div class="space-y-2">
+					<label for="reset-email" class="block text-sm font-medium">
+						Email
 					</label>
 					<input
 						id="reset-email"
 						type="email"
-						class="input-bordered input"
+						class="input-bordered input w-full"
 						bind:value={resetEmail}
 						required
 						disabled={resetLoading}

@@ -163,9 +163,9 @@
 
 				<form onsubmit={saveProfile} class="space-y-6">
 					<!-- Profile Picture -->
-					<div class="form-control">
-						<label class="label" for="profile-pic-input">
-							<span class="label-text">Profile Picture</span>
+					<div class="space-y-2">
+						<label for="profile-pic-input" class="block text-sm font-medium">
+							Profile Picture
 						</label>
 						<div class="flex items-center gap-4">
 							<div class="avatar">
@@ -193,14 +193,14 @@
 					</div>
 
 					<!-- Display Name -->
-					<div class="form-control">
-						<label class="label" for="display-name">
-							<span class="label-text">Display Name</span>
+					<div class="space-y-2">
+						<label for="display-name" class="block text-sm font-medium">
+							Display Name
 						</label>
 						<input
 							id="display-name"
 							type="text"
-							class="input-bordered input"
+							class="input-bordered input w-full"
 							bind:value={displayName}
 							required
 							disabled={loading}
@@ -209,34 +209,36 @@
 					</div>
 
 					<!-- Username (read-only) -->
-					<div class="form-control">
-						<label class="label" for="username">
-							<span class="label-text">Username</span>
-							<span class="label-text-alt text-warning">Username cannot be changed</span>
+					<div class="space-y-2">
+						<label for="username" class="block text-sm font-medium">
+							Username
 						</label>
 						<input
 							id="username"
 							type="text"
-							class="input-bordered input-disabled input"
+							class="input-bordered input-disabled input w-full"
 							value={$user.username}
 							disabled
 						/>
+						<span class="text-xs text-warning">Username cannot be changed</span>
 					</div>
 
 					<!-- Bio -->
-					<div class="form-control">
-						<label class="label" for="bio">
-							<span class="label-text">Bio</span>
-							<span class="label-text-alt">{bio.length}/160 characters</span>
+					<div class="space-y-2">
+						<label for="bio" class="block text-sm font-medium">
+							Bio
 						</label>
 						<textarea
 							id="bio"
-							class="textarea-bordered textarea mt-2 h-24"
+							class="textarea-bordered textarea h-24 w-full"
 							placeholder="Tell us about yourself..."
 							bind:value={bio}
 							disabled={loading}
 							maxlength="160"
 						></textarea>
+						<div class="flex justify-end">
+							<span class="text-xs text-base-content/60">{bio.length}/160 characters</span>
+						</div>
 					</div>
 
 					<!-- Save Button -->

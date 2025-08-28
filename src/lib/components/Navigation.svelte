@@ -168,7 +168,7 @@
 	});
 </script>
 
-<nav class="sticky top-0 z-50 navbar overflow-visible border-b border-base-300 bg-base-100">
+<nav class="fixed top-0 left-0 right-0 w-full z-50 navbar overflow-visible border-b border-base-300 bg-base-100">
 	<div class="navbar-start">
 		<a href="/" class="btn flex items-center gap-2 text-xl font-bold btn-ghost">
 			<img src={LikeyLogo} alt="Likey" class="likey-logo h-8 w-8 rounded-lg" />
@@ -254,7 +254,7 @@
 				</button>
 
 				{#if showNotifications}
-					<div class="modern-dropdown absolute top-full right-0 z-[100] mt-2 w-72 sm:w-80">
+					<div class="modern-dropdown absolute top-full right-0 z-[100] mt-2 w-80 sm:w-96 md:w-80">
 						<div class="modern-dropdown-header">
 							<h3 class="text-lg font-semibold">Notifications</h3>
 							{#if $unreadCount > 0}
@@ -398,9 +398,10 @@
 			0 20px 40px rgba(0, 0, 0, 0.1),
 			0 0 0 1px rgba(255, 255, 255, 0.1);
 		overflow: hidden;
-		max-height: 400px;
-		min-width: 320px;
-		width: 320px;
+		max-height: 480px;
+		min-width: 280px;
+		display: flex;
+		flex-direction: column;
 	}
 
 	:global([data-theme='dark']) .modern-dropdown {
@@ -476,8 +477,9 @@
 
 	.modern-dropdown-content {
 		padding: 8px;
-		max-height: 300px;
+		flex: 1;
 		overflow-y: auto;
+		min-height: 0;
 	}
 
 	.modern-notification-item {
@@ -520,6 +522,8 @@
 		padding: 12px 20px;
 		border-top: 1px solid hsl(var(--base-300) / 0.5);
 		background: hsl(var(--base-100) / 0.5);
+		flex-shrink: 0;
+		margin-top: auto;
 	}
 
 	.modern-view-all-btn {
@@ -555,5 +559,16 @@
 
 	.modern-dropdown-content::-webkit-scrollbar-thumb:hover {
 		background: hsl(var(--base-400));
+	}
+
+	/* Ensure navbar is properly positioned and visible */
+	nav {
+		position: fixed !important;
+		top: 0 !important;
+		left: 0 !important;
+		right: 0 !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box !important;
 	}
 </style>

@@ -37,11 +37,14 @@
 	 * @param {boolean} append - Whether to append to existing posts or replace
 	 */
 	async function loadPosts(append = false) {
+		// Prevent multiple simultaneous loads
 		if ($feedLoading) return;
 
 		feedLoading.set(true);
 
 		try {
+			// Get posts with all the data we need for displaying them
+			// Using left joins so we get posts even if they have no likes
 			const { data, error } = await supabase
 				.from('posts')
 				.select(
@@ -57,7 +60,7 @@
 					)
 				`
 				)
-				.order('created_at', { ascending: false })
+				.order('created_at', { ascending: false }) // Newest first
 				.range(page * postsPerPage, (page + 1) * postsPerPage - 1);
 
 			if (error) throw error;
@@ -333,7 +336,7 @@
 	<div class="col-span-6 pb-24">
 		<!-- Desktop Header -->
 		<div
-			class="sticky top-4 z-40 mb-6 rounded-2xl border border-base-300/50 bg-base-100/80 p-6 backdrop-blur-xl"
+			class=" top-0 z-40 mb-6 rounded-2xl border border-base-300/50 bg-base-100/80 p-6 backdrop-blur-xl"
 		>
 			<div class="flex items-center justify-between">
 				<div>

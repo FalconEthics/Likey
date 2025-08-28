@@ -44,10 +44,10 @@ async function loadUserProfile(userId) {
 		const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
 		if (error) {
-			// If profile doesn't exist, create it (for first-time login after email confirmation)
+			// PGRST116 means "no rows returned" - happens for new users
 			if (error.code === 'PGRST116') {
 				console.log('Profile not found, creating new profile for user:', userId);
-				// Set user as null to trigger profile creation flow
+				// Setting user to null will show the profile setup modal
 				user.set(null);
 				return;
 			}
@@ -56,7 +56,7 @@ async function loadUserProfile(userId) {
 
 		user.set(data);
 
-		// Initialize notifications after user is loaded
+		// Small delay ensures stores are updated before we start listening to notifications
 		setTimeout(() => initializeNotifications(), 100);
 	} catch (error) {
 		console.error('Error loading user profile:', error);
@@ -82,7 +82,8 @@ export async function signUp(email, password) {
 	}
 
 	try {
-		// Get the current origin for redirect URL
+		// Build redirect URL for email confirmation
+		// Use current domain in browser, fallback to localhost for SSR
 		const redirectTo =
 			typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
 
@@ -214,12 +215,14 @@ export async function resetPassword(email) {
  */
 export async function createProfile(userId, username, displayName) {
 	try {
-		// Double-check username availability
+		// Check if username is already taken before creating profile
+		// This prevents race conditions where multiple users try the same username
 		const { data: existingUsers, error: checkError } = await supabase
 			.from('profiles')
 			.select('username')
 			.eq('username', username.toLowerCase());
 
+		// Ignore PGRST116 (no rows found) as that's what we want
 		if (checkError && checkError.code !== 'PGRST116') {
 			console.error('Error checking username:', checkError);
 			return { success: false, error: 'Failed to validate username' };

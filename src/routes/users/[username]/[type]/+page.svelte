@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabase.js';
+	import { useFollow } from '$lib/composables/useFollow.js';
 
 	// Lucide Icons
-	import { ArrowLeft, Users, UserPlus, UserCheck, UserMinus } from 'lucide-svelte';
+	import { ArrowLeft, Users, UserPlus, UserCheck, UserMinus, Check } from 'lucide-svelte';
 
 	/** @type {import('./$types').PageData} */
 	let { data } = $props();
@@ -19,6 +20,9 @@
 	// Following state tracking for follow/unfollow buttons
 	let followingStates = $state({});
 	let followingLoading = $state({});
+
+	// Initialize follow composable
+	const followManager = useFollow();
 
 	/**
 	 * Load users (followers or following)
@@ -120,20 +124,8 @@
 		if (!data.currentUser) return;
 
 		const userIds = userList.map((u) => u.id);
-
-		const { data: follows, error } = await supabase
-			.from('follows')
-			.select('following_id')
-			.eq('follower_id', data.currentUser.id)
-			.in('following_id', userIds);
-
-		if (!error && follows) {
-			const newStates = {};
-			follows.forEach((follow) => {
-				newStates[follow.following_id] = true;
-			});
-			followingStates = { ...followingStates, ...newStates };
-		}
+		const newStates = await followManager.checkMultipleFollowStatus(userIds);
+		followingStates = { ...followingStates, ...newStates };
 	}
 
 	/**
@@ -157,30 +149,18 @@
 		const isFollowing = followingStates[user.id];
 
 		try {
-			if (isFollowing) {
-				// Unfollow
-				const { error } = await supabase
-					.from('follows')
-					.delete()
-					.eq('follower_id', data.currentUser.id)
-					.eq('following_id', user.id);
+			const result = await followManager.toggleFollow(
+				user.id,
+				isFollowing,
+				user.display_name
+			);
 
-				if (error) throw error;
-
-				followingStates[user.id] = false;
-			} else {
-				// Follow
-				const { error } = await supabase.from('follows').insert({
-					follower_id: data.currentUser.id,
-					following_id: user.id
-				});
-
-				if (error) throw error;
-
-				followingStates[user.id] = true;
+			if (result.success) {
+				followingStates[user.id] = result.newState;
+				followingStates = { ...followingStates };
+			} else if (result.error) {
+				console.error('Error toggling follow:', result.error);
 			}
-
-			followingStates = { ...followingStates };
 		} catch (error) {
 			console.error('Error toggling follow:', error);
 		} finally {
@@ -195,7 +175,7 @@
 	 */
 	function getFollowButtonProps(user) {
 		if (!data.currentUser) {
-			return { text: 'Follow', icon: UserPlus, classes: 'btn-primary' };
+			return { text: 'Follow', icon: UserPlus, classes: 'follow-btn' };
 		}
 
 		if (user.id === data.currentUser.id) {
@@ -206,18 +186,18 @@
 		const isLoading = followingLoading[user.id];
 
 		if (isLoading) {
-			return { text: '', icon: null, classes: 'btn-primary loading', disabled: true };
+			return { text: '', icon: null, classes: 'follow-btn loading', disabled: true };
 		}
 
 		if (isFollowing) {
 			return {
 				text: 'Following',
-				icon: UserCheck,
-				classes: 'btn-outline hover:btn-error hover:text-error'
+				icon: Check,
+				classes: 'following-btn'
 			};
 		}
 
-		return { text: 'Follow', icon: UserPlus, classes: 'btn-primary' };
+		return { text: 'Follow', icon: UserPlus, classes: 'follow-btn' };
 	}
 
 	// Load initial data
@@ -355,10 +335,20 @@
 </div>
 
 <style>
+	@import "tailwindcss" reference;
+
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	.follow-btn {
+		@apply border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] text-white hover:bg-[hsl(346_77%_59%)];
+	}
+
+	.following-btn {
+		@apply border-green-500 bg-green-500 text-white hover:border-red-500 hover:bg-red-500;
 	}
 </style>

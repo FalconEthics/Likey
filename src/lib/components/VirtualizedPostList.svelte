@@ -31,19 +31,21 @@
 	let useVirtualization = $state(false);
 	let virtualizer = $state();
 
-	// Enable virtualization when threshold is reached (but not for auto height)
+	// Only virtualize if we have enough posts to justify the overhead
+	// Auto height containers can't be virtualized properly
 	$effect(() => {
 		useVirtualization = posts.length > virtualizationThreshold && containerHeight !== 'auto';
 	});
 
-	// Create virtualizer when needed
+	// Set up TanStack Virtual when we need it
+	// Virtualizer handles rendering only visible items for performance
 	$effect(() => {
 		if (useVirtualization && parentRef && posts.length > virtualizationThreshold) {
 			virtualizer = createVirtualizer({
 				count: posts.length,
 				getScrollElement: () => parentRef,
-				estimateSize: () => estimatedItemSize,
-				overscan: 10
+				estimateSize: () => estimatedItemSize, // Rough guess at post height
+				overscan: 10 // Render 10 extra items above/below for smooth scrolling
 			});
 		} else {
 			virtualizer = null;

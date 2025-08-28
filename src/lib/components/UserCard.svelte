@@ -1,12 +1,11 @@
 <script>
 	import { user } from '../stores.js';
-	import { supabase } from '../supabase.js';
-	import { createNotification } from '../notifications.js';
+	import { useFollow } from '../composables/useFollow.js';
 	import { getOrCreateConversation } from '../messages.js';
 	import { goto } from '$app/navigation';
 
 	// Lucide Icons
-	import { MessageCircle } from 'lucide-svelte';
+	import { MessageCircle, Check } from 'lucide-svelte';
 
 	/**
 	 * @type {Object}
@@ -15,6 +14,16 @@
 
 	let isFollowing = $state(profileUser.is_following || false);
 	let followLoading = $state(false);
+
+	// Initialize follow composable
+	const followManager = useFollow({
+		onFollowChange: (newState) => {
+			isFollowing = newState;
+		},
+		onCountUpdate: (delta) => {
+			profileUser.followers_count = Math.max(0, (profileUser.followers_count || 0) + delta);
+		}
+	});
 
 	/**
 	 * Toggle follow status
@@ -25,37 +34,14 @@
 		followLoading = true;
 
 		try {
-			if (isFollowing) {
-				// Unfollow
-				const { error } = await supabase
-					.from('follows')
-					.delete()
-					.eq('follower_id', $user.id)
-					.eq('following_id', profileUser.id);
+			const result = await followManager.toggleFollow(
+				profileUser.id,
+				isFollowing,
+				profileUser.display_name
+			);
 
-				if (error) throw error;
-
-				isFollowing = false;
-				profileUser.followers_count = Math.max(0, profileUser.followers_count - 1);
-			} else {
-				// Follow
-				const { error } = await supabase.from('follows').insert({
-					follower_id: $user.id,
-					following_id: profileUser.id
-				});
-
-				if (error) throw error;
-
-				isFollowing = true;
-				profileUser.followers_count += 1;
-
-				// Create notification
-				await createNotification(
-					profileUser.id,
-					'follow',
-					`${$user.display_name} started following you`,
-					$user.id
-				);
+			if (!result.success && result.error) {
+				console.error('Error toggling follow:', result.error);
 			}
 		} catch (error) {
 			console.error('Error toggling follow:', error);
@@ -155,13 +141,21 @@
 			{#if $user && profileUser.id !== $user.id}
 				<div class="flex h-10 items-center gap-2">
 					<button
-						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
-						class:btn-outline={isFollowing}
+						class="btn h-full min-h-0 flex-1 font-medium btn-sm"
 						class:loading={followLoading}
+						class:follow-btn={!isFollowing}
+						class:following-btn={isFollowing}
 						onclick={toggleFollow}
 						disabled={followLoading}
 					>
-						{followLoading ? '' : isFollowing ? 'Following' : 'Follow'}
+						{#if followLoading}
+							<!-- Loading spinner handled by loading class -->
+						{:else if isFollowing}
+							<Check size={14} class="mr-1" />
+							Following
+						{:else}
+							Follow
+						{/if}
 					</button>
 
 					<button
@@ -176,7 +170,7 @@
 				<div class="flex h-10 items-center">
 					<a
 						href="/"
-						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
+						class="btn h-full min-h-0 flex-1 font-medium btn-sm follow-btn"
 					>
 						Sign in to follow
 					</a>
@@ -187,10 +181,20 @@
 </div>
 
 <style>
+	@import "tailwindcss" reference;
+
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	.follow-btn {
+		@apply border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] text-white hover:bg-[hsl(346_77%_59%)];
+	}
+
+	.following-btn {
+		@apply border-green-500 bg-green-500 text-white hover:border-red-500 hover:bg-red-500;
 	}
 </style>

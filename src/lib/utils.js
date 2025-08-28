@@ -2,9 +2,9 @@ import pkg from 'lodash';
 const { debounce } = pkg;
 
 /**
- * Format date to relative time (e.g., "2 hours ago")
- * @param {Date | string} date - Date to format
- * @returns {string} Formatted relative time
+ * Takes a date and returns human-friendly relative time like "2h" or "3d ago"
+ * @param {Date | string} date - The date to format
+ * @returns {string} Human-readable time difference
  */
 export function formatRelativeTime(date) {
 	const now = new Date();
@@ -37,10 +37,10 @@ export function extractHashtags(text) {
 }
 
 /**
- * Generate a unique filename for uploaded images
- * @param {string} userId - User ID
- * @param {string} originalName - Original filename
- * @returns {string} Unique filename
+ * Creates a unique path for storing user images to avoid naming conflicts
+ * @param {string} userId - Who's uploading this image
+ * @param {string} originalName - The original file name from user's device
+ * @returns {string} Safe storage path like "userId/timestamp.jpg"
  */
 export function generateImagePath(userId, originalName) {
 	const timestamp = Date.now();
@@ -49,7 +49,7 @@ export function generateImagePath(userId, originalName) {
 }
 
 /**
- * Debounced search function
+ * Prevents search from firing on every keystroke - waits 300ms after user stops typing
  */
 export const debouncedSearch = debounce((searchTerm, callback) => {
 	callback(searchTerm);

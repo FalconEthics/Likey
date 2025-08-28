@@ -59,23 +59,25 @@ async function loadNotifications() {
  * @param {string} userId - Current user ID
  */
 function subscribeToNotifications(userId) {
-	// Clean up existing subscription
+	// Prevent memory leaks by cleaning up previous subscriptions
 	if (notificationSubscription) {
 		notificationSubscription.unsubscribe();
 	}
 
+	// Set up real-time listening for new notifications
 	notificationSubscription = supabase
 		.channel('notifications')
 		.on(
 			'postgres_changes',
 			{
-				event: 'INSERT',
+				event: 'INSERT', // Only listen for new notifications
 				schema: 'public',
 				table: 'notifications',
-				filter: `user_id=eq.${userId}`
+				filter: `user_id=eq.${userId}` // Only get notifications for this user
 			},
 			async (payload) => {
-				// Fetch the full notification with related data
+				// The webhook payload only has basic data, so we need to fetch the full record
+				// This gets us the user profile data for the notification sender
 				const { data, error } = await supabase
 					.from('notifications')
 					.select(
@@ -92,13 +94,13 @@ function subscribeToNotifications(userId) {
 					.single();
 
 				if (!error && data) {
-					// Add to notifications store
+					// Add to front of notifications list (newest first)
 					notifications.update((current) => [data, ...current]);
 
-					// Update unread count
+					// Bump the unread counter
 					unreadCount.update((count) => count + 1);
 
-					// Show browser notification if permission is granted
+					// Show OS-level notification if user allowed it
 					showBrowserNotification(data);
 				}
 			}

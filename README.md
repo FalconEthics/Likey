@@ -9,7 +9,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/FalconEthics/Likey">
+  <a href="https://github.com/soumikdas/Likey">
     <img src="src/lib/assets/Likey.png" alt="Logo" width="100" height="100">
   </a>
 
@@ -20,9 +20,9 @@
   <p align="center">
     <a href="https://likey-social-media-app.vercel.app/">View Demo</a>
     ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Report Bug</a>
+    <a href="https://github.com/soumikdas/Likey/issues">Report Bug</a>
     ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Request Feature</a>
+    <a href="https://github.com/soumikdas/Likey/issues">Request Feature</a>
   </p>
 </div>
 
@@ -89,10 +89,13 @@ Likey is a production-ready, modern social media platform that recreates the Ins
 - ![SvelteKit][SvelteKit.com] - SvelteKit 5 with modern runes syntax and server-side rendering
 - ![TypeScript][TypeScript.com] - JSDoc type annotations for type safety without TypeScript overhead
 - ![Supabase][Supabase.com] - PostgreSQL database with real-time subscriptions, auth, and storage
-- ![Tailwind][Tailwind.com] - Tailwind CSS v4 with DaisyUI component system
+- ![Tailwind][Tailwind.com] - Tailwind CSS v4 with utility-first styling
+- ![DaisyUI][DaisyUI.com] - Beautiful component library built on Tailwind CSS
+- ![TanStack][TanStack.com] - High-performance virtualization for rendering large lists
 - ![Bun][Bun.com] - Ultra-fast JavaScript runtime and package manager
 - ![Lucide][Lucide.com] - Beautiful, customizable SVG icons
-- **TanStack Virtual** - High-performance virtualization for rendering large lists
+- ![Lodash][Lodash.com] - Modern JavaScript utility library for data manipulation
+- ![Framer Motion][Motion.com] - Production-ready motion library for React and Svelte
 - ![Vite][Vite.com] - Lightning-fast build tool with hot module replacement
 - ![Vercel][Vercel.com] - Seamless deployment and hosting platform
 
@@ -262,6 +265,8 @@ src/
 │   │   │   ├── PeopleSection.svelte
 │   │   │   └── LatestSection.svelte
 │   │   └── Modals/               # Authentication and post modals
+│   ├── composables/        # Reusable business logic
+│   │   └── useFollow.js          # Centralized follow/unfollow logic
 │   ├── auth.js             # Authentication logic
 │   ├── supabase.js         # Supabase client and utilities
 │   ├── stores.js           # Centralized state management
@@ -395,9 +400,11 @@ src/
 - **Modern Svelte 5**: Utilizes latest Svelte features including runes and modern syntax
 - **Real-time Everything**: Live updates for posts, messages, notifications, and user interactions
 - **Intelligent Algorithms**: Score-based trending and recommendation systems
-- **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement
+- **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement and fixed navigation
 - **Type Safety**: Comprehensive JSDoc annotations without TypeScript overhead
 - **Performance Optimized**: Advanced virtualization, infinite scroll, image compression, and efficient real-time subscriptions
+- **Modern UI/UX**: Glassmorphism design with smooth animations, branded color palette, and responsive navigation
+- **Composables Architecture**: Reusable business logic with the useFollow composable eliminating code duplication across components
 - **Production Ready**: Complete with security, error handling, and deployment configuration
 
 <p align="right"><a href="#readme-top">˄ back to top</a></p>
@@ -500,7 +507,11 @@ Perfect for learning modern web development patterns and building production-rea
 [TypeScript.com]: https://img.shields.io/badge/JSDoc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [Supabase.com]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white
 [Tailwind.com]: https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
+[DaisyUI.com]: https://img.shields.io/badge/DaisyUI-5A67D8?style=for-the-badge&logo=css3&logoColor=white
+[TanStack.com]: https://img.shields.io/badge/TanStack_Virtual-FF4154?style=for-the-badge&logo=react&logoColor=white
 [Bun.com]: https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white
 [Lucide.com]: https://img.shields.io/badge/Lucide-000000?style=for-the-badge&logo=lucide&logoColor=white
+[Lodash.com]: https://img.shields.io/badge/Lodash-3492FF?style=for-the-badge&logo=lodash&logoColor=white
+[Motion.com]: https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white
 [Vite.com]: https://img.shields.io/badge/Vite-646cff?style=for-the-badge&logo=vite&logoColor=white
 [Vercel.com]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white

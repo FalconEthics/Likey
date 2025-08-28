@@ -425,14 +425,14 @@
 
 {#if $user}
 	<div
-		class="mx-auto flex min-h-[calc(100vh-6rem)] max-w-4xl flex-col"
+		class="mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col overflow-hidden"
 		onclick={handleClickOutside}
 		onkeydown={handleClickOutside}
 		role="main"
 	>
 		<!-- Header -->
 		<div
-			class="sticky top-0 z-50 flex items-center gap-4 border-b border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+			class="flex-shrink-0 sticky top-0 z-40 flex items-center gap-4 border-b border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
 		>
 			<button class="btn btn-circle btn-ghost" onclick={() => goto('/messages')}>
 				<ArrowLeft size={20} />
@@ -468,7 +468,7 @@
 
 		<!-- Messages -->
 		<div 
-			class="flex-1 space-y-4 p-4 overflow-y-auto scroll-smooth" 
+			class="flex-1 space-y-4 p-4 overflow-y-auto scroll-smooth min-h-0" 
 			bind:this={messagesContainer}
 		>
 			{#if loading}
@@ -630,7 +630,7 @@
 
 		<!-- Message Input -->
 		<div
-			class="sticky bottom-0 z-50 border-t border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
+			class="flex-shrink-0 border-t border-base-300/50 bg-base-100/95 p-4 backdrop-blur-xl"
 		>
 			<form onsubmit={handleSendMessage} class="flex gap-2">
 				<input

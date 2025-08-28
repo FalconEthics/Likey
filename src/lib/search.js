@@ -28,7 +28,8 @@ export async function searchUsers(query, limit = 20) {
 	const searchTerm = query.trim();
 
 	try {
-		// Use full-text search for better results
+		// Use ILIKE for case-insensitive partial matching on username and display_name
+		// We're searching both fields so users can find each other by either
 		const { data, error } = await supabase
 			.from('profiles')
 			.select(
@@ -45,12 +46,13 @@ export async function searchUsers(query, limit = 20) {
 			`
 			)
 			.or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
-			.order('followers_count', { ascending: false })
+			.order('followers_count', { ascending: false }) // Popular users first
 			.limit(limit);
 
 		if (error) throw error;
 
-		// Add is_following flag
+		// Transform the data to include follow status for current user
+		// This saves us from making separate API calls later
 		const results = data.map((profile) => ({
 			...profile,
 			is_following: currentUser
@@ -96,16 +98,16 @@ export async function getTrendingPosts(limit = 20) {
 
 		if (error) throw error;
 
-		// Process posts to add user data and like status
+		// Transform the complex joined data into a simple posts array
 		const currentUser = get(user);
 		const posts = data
-			.filter((item) => item.posts) // Filter out null posts
+			.filter((item) => item.posts) // Sometimes posts get deleted but trending records remain
 			.map((item) => ({
 				...item.posts,
-				user: item.posts.profiles,
+				user: item.posts.profiles, // Flatten the nested profile data
 				liked_by_user: currentUser
 					? item.posts.likes.some((like) => like.user_id === currentUser.id)
-					: false
+					: false // Show heart as filled if current user liked it
 			}));
 
 		return { data: posts, error: null };

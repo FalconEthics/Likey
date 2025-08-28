@@ -109,15 +109,29 @@
 <div class="min-h-screen bg-base-100">
 	<Navigation />
 
-	<main class="container mx-auto max-w-6xl px-4 py-6 pb-20 lg:pb-6">
-		{#if $loading}
-			<div class="flex h-64 items-center justify-center">
-				<span class="loading loading-lg loading-spinner"></span>
-			</div>
-		{:else}
-			{@render children?.()}
-		{/if}
-	</main>
+	{#if $page.url.pathname.startsWith('/messages/')}
+		<!-- Messages pages get full viewport without container constraints -->
+		<div class="pt-16">
+			{#if $loading}
+				<div class="flex h-64 items-center justify-center">
+					<span class="loading loading-lg loading-spinner"></span>
+				</div>
+			{:else}
+				{@render children?.()}
+			{/if}
+		</div>
+	{:else}
+		<!-- Other pages use the normal container layout -->
+		<main class="container mx-auto max-w-6xl p-4 pt-20 lg:p-6 lg:pt-24">
+			{#if $loading}
+				<div class="flex h-64 items-center justify-center">
+					<span class="loading loading-lg loading-spinner"></span>
+				</div>
+			{:else}
+				{@render children?.()}
+			{/if}
+		</main>
+	{/if}
 
 	{#if $user && !$page.url.pathname.startsWith('/messages/')}
 		<BottomNavigation />

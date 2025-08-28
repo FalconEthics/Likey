@@ -21,6 +21,7 @@ export function useFollow(options = {}) {
 	 */
 	async function checkFollowStatus(targetUserId) {
 		const currentUser = get(user);
+		// Can't follow yourself or check status when not logged in
 		if (!currentUser || currentUser.id === targetUserId) {
 			return false;
 		}
@@ -28,14 +29,15 @@ export function useFollow(options = {}) {
 		try {
 			const { data, error } = await supabase
 				.from('follows')
-				.select('id')
+				.select('id') // We just need to know if the record exists
 				.eq('follower_id', currentUser.id)
 				.eq('following_id', targetUserId)
 				.single();
 
+			// Convert to boolean - data exists means we're following
 			return !!data;
 		} catch (error) {
-			// Not following or error occurred
+			// Usually means no follow record exists, which is fine
 			return false;
 		}
 	}

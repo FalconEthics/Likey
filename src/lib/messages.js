@@ -35,7 +35,8 @@ export async function getOrCreateConversation(otherUserId) {
 	}
 
 	try {
-		// First try to find existing conversation
+		// Check if there's already a conversation between these two users
+		// Conversations are bidirectional so we check both user combinations
 		const { data: existingConversation, error: findError } = await supabase
 			.from('conversations')
 			.select(
@@ -61,7 +62,8 @@ export async function getOrCreateConversation(otherUserId) {
 			.single();
 
 		if (existingConversation) {
-			// Determine which user is the "other" user
+			// Figure out who the other person in this conversation is
+			// Since we store user1 and user2, we need to check which one is us
 			const otherUser =
 				existingConversation.user1.id === currentUser.id
 					? existingConversation.user2
@@ -76,7 +78,7 @@ export async function getOrCreateConversation(otherUserId) {
 			};
 		}
 
-		// Create new conversation if none exists
+		// No existing conversation found, so create a new one
 		const { data: newConversation, error: createError } = await supabase
 			.from('conversations')
 			.insert({

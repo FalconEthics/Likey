@@ -45,20 +45,27 @@ export function getImageUrl(bucket = 'images', path) {
  */
 export async function compressImage(file, maxWidth = 1080, quality = 0.8) {
 	return new Promise((resolve) => {
+		// Set up canvas and image elements for compression
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d');
 		const img = new Image();
 
 		img.onload = () => {
+			// Calculate the scaling ratio to maintain aspect ratio
+			// This ensures we don't distort the image while resizing
 			const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
 			canvas.width = img.width * ratio;
 			canvas.height = img.height * ratio;
 
+			// Draw the resized image onto the canvas
 			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+			// Convert canvas back to a blob with specified quality
+			// Using JPEG format for better compression vs PNG
 			canvas.toBlob(resolve, 'image/jpeg', quality);
 		};
 
+		// Create object URL from the original file to load into image
 		img.src = URL.createObjectURL(file);
 	});
 }

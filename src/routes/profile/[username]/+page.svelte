@@ -8,7 +8,7 @@
 	import { goto } from '$app/navigation';
 
 	// Lucide Icons
-	import { MessageCircle, Camera } from 'lucide-svelte';
+	import { MessageCircle, Camera, Check } from 'lucide-svelte';
 
 	const { data } = $props();
 	let { profile } = data;
@@ -176,13 +176,21 @@
 							{:else}
 								<div class="flex items-center gap-2">
 									<button
-										class="btn h-11 min-h-[44px] min-w-[100px] flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] px-6 font-medium text-white hover:bg-[hsl(346_77%_59%)]"
-										class:btn-outline={isFollowing}
+										class="btn h-11 min-h-[44px] min-w-[100px] flex-1 px-6 font-medium"
 										class:loading={followLoading}
+										class:follow-btn={!isFollowing}
+										class:following-btn={isFollowing}
 										onclick={toggleFollow}
 										disabled={followLoading}
 									>
-										{followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+										{#if followLoading}
+											Loading...
+										{:else if isFollowing}
+											<Check size={16} class="mr-1" />
+											Following
+										{:else}
+											Follow
+										{/if}
 									</button>
 
 									<button
@@ -255,3 +263,15 @@
 		/>
 	</div>
 </div>
+
+<style>
+	@import "tailwindcss" reference;
+
+	.follow-btn {
+		@apply border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] text-white hover:bg-[hsl(346_77%_59%)];
+	}
+
+	.following-btn {
+		@apply border-green-500 bg-green-500 text-white hover:border-red-500 hover:bg-red-500;
+	}
+</style>

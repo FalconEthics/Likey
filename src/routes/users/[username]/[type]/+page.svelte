@@ -4,7 +4,7 @@
 	import { supabase } from '$lib/supabase.js';
 
 	// Lucide Icons
-	import { ArrowLeft, Users, UserPlus, UserCheck, UserMinus } from 'lucide-svelte';
+	import { ArrowLeft, Users, UserPlus, UserCheck, UserMinus, Check } from 'lucide-svelte';
 
 	/** @type {import('./$types').PageData} */
 	let { data } = $props();
@@ -195,7 +195,7 @@
 	 */
 	function getFollowButtonProps(user) {
 		if (!data.currentUser) {
-			return { text: 'Follow', icon: UserPlus, classes: 'btn-primary' };
+			return { text: 'Follow', icon: UserPlus, classes: 'follow-btn' };
 		}
 
 		if (user.id === data.currentUser.id) {
@@ -206,18 +206,18 @@
 		const isLoading = followingLoading[user.id];
 
 		if (isLoading) {
-			return { text: '', icon: null, classes: 'btn-primary loading', disabled: true };
+			return { text: '', icon: null, classes: 'follow-btn loading', disabled: true };
 		}
 
 		if (isFollowing) {
 			return {
 				text: 'Following',
-				icon: UserCheck,
-				classes: 'btn-outline hover:btn-error hover:text-error'
+				icon: Check,
+				classes: 'following-btn'
 			};
 		}
 
-		return { text: 'Follow', icon: UserPlus, classes: 'btn-primary' };
+		return { text: 'Follow', icon: UserPlus, classes: 'follow-btn' };
 	}
 
 	// Load initial data
@@ -355,10 +355,20 @@
 </div>
 
 <style>
+	@import "tailwindcss" reference;
+
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	.follow-btn {
+		@apply border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] text-white hover:bg-[hsl(346_77%_59%)];
+	}
+
+	.following-btn {
+		@apply border-green-500 bg-green-500 text-white hover:border-red-500 hover:bg-red-500;
 	}
 </style>

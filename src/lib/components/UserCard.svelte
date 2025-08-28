@@ -6,7 +6,7 @@
 	import { goto } from '$app/navigation';
 
 	// Lucide Icons
-	import { MessageCircle } from 'lucide-svelte';
+	import { MessageCircle, Check } from 'lucide-svelte';
 
 	/**
 	 * @type {Object}
@@ -155,13 +155,21 @@
 			{#if $user && profileUser.id !== $user.id}
 				<div class="flex h-10 items-center gap-2">
 					<button
-						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
-						class:btn-outline={isFollowing}
+						class="btn h-full min-h-0 flex-1 font-medium btn-sm"
 						class:loading={followLoading}
+						class:follow-btn={!isFollowing}
+						class:following-btn={isFollowing}
 						onclick={toggleFollow}
 						disabled={followLoading}
 					>
-						{followLoading ? '' : isFollowing ? 'Following' : 'Follow'}
+						{#if followLoading}
+							<!-- Loading spinner handled by loading class -->
+						{:else if isFollowing}
+							<Check size={14} class="mr-1" />
+							Following
+						{:else}
+							Follow
+						{/if}
 					</button>
 
 					<button
@@ -176,7 +184,7 @@
 				<div class="flex h-10 items-center">
 					<a
 						href="/"
-						class="btn h-full min-h-0 flex-1 border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] font-medium text-white btn-sm btn-primary hover:bg-[hsl(346_77%_59%)]"
+						class="btn h-full min-h-0 flex-1 font-medium btn-sm follow-btn"
 					>
 						Sign in to follow
 					</a>
@@ -187,10 +195,20 @@
 </div>
 
 <style>
+	@import "tailwindcss" reference;
+
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	.follow-btn {
+		@apply border-[hsl(346_77%_49%)] bg-[hsl(346_77%_49%)] text-white hover:bg-[hsl(346_77%_59%)];
+	}
+
+	.following-btn {
+		@apply border-green-500 bg-green-500 text-white hover:border-red-500 hover:bg-red-500;
 	}
 </style>

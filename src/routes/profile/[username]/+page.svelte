@@ -3,7 +3,7 @@
 	import { user } from '$lib/stores.js';
 	import { supabase } from '$lib/supabase.js';
 	import VirtualizedPostList from '$lib/components/VirtualizedPostList.svelte';
-	import { createNotification } from '$lib/notifications.js';
+	import { useFollow } from '$lib/composables/useFollow.js';
 	import { getOrCreateConversation } from '$lib/messages.js';
 	import { goto } from '$app/navigation';
 
@@ -20,25 +20,23 @@
 	// Use $derived for Svelte 5 runes mode
 	let isCurrentUser = $derived($user?.id === profile.id);
 
+	// Initialize follow composable
+	const followManager = useFollow({
+		onFollowChange: (newState) => {
+			isFollowing = newState;
+		},
+		onCountUpdate: (delta) => {
+			profile.followers_count += delta;
+		}
+	});
+
 	/**
 	 * Check if current user is following this profile
 	 */
 	async function checkFollowStatus() {
 		if (!$user || isCurrentUser) return;
 
-		try {
-			const { data, error } = await supabase
-				.from('follows')
-				.select('id')
-				.eq('follower_id', $user.id)
-				.eq('following_id', profile.id)
-				.single();
-
-			isFollowing = !!data;
-		} catch (error) {
-			// Not following or error
-			isFollowing = false;
-		}
+		isFollowing = await followManager.checkFollowStatus(profile.id);
 	}
 
 	/**
@@ -50,37 +48,14 @@
 		followLoading = true;
 
 		try {
-			if (isFollowing) {
-				// Unfollow
-				const { error } = await supabase
-					.from('follows')
-					.delete()
-					.eq('follower_id', $user.id)
-					.eq('following_id', profile.id);
+			const result = await followManager.toggleFollow(
+				profile.id,
+				isFollowing,
+				profile.display_name
+			);
 
-				if (error) throw error;
-
-				isFollowing = false;
-				profile.followers_count -= 1;
-			} else {
-				// Follow
-				const { error } = await supabase.from('follows').insert({
-					follower_id: $user.id,
-					following_id: profile.id
-				});
-
-				if (error) throw error;
-
-				isFollowing = true;
-				profile.followers_count += 1;
-
-				// Create notification for the followed user
-				await createNotification(
-					profile.id,
-					'follow',
-					`${$user.display_name} started following you`,
-					$user.id
-				);
+			if (!result.success && result.error) {
+				console.error('Error toggling follow:', result.error);
 			}
 		} catch (error) {
 			console.error('Error toggling follow:', error);

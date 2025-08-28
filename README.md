@@ -265,6 +265,8 @@ src/
 │   │   │   ├── PeopleSection.svelte
 │   │   │   └── LatestSection.svelte
 │   │   └── Modals/               # Authentication and post modals
+│   ├── composables/        # Reusable business logic
+│   │   └── useFollow.js          # Centralized follow/unfollow logic
 │   ├── auth.js             # Authentication logic
 │   ├── supabase.js         # Supabase client and utilities
 │   ├── stores.js           # Centralized state management
@@ -402,6 +404,7 @@ src/
 - **Type Safety**: Comprehensive JSDoc annotations without TypeScript overhead
 - **Performance Optimized**: Advanced virtualization, infinite scroll, image compression, and efficient real-time subscriptions
 - **Modern UI/UX**: Glassmorphism design with smooth animations, branded color palette, and responsive navigation
+- **Composables Architecture**: Reusable business logic with the useFollow composable eliminating code duplication across components
 - **Production Ready**: Complete with security, error handling, and deployment configuration
 
 <p align="right"><a href="#readme-top">˄ back to top</a></p>

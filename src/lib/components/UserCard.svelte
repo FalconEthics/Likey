@@ -1,7 +1,6 @@
 <script>
 	import { user } from '../stores.js';
-	import { supabase } from '../supabase.js';
-	import { createNotification } from '../notifications.js';
+	import { useFollow } from '../composables/useFollow.js';
 	import { getOrCreateConversation } from '../messages.js';
 	import { goto } from '$app/navigation';
 
@@ -16,6 +15,16 @@
 	let isFollowing = $state(profileUser.is_following || false);
 	let followLoading = $state(false);
 
+	// Initialize follow composable
+	const followManager = useFollow({
+		onFollowChange: (newState) => {
+			isFollowing = newState;
+		},
+		onCountUpdate: (delta) => {
+			profileUser.followers_count = Math.max(0, (profileUser.followers_count || 0) + delta);
+		}
+	});
+
 	/**
 	 * Toggle follow status
 	 */
@@ -25,37 +34,14 @@
 		followLoading = true;
 
 		try {
-			if (isFollowing) {
-				// Unfollow
-				const { error } = await supabase
-					.from('follows')
-					.delete()
-					.eq('follower_id', $user.id)
-					.eq('following_id', profileUser.id);
+			const result = await followManager.toggleFollow(
+				profileUser.id,
+				isFollowing,
+				profileUser.display_name
+			);
 
-				if (error) throw error;
-
-				isFollowing = false;
-				profileUser.followers_count = Math.max(0, profileUser.followers_count - 1);
-			} else {
-				// Follow
-				const { error } = await supabase.from('follows').insert({
-					follower_id: $user.id,
-					following_id: profileUser.id
-				});
-
-				if (error) throw error;
-
-				isFollowing = true;
-				profileUser.followers_count += 1;
-
-				// Create notification
-				await createNotification(
-					profileUser.id,
-					'follow',
-					`${$user.display_name} started following you`,
-					$user.id
-				);
+			if (!result.success && result.error) {
+				console.error('Error toggling follow:', result.error);
 			}
 		} catch (error) {
 			console.error('Error toggling follow:', error);

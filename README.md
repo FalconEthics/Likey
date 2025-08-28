@@ -9,7 +9,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/FalconEthics/Likey">
+  <a href="https://github.com/soumikdas/Likey">
     <img src="src/lib/assets/Likey.png" alt="Logo" width="100" height="100">
   </a>
 
@@ -20,9 +20,9 @@
   <p align="center">
     <a href="https://likey-social-media-app.vercel.app/">View Demo</a>
     ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Report Bug</a>
+    <a href="https://github.com/soumikdas/Likey/issues">Report Bug</a>
     ·
-    <a href="https://github.com/FalconEthics/Likey/issues">Request Feature</a>
+    <a href="https://github.com/soumikdas/Likey/issues">Request Feature</a>
   </p>
 </div>
 
@@ -398,9 +398,10 @@ src/
 - **Modern Svelte 5**: Utilizes latest Svelte features including runes and modern syntax
 - **Real-time Everything**: Live updates for posts, messages, notifications, and user interactions
 - **Intelligent Algorithms**: Score-based trending and recommendation systems
-- **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement
+- **Mobile-First Design**: Optimized for mobile with progressive desktop enhancement and fixed navigation
 - **Type Safety**: Comprehensive JSDoc annotations without TypeScript overhead
 - **Performance Optimized**: Advanced virtualization, infinite scroll, image compression, and efficient real-time subscriptions
+- **Modern UI/UX**: Glassmorphism design with smooth animations, branded color palette, and responsive navigation
 - **Production Ready**: Complete with security, error handling, and deployment configuration
 
 <p align="right"><a href="#readme-top">˄ back to top</a></p>
@@ -487,16 +488,16 @@ Perfect for learning modern web development patterns and building production-rea
 
 <!-- MARKDOWN LINKS & IMAGES -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/FalconEthics/Likey.svg?style=for-the-badge
-[contributors-url]: https://github.com/FalconEthics/Likey/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/FalconEthics/Likey.svg?style=for-the-badge
-[forks-url]: https://github.com/FalconEthics/Likey/network/members
-[stars-shield]: https://img.shields.io/github/stars/FalconEthics/Likey.svg?style=for-the-badge
-[stars-url]: https://github.com/FalconEthics/Likey/stargazers
-[issues-shield]: https://img.shields.io/github/issues/FalconEthics/Likey.svg?style=for-the-badge
-[issues-url]: https://github.com/FalconEthics/Likey/issues
-[license-shield]: https://img.shields.io/github/license/FalconEthics/Likey.svg?style=for-the-badge
-[license-url]: https://github.com/FalconEthics/Likey/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/soumikdas/Likey.svg?style=for-the-badge
+[contributors-url]: https://github.com/soumikdas/Likey/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/soumikdas/Likey.svg?style=for-the-badge
+[forks-url]: https://github.com/soumikdas/Likey/network/members
+[stars-shield]: https://img.shields.io/github/stars/soumikdas/Likey.svg?style=for-the-badge
+[stars-url]: https://github.com/soumikdas/Likey/stargazers
+[issues-shield]: https://img.shields.io/github/issues/soumikdas/Likey.svg?style=for-the-badge
+[issues-url]: https://github.com/soumikdas/Likey/issues
+[license-shield]: https://img.shields.io/github/license/soumikdas/Likey.svg?style=for-the-badge
+[license-url]: https://github.com/soumikdas/Likey/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/soumik-das-profile/
 [SvelteKit.com]: https://img.shields.io/badge/SvelteKit_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white

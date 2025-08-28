@@ -270,20 +270,20 @@
 			</div>
 
 			<!-- Caption -->
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="caption">
-					<span class="label-text mb-2">Caption</span>
+			<div class="space-y-2">
+				<label for="caption" class="block text-sm font-medium">
+					Caption
 				</label>
 				<textarea
 					id="caption"
-					class="textarea-bordered textarea h-24"
+					class="textarea-bordered textarea h-24 w-full"
 					placeholder="Write a caption..."
 					bind:value={caption}
 					disabled={uploading}
 					maxlength="2200"
 				></textarea>
-				<div class="label flex-col !items-end">
-					<span class="label-text-alt text-base-content/60">
+				<div class="flex justify-end">
+					<span class="text-xs text-base-content/60">
 						{caption.length}/2200 characters
 					</span>
 				</div>

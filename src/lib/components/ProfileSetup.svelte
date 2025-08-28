@@ -108,30 +108,30 @@
 		</p>
 
 		<form onsubmit={handleCreateProfile} class="space-y-4">
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="username">
-					<span class="label-text mb-2">Username</span>
+			<div class="space-y-2">
+				<label for="username" class="block text-sm font-medium">
+					Username
 				</label>
 				<input
 					id="username"
 					type="text"
 					bind:value={username}
-					class="input-bordered input"
+					class="input-bordered input w-full"
 					placeholder="Enter your username"
 					required
 					disabled={loading}
 				/>
 			</div>
 
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="display-name">
-					<span class="label-text mb-2">Display Name</span>
+			<div class="space-y-2">
+				<label for="display-name" class="block text-sm font-medium">
+					Display Name
 				</label>
 				<input
 					id="display-name"
 					type="text"
 					bind:value={displayName}
-					class="input-bordered input"
+					class="input-bordered input w-full"
 					placeholder="Enter your display name"
 					required
 					disabled={loading}

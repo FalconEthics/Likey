@@ -216,14 +216,14 @@
 		<div class="divider">Or continue with email</div>
 
 		<form onsubmit={handleSignup} class="space-y-4">
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="signup-email">
-					<span class="label-text mb-2">Email</span>
+			<div class="space-y-2">
+				<label for="signup-email" class="block text-sm font-medium">
+					Email
 				</label>
 				<input
 					id="signup-email"
 					type="email"
-					class="input-bordered input"
+					class="input-bordered input w-full"
 					class:input-error={errors.email}
 					bind:value={email}
 					onblur={() => handleBlur('email')}
@@ -231,20 +231,18 @@
 					disabled={loading}
 				/>
 				{#if errors.email}
-					<div class="label flex-col !items-start">
-						<span class="label-text-alt text-error">{errors.email}</span>
-					</div>
+					<span class="text-xs text-error">{errors.email}</span>
 				{/if}
 			</div>
 
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="signup-password">
-					<span class="label-text mb-2">Password</span>
+			<div class="space-y-2">
+				<label for="signup-password" class="block text-sm font-medium">
+					Password
 				</label>
 				<input
 					id="signup-password"
 					type="password"
-					class="input-bordered input"
+					class="input-bordered input w-full"
 					class:input-error={errors.password}
 					bind:value={password}
 					onblur={() => handleBlur('password')}
@@ -252,20 +250,18 @@
 					disabled={loading}
 				/>
 				{#if errors.password}
-					<div class="label flex-col !items-start">
-						<span class="label-text-alt text-error">{errors.password}</span>
-					</div>
+					<span class="text-xs text-error">{errors.password}</span>
 				{/if}
 			</div>
 
-			<div class="form-control">
-				<label class="label flex-col !items-start" for="signup-confirm-password">
-					<span class="label-text mb-2">Confirm Password</span>
+			<div class="space-y-2">
+				<label for="signup-confirm-password" class="block text-sm font-medium">
+					Confirm Password
 				</label>
 				<input
 					id="signup-confirm-password"
 					type="password"
-					class="input-bordered input"
+					class="input-bordered input w-full"
 					class:input-error={errors.confirmPassword}
 					bind:value={confirmPassword}
 					onblur={() => handleBlur('confirmPassword')}
@@ -273,9 +269,7 @@
 					disabled={loading}
 				/>
 				{#if errors.confirmPassword}
-					<div class="label flex-col !items-start">
-						<span class="label-text-alt text-error">{errors.confirmPassword}</span>
-					</div>
+					<span class="text-xs text-error">{errors.confirmPassword}</span>
 				{/if}
 			</div>
 

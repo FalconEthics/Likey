@@ -212,7 +212,6 @@
 					<div class="space-y-2">
 						<label for="username" class="block text-sm font-medium">
 							Username
-							<span class="text-xs text-warning">Username cannot be changed</span>
 						</label>
 						<input
 							id="username"
@@ -221,6 +220,7 @@
 							value={$user.username}
 							disabled
 						/>
+						<span class="text-xs text-warning">Username cannot be changed</span>
 					</div>
 
 					<!-- Bio -->

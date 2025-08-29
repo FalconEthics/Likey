@@ -171,6 +171,7 @@
 
 		<!-- Social Auth Buttons -->
 		<div class="mb-6 space-y-3">
+			<!-- TEMPORARILY HIDDEN - Google OAuth issues
 			<button
 				type="button"
 				class="btn w-full btn-outline"
@@ -197,6 +198,7 @@
 				</svg>
 				Continue with Google
 			</button>
+			-->
 
 			<button
 				type="button"

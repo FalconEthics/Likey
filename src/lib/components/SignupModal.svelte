@@ -80,17 +80,7 @@
 					'Please check your email and click the confirmation link to complete registration.';
 				generalError = ''; // Clear any previous error
 
-				// Auto-close modal after 3 seconds
-				setTimeout(() => {
-					showSignup.set(false);
-					// Reset form
-					email = '';
-					password = '';
-					confirmPassword = '';
-					touched = {};
-					confirmationMessage = '';
-					generalError = '';
-				}, 3000);
+				// Don't auto-close modal - let user close it manually
 			} else {
 				showSignup.set(false);
 				// Reset form

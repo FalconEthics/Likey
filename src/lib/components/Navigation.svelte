@@ -19,7 +19,7 @@
 	import LikeyLogo from '$lib/assets/Likey.png';
 
 	// Lucide Icons
-	import { Bell, User, Search, Settings, Moon, Sun, LogOut } from 'lucide-svelte';
+	import { Bell, User, Search, Settings, Moon, Sun, LogOut, Info } from 'lucide-svelte';
 
 	let showUserMenu = $state(false);
 	let showNotifications = $state(false);
@@ -351,6 +351,11 @@
 							{/if}
 						</button>
 
+						<a href="/about" class="menu-item" onclick={handleNavClick}>
+							<Info size={16} />
+							About
+						</a>
+
 						<div class="divider"></div>
 
 						<button class="menu-item text-error" onclick={handleSignOut}>
@@ -362,6 +367,11 @@
 			</div>
 		{:else}
 			<!-- Not authenticated -->
+			<a href="/about" class="btn btn-ghost">
+				<Info size={16} />
+				About
+			</a>
+
 			<button class="btn btn-ghost" onclick={() => showLogin.set(true)}> Sign In </button>
 
 			<button class="btn btn-primary" onclick={() => showSignup.set(true)}> Sign Up </button>
